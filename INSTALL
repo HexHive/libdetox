@@ -1,5 +1,6 @@
 The Makefile depends on "GNU libtool". This tool is easily installable
 with "aptitude install libtool" under any debian/ubuntu based system.
+For 64bit systems, you need the 32bit libc: "aptitude install libc6-dev-i386"
 
 To install, run make in the "libstm" directory
 (not in the subdirectory "library"):

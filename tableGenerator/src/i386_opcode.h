@@ -94,23 +94,25 @@ typedef struct instr {
 #define		OPT_d					0x00040000
 #define		OPT_dq					0x00050000
 #define		OPT_p					0x00060000
-#define		OPT_pi					0x00070000
-#define		OPT_ps					0x00080000
-#define		OPT_q					0x00090000
-#define		OPT_s					0x000A0000
-#define		OPT_ss					0x000B0000
-#define		OPT_si					0x000C0000
-#define		OPT_v					0x000D0000
-#define		OPT_w					0x000E0000
-#define		OPT_z					0x000F0000
+#define		OPT_pd					0x00070000
+#define		OPT_pi					0x00080000
+#define		OPT_ps					0x00090000
+#define		OPT_q					0x000A0000
+#define		OPT_s					0x000B0000
+#define		OPT_ss					0x000C0000
+#define		OPT_sd					0x000D0000 /* this one is not in the intel manual! */
+#define		OPT_si					0x000E0000
+#define		OPT_v					0x000F0000
+#define		OPT_w					0x00100000
+#define		OPT_z					0x00110000
 
 /* operand types for FPU - these are not found in the intel manual */
-#define		OPT_fs					0x00100000		/* single-real*/
-#define		OPT_fd					0x00200000		/* double-real */
-#define		OPT_fe					0x00300000		/* extended-real */
-#define		OPT_fp					0x00400000		/* packed-BCD */
-#define		OPT_fv					0x00500000		/* FPU env (14/28 bytes) */
-#define		OPT_fst					0x00600000		/* FPU state (98/108 bytes) */
+#define		OPT_fs					0x00200000		/* single-real*/
+#define		OPT_fd					0x00210000		/* double-real */
+#define		OPT_fe					0x00220000		/* extended-real */
+#define		OPT_fp					0x00230000		/* packed-BCD */
+#define		OPT_fv					0x00240000		/* FPU env (14/28 bytes) */
+#define		OPT_fst					0x00250000		/* FPU state (98/108 bytes) */
 
 
 /*******************************************************\
@@ -341,6 +343,8 @@ typedef struct instr {
 
 /* these are defined in i386_opcode.map */
 extern instr_t table_opcode_onebyte[], table_opcode_twobytes[];
+
+extern instr_t table_opcode_660f[];
 
 extern instr_t table_opcode_80_rm[], table_opcode_81_rm[], table_opcode_82_rm[], table_opcode_83_rm[];
 extern instr_t table_opcode_C0_rm[], table_opcode_C1_rm[];

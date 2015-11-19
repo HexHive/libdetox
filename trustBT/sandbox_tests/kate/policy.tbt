@@ -1,0 +1,2 @@
+mode:blacklist
+open("/secret",*):deny

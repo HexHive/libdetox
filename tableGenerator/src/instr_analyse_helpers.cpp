@@ -134,7 +134,9 @@ unsigned int operandSize (unsigned int operandFlags) {
 			return 10;
 		case OPT_dq:
 		case OPT_ps:
+		case OPT_pd:
 		case OPT_ss:
+		case OPT_sd:
 			return 16;
 		case OPT_fv:
 			return 28;

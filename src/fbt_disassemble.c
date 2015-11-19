@@ -53,7 +53,7 @@
  */
 void disasm_instr(translate_struct_t *ts)
 {
-	ia32_opcode_t *opcode, *opcode_table = opcode_table_onebyte;
+	const struct ia32_opcode *opcode, *opcode_table = opcode_table_onebyte;
 	int bytes_argument;
 
 	unsigned char *cur = (ts->cur_instr = ts->next_instr);
@@ -62,11 +62,24 @@ void disasm_instr(translate_struct_t *ts)
 	/* 0x1 - operand overwrite */
 	unsigned char prefix = 0;
 
+	unsigned char rex = 0;
+	
 	while (1) {
 		opcode = opcode_table + (unsigned int)*cur;
 
+		if ((*cur==PREFIX_OP_SZ_OVR || *cur==PREFIX_REPNEZ || *cur==PREFIX_MISC) && (*(cur+1)==0x0F) && (opcode->opcode_table + *(cur+2))->opcode_handler!=0) {
+		    /* this is an opcode escape -> we have to perform a lookup in an additional table */
+		    PRINT_DEBUG("opcode escape found to 3byte opcode: %x", *cur);
+		    /* there are some 3byte opcodes which start with a prefix and then escape through 0x0f
+		       we take care of them _here_
+		       otherwise, we just go back to the first table and continue our translation
+		    */
+		    opcode_table = opcode->opcode_table;
+		    cur+=2; /* skip the 0x0f escape byte */
+		    continue;  /* do one more iteration */
+		    
 		/* check for OPCODE_ESC */
-		if ((opcode->opcode_flags & OPCODE_ESC) != 0) {
+		} else if ((opcode->opcode_flags & OPCODE_ESC) != 0) {
 			/* this is an opcode escape -> we have to perform a lookup in an additional table */
 			PRINT_DEBUG("opcode escape found: %x", *cur);
 			opcode_table = opcode->opcode_table;
@@ -80,10 +93,17 @@ void disasm_instr(translate_struct_t *ts)
 			/* for performance reasons we _now_ only support 1 prefix. more can be added. */
 			assert(ts->num_prefixes<=1 || ((prefix!=PREFIX_ADDR_SZ_OVR) && (prefix!=PREFIX_OP_SZ_OVR)));
 			prefix = *cur;
-			opcode_table = opcode->opcode_table;
+			/* go back to the first table if it is not a special escape prefix! */
+			opcode_table = opcode_table_onebyte;
 			cur++;
 			continue;  /* do one more iteration */
 
+#ifdef __LP64__
+		} else if (*cur>=0x40 && *cur<=0x4f && opcode_table==opcode_table_onebyte) {
+		    rex = *cur;
+		    cur++;
+		    continue;
+#endif
 		} else {
 			/* this was the last byte of the opcode */
 			ts->first_byte_after_opcode = cur + 1;
@@ -150,6 +170,14 @@ void disasm_instr(translate_struct_t *ts)
 			/* set the action */
 			ts->action = opcode->opcode_handler;
 
+			if (rex && (rex&REXW)) {
+			    /* rex.b size extenstion */
+			    if ((MASK_ARG & opcode->opcode_flags)==ARG_D) {
+				cur += 8;
+			    } else {
+				printf("unhandled rexw prefix!\n");
+			    }
+			} else
 			/* read info regarding immediate arguments (immediates, code offset, ...) */
 			/* this checks for the operand size and if we have a different os, then we
 			   check for 4byte parameters and change them into 2byte..

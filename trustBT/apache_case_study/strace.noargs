@@ -1,0 +1,1153 @@
+Process 18098 attached - interrupt to quit
+restart_syscall(<... resuming interrupted call ...>) = 0
+stat64("/proc/self/maps", {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+stat64("/proc/self/smaps", {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+stat64("/proc/self/numa_maps", 0xbf8a4fbc) = -1 ENOENT (No such file or directory)
+stat64("/proc/self/stat", {st_mode=S_IFREG|0444, st_size=0, ...}) = 0
+futex(0xb7d6c070, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+rt_sigaction(SIGILL, {0xb7f71b00, [], SA_SIGINFO}, NULL, 8) = 0
+rt_sigaction(SIGSEGV, {0xb7f71b00, [], SA_SIGINFO}, NULL, 8) = 0
+rt_sigaction(SIGBUS, {0xb7f71b00, [], SA_SIGINFO}, NULL, 8) = 0
+open("./syscalls.tbt", O_RDONLY)        = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=9269, ...}) = 0
+mmap2(NULL, 9269, PROT_READ, MAP_SHARED, 3, 0) = 0xb7f61000
+close(3)                                = 0
+gettimeofday({1256867859, 234345}, NULL) = 0
+mmap2(0x4a598000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x4a598000
+mmap2(0x49d97000, 8392704, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49d97000
+mmap2(0x49c97000, 1048576, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c97000
+mprotect(0x49c97000, 1048576, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+mmap2(0x49c96000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c96000
+mprotect(0x49c96000, 4096, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+mprotect(0x49c96000, 4096, PROT_READ|PROT_EXEC) = 0
+mmap2(0x49c92000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c92000
+munmap(0xb7f61000, 9269)                = 0
+mmap2(0x49c8e000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c8e000
+mmap2(0x49c8a000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c8a000
+mmap2(0x49c86000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c86000
+mmap2(0x49c82000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c82000
+mmap2(0x49c7e000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c7e000
+mmap2(0x49c7a000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c7a000
+mmap2(0x49c76000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c76000
+mmap2(0x49c72000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c72000
+mmap2(0x49c6e000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c6e000
+mmap2(0x49c6a000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c6a000
+mmap2(0x49c66000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c66000
+mmap2(0x49c62000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c62000
+mmap2(0x49c5e000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c5e000
+mmap2(0x49c5a000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c5a000
+mmap2(0x49c56000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c56000
+mmap2(0x49c52000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c52000
+mmap2(0x49c4e000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c4e000
+mmap2(0x49c4a000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c4a000
+mmap2(0x49c46000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c46000
+mmap2(0x49c42000, 16384, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c42000
+open("./policy.tbt", O_RDONLY)          = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=922, ...}) = 0
+mmap2(NULL, 922, PROT_READ, MAP_SHARED, 3, 0) = 0xb7f63000
+close(3)                                = 0
+munmap(0xb7f63000, 922)                 = 0
+open("/proc/self/exe", O_RDONLY)        = 3
+fstat64(3, {st_mode=S_IFREG|0755, st_size=353016, ...}) = 0
+mmap2(NULL, 353016, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7487000
+munmap(0xb7487000, 353016)              = 0
+close(3)                                = 0
+open("/usr/lib/libfastbt.so", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0755, st_size=291114, ...}) = 0
+mmap2(NULL, 291114, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7496000
+munmap(0xb7496000, 291114)              = 0
+close(3)                                = 0
+open("/usr/lib/libpcre.so.3", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=162088, ...}) = 0
+mmap2(NULL, 162088, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74b6000
+munmap(0xb74b6000, 162088)              = 0
+close(3)                                = 0
+open("/usr/lib/libaprutil-1.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=121404, ...}) = 0
+mmap2(NULL, 121404, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74c0000
+munmap(0xb74c0000, 121404)              = 0
+close(3)                                = 0
+open("/usr/lib/libapr-1.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=170596, ...}) = 0
+mmap2(NULL, 170596, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74b4000
+munmap(0xb74b4000, 170596)              = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libpthread.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0755, st_size=116414, ...}) = 0
+mmap2(NULL, 116414, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74c1000
+munmap(0xb74c1000, 116414)              = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libc.so.6", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0755, st_size=1413540, ...}) = 0
+mmap2(NULL, 1413540, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7384000
+munmap(0xb7384000, 1413540)             = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libdl.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=9680, ...}) = 0
+mmap2(NULL, 9680, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f61000
+munmap(0xb7f61000, 9680)                = 0
+close(3)                                = 0
+open("/usr/lib/libldap_r-2.4.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=265124, ...}) = 0
+mmap2(NULL, 265124, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb749d000
+munmap(0xb749d000, 265124)              = 0
+close(3)                                = 0
+open("/usr/lib/liblber-2.4.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=51228, ...}) = 0
+mmap2(NULL, 51228, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f57000
+munmap(0xb7f57000, 51228)               = 0
+close(3)                                = 0
+open("/usr/lib/libdb-4.6.so", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1256548, ...}) = 0
+mmap2(NULL, 1256548, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb73ab000
+munmap(0xb73ab000, 1256548)             = 0
+close(3)                                = 0
+open("/usr/lib/libpq.so.5", O_RDONLY)   = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=127724, ...}) = 0
+mmap2(NULL, 127724, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74be000
+munmap(0xb74be000, 127724)              = 0
+close(3)                                = 0
+open("/usr/lib/libmysqlclient_r.so.15", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=2004028, ...}) = 0
+mmap2(NULL, 2004028, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb72f4000
+munmap(0xb72f4000, 2004028)             = 0
+close(3)                                = 0
+open("/usr/lib/libsqlite3.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=449956, ...}) = 0
+mmap2(NULL, 449956, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7470000
+munmap(0xb7470000, 449956)              = 0
+close(3)                                = 0
+open("/usr/lib/libexpat.so.1", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=151308, ...}) = 0
+mmap2(NULL, 151308, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74b9000
+munmap(0xb74b9000, 151308)              = 0
+close(3)                                = 0
+open("/lib/libuuid.so.1", O_RDONLY)     = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=12912, ...}) = 0
+mmap2(NULL, 12912, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f60000
+munmap(0xb7f60000, 12912)               = 0
+close(3)                                = 0
+open("/lib/i686/cmov/librt.so.1", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=30624, ...}) = 0
+mmap2(NULL, 30624, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f5c000
+munmap(0xb7f5c000, 30624)               = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libcrypt.so.1", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=38296, ...}) = 0
+mmap2(NULL, 38296, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f5a000
+munmap(0xb7f5a000, 38296)               = 0
+close(3)                                = 0
+open("/lib/ld-linux.so.2", O_RDONLY)    = 3
+fstat64(3, {st_mode=S_IFREG|0755, st_size=113248, ...}) = 0
+mmap2(NULL, 113248, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74c2000
+munmap(0xb74c2000, 113248)              = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libresolv.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=67408, ...}) = 0
+mmap2(NULL, 67408, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74cd000
+munmap(0xb74cd000, 67408)               = 0
+close(3)                                = 0
+open("/usr/lib/libsasl2.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=91016, ...}) = 0
+mmap2(NULL, 91016, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74c7000
+munmap(0xb74c7000, 91016)               = 0
+close(3)                                = 0
+open("/usr/lib/libgnutls.so.26", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=642912, ...}) = 0
+mmap2(NULL, 642912, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7441000
+munmap(0xb7441000, 642912)              = 0
+close(3)                                = 0
+open("/usr/lib/i686/cmov/libssl.so.0.9.8", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=285188, ...}) = 0
+mmap2(NULL, 285188, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7498000
+munmap(0xb7498000, 285188)              = 0
+close(3)                                = 0
+open("/usr/lib/i686/cmov/libcrypto.so.0.9.8", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1375588, ...}) = 0
+mmap2(NULL, 1375588, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb738e000
+munmap(0xb738e000, 1375588)             = 0
+close(3)                                = 0
+open("/usr/lib/libkrb5.so.3", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=607284, ...}) = 0
+mmap2(NULL, 607284, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7449000
+munmap(0xb7449000, 607284)              = 0
+close(3)                                = 0
+open("/lib/libcom_err.so.2", O_RDONLY)  = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=8676, ...}) = 0
+mmap2(NULL, 8676, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f61000
+munmap(0xb7f61000, 8676)                = 0
+close(3)                                = 0
+open("/usr/lib/libgssapi_krb5.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=169076, ...}) = 0
+mmap2(NULL, 169076, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74b4000
+munmap(0xb74b4000, 169076)              = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libnsl.so.1", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=87800, ...}) = 0
+mmap2(NULL, 87800, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74c8000
+munmap(0xb74c8000, 87800)               = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libm.so.6", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=149328, ...}) = 0
+mmap2(NULL, 149328, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74b9000
+munmap(0xb74b9000, 149328)              = 0
+close(3)                                = 0
+open("/usr/lib/libz.so.1", O_RDONLY)    = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=81012, ...}) = 0
+mmap2(NULL, 81012, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74ca000
+munmap(0xb74ca000, 81012)               = 0
+close(3)                                = 0
+open("/usr/lib/libtasn1.so.3", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=59708, ...}) = 0
+mmap2(NULL, 59708, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74cf000
+munmap(0xb74cf000, 59708)               = 0
+close(3)                                = 0
+open("/usr/lib/libgpg-error.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=11556, ...}) = 0
+mmap2(NULL, 11556, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f61000
+munmap(0xb7f61000, 11556)               = 0
+close(3)                                = 0
+open("/usr/lib/libgcrypt.so.11", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=425220, ...}) = 0
+mmap2(NULL, 425220, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7476000
+munmap(0xb7476000, 425220)              = 0
+close(3)                                = 0
+open("/usr/lib/libk5crypto.so.3", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=147392, ...}) = 0
+mmap2(NULL, 147392, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb74ba000
+munmap(0xb74ba000, 147392)              = 0
+close(3)                                = 0
+open("/usr/lib/libkrb5support.so.0", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=27876, ...}) = 0
+mmap2(NULL, 27876, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f5d000
+munmap(0xb7f5d000, 27876)               = 0
+close(3)                                = 0
+open("/lib/libkeyutils.so.1", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=5744, ...}) = 0
+mmap2(NULL, 5744, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb7f62000
+munmap(0xb7f62000, 5744)                = 0
+close(3)                                = 0
+mmap2(0x49c40000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c40000
+mprotect(0x49c40000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+brk(0x85b9000)                          = 0x85b9000
+brk(0x85db000)                          = 0x85db000
+socket(PF_NETLINK, SOCK_RAW, 0)         = 3
+bind(3, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(3, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(3, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(3)                                = 0
+mmap2(0x49c3e000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c3e000
+mprotect(0x49c3e000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+stat64("/etc/apache2/apache2.conf", {st_mode=S_IFREG|0644, st_size=10104, ...}) = 0
+open("/etc/apache2/apache2.conf", O_RDONLY|O_LARGEFILE) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=10104, ...}) = 0
+read(3, "#\n# Based upon the NCSA server co"..., 4096) = 4096
+stat64("/etc/apache2", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+read(3, "t number of worker threads in eac"..., 4096) = 4096
+stat64("/etc/apache2/mods-enabled", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/mods-enabled", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 4
+fstat64(4, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+fcntl64(4, F_GETFD)                     = 0x1 (flags FD_CLOEXEC)
+getdents(4, /* 28 entries */, 4096)     = 696
+getdents(4, /* 0 entries */, 4096)      = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/alias.load", {st_mode=S_IFREG|0644, st_size=62, ...}) = 0
+open("/etc/apache2/mods-enabled/alias.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=62, ...}) = 0
+read(4, "LoadModule alias_module /usr/lib/"..., 4096) = 62
+mmap2(0x49c3c000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c3c000
+mprotect(0x49c3c000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+open("/usr/lib/apache2/modules/mod_alias.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0`\n\0\0004\0\0\0\264"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=10180, ...}) = 0
+mmap2(NULL, 8928, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f61000
+mmap2(0xb7f63000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x2) = 0xb7f63000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_alias.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=10180, ...}) = 0
+mmap2(NULL, 10180, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb7f5e000
+munmap(0xb7f5e000, 10180)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/auth_basic.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/auth_basic.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(4, "LoadModule auth_basic_module /usr"..., 4096) = 72
+open("/usr/lib/apache2/modules/mod_auth_basic.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0p\10\0\0004\0\0\0\330"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=6376, ...}) = 0
+mmap2(NULL, 9216, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f5e000
+mmap2(0xb7f60000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x1) = 0xb7f60000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_auth_basic.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=6376, ...}) = 0
+mmap2(NULL, 6376, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb7f5c000
+munmap(0xb7f5c000, 6376)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/authn_file.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authn_file.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(4, "LoadModule authn_file_module /usr"..., 4096) = 72
+open("/usr/lib/apache2/modules/mod_authn_file.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\200\6\0\0004\0\0\0\270"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5064, ...}) = 0
+mmap2(NULL, 7904, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f5c000
+mmap2(0xb7f5d000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0) = 0xb7f5d000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_authn_file.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5064, ...}) = 0
+mmap2(NULL, 5064, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb7f5a000
+munmap(0xb7f5a000, 5064)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_default.load", {st_mode=S_IFREG|0644, st_size=78, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_default.load", O_RDONLY|O_LARGEFILE) = 4
+brk(0x85fd000)                          = 0x85fd000
+fstat64(4, {st_mode=S_IFREG|0644, st_size=78, ...}) = 0
+read(4, "LoadModule authz_default_module /"..., 4096) = 78
+open("/usr/lib/apache2/modules/mod_authz_default.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\340\4\0\0004\0\0\0<"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=3916, ...}) = 0
+mmap2(NULL, 6752, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f5a000
+mmap2(0xb7f5b000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0) = 0xb7f5b000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_authz_default.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=3916, ...}) = 0
+mmap2(NULL, 3916, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb7f59000
+munmap(0xb7f59000, 3916)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_groupfile.load", {st_mode=S_IFREG|0644, st_size=82, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_groupfile.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=82, ...}) = 0
+read(4, "LoadModule authz_groupfile_module"..., 4096) = 82
+open("/usr/lib/apache2/modules/mod_authz_groupfile.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0`\n\0\0004\0\0\0|"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=7052, ...}) = 0
+mmap2(NULL, 9888, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f57000
+mmap2(0xb7f59000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x1) = 0xb7f59000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_authz_groupfile.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=7052, ...}) = 0
+mmap2(NULL, 7052, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb7f55000
+munmap(0xb7f55000, 7052)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_host.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_host.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(4, "LoadModule authz_host_module /usr"..., 4096) = 72
+open("/usr/lib/apache2/modules/mod_authz_host.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\0\10\0\0004\0\0\0\270"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=6344, ...}) = 0
+mmap2(NULL, 9188, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb7f54000
+mmap2(0xb7f56000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x1) = 0xb7f56000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_authz_host.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=6344, ...}) = 0
+mmap2(NULL, 6344, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74dc000
+munmap(0xb74dc000, 6344)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_user.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_user.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(4, "LoadModule authz_user_module /usr"..., 4096) = 72
+open("/usr/lib/apache2/modules/mod_authz_user.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\20\6\0\0004\0\0\0\270"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=4552, ...}) = 0
+mmap2(NULL, 7392, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74dc000
+mmap2(0xb74dd000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0) = 0xb74dd000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_authz_user.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=4552, ...}) = 0
+mmap2(NULL, 4552, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74da000
+munmap(0xb74da000, 4552)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/autoindex.load", {st_mode=S_IFREG|0644, st_size=70, ...}) = 0
+open("/etc/apache2/mods-enabled/autoindex.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=70, ...}) = 0
+read(4, "LoadModule autoindex_module /usr/"..., 4096) = 70
+open("/usr/lib/apache2/modules/mod_autoindex.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\260\27\0\0004\0\0\0\370"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=30984, ...}) = 0
+mmap2(NULL, 29732, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74d4000
+mmap2(0xb74db000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x7) = 0xb74db000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_autoindex.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=30984, ...}) = 0
+mmap2(NULL, 30984, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74cc000
+munmap(0xb74cc000, 30984)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/cgi.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/cgi.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(4, "LoadModule cgi_module /usr/lib/ap"..., 4096) = 58
+open("/usr/lib/apache2/modules/mod_cgi.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0P\31\0\0004\0\0\0p"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=20608, ...}) = 0
+mmap2(NULL, 23472, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74ce000
+mmap2(0xb74d3000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x4) = 0xb74d3000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_cgi.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=20608, ...}) = 0
+mmap2(NULL, 20608, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74c8000
+munmap(0xb74c8000, 20608)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/deflate.load", {st_mode=S_IFREG|0644, st_size=66, ...}) = 0
+open("/etc/apache2/mods-enabled/deflate.load", O_RDONLY|O_LARGEFILE) = 4
+brk(0x861e000)                          = 0x861e000
+fstat64(4, {st_mode=S_IFREG|0644, st_size=66, ...}) = 0
+read(4, "LoadModule deflate_module /usr/li"..., 4096) = 66
+open("/usr/lib/apache2/modules/mod_deflate.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\360\17\0\0004\0\0\0\264"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=18372, ...}) = 0
+mmap2(NULL, 17120, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74c9000
+mmap2(0xb74cd000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x4) = 0xb74cd000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_deflate.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=18372, ...}) = 0
+mmap2(NULL, 18372, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74c4000
+munmap(0xb74c4000, 18372)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/dir.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/dir.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(4, "LoadModule dir_module /usr/lib/ap"..., 4096) = 58
+open("/usr/lib/apache2/modules/mod_dir.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0@\7\0\0004\0\0\0\320"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5856, ...}) = 0
+mmap2(NULL, 4608, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74c7000
+mmap2(0xb74c8000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x1) = 0xb74c8000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_dir.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5856, ...}) = 0
+mmap2(NULL, 5856, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74c5000
+munmap(0xb74c5000, 5856)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/env.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/env.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(4, "LoadModule env_module /usr/lib/ap"..., 4096) = 58
+open("/usr/lib/apache2/modules/mod_env.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\300\6\0\0004\0\0\0p"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=4992, ...}) = 0
+mmap2(NULL, 7840, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74c5000
+mmap2(0xb74c6000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0) = 0xb74c6000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_env.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=4992, ...}) = 0
+mmap2(NULL, 4992, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74c3000
+munmap(0xb74c3000, 4992)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/mime.load", {st_mode=S_IFREG|0644, st_size=60, ...}) = 0
+open("/etc/apache2/mods-enabled/mime.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=60, ...}) = 0
+read(4, "LoadModule mime_module /usr/lib/a"..., 4096) = 60
+open("/usr/lib/apache2/modules/mod_mime.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\260\r\0\0004\0\0\0\260"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=14528, ...}) = 0
+mmap2(NULL, 13284, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74c1000
+mmap2(0xb74c4000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x3) = 0xb74c4000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_mime.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=14528, ...}) = 0
+mmap2(NULL, 14528, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74bd000
+munmap(0xb74bd000, 14528)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/negotiation.load", {st_mode=S_IFREG|0644, st_size=74, ...}) = 0
+open("/etc/apache2/mods-enabled/negotiation.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=74, ...}) = 0
+read(4, "LoadModule negotiation_module /us"..., 4096) = 74
+open("/usr/lib/apache2/modules/mod_negotiation.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\220\25\0\0004\0\0\0\370"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=28168, ...}) = 0
+mmap2(NULL, 31008, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb74b9000
+mmap2(0xb74c0000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x6) = 0xb74c0000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_negotiation.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=28168, ...}) = 0
+mmap2(NULL, 28168, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb74b2000
+munmap(0xb74b2000, 28168)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/php5.load", {st_mode=S_IFREG|0644, st_size=59, ...}) = 0
+open("/etc/apache2/mods-enabled/php5.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=59, ...}) = 0
+read(4, "LoadModule php5_module /usr/lib/a"..., 4096) = 59
+open("/usr/lib/apache2/modules/libphp5.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0P\304\7\0004\0\0\0\340"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5450520, ...}) = 0
+mmap2(NULL, 5476000, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb6f80000
+mmap2(0xb747c000, 229376, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x4fb) = 0xb747c000
+mmap2(0xb74b4000, 20128, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xb74b4000
+close(5)                                = 0
+mmap2(0x49c3a000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c3a000
+mprotect(0x49c3a000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+open("/etc/ld.so.cache", O_RDONLY)      = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=63230, ...}) = 0
+mmap2(NULL, 63230, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb6f70000
+close(5)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/libbz2.so.1.0", O_RDONLY)    = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\360\20\0\0004\0\0\0\374"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=66276, ...}) = 0
+mmap2(NULL, 65096, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb6f60000
+mmap2(0xb6f6f000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0xf) = 0xb6f6f000
+close(5)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/usr/lib/libxml2.so.2", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\200\331\1\0004\0\0\0x"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=1274504, ...}) = 0
+mmap2(NULL, 1281172, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb6e27000
+mmap2(0xb6f5a000, 20480, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x132) = 0xb6f5a000
+mmap2(0xb6f5f000, 3220, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_ANONYMOUS, -1, 0) = 0xb6f5f000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/libphp5.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=5450520, ...}) = 0
+mmap2(NULL, 5450520, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb68f4000
+munmap(0xb68f4000, 5450520)             = 0
+close(5)                                = 0
+open("/lib/libbz2.so.1.0", O_RDONLY)    = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=66276, ...}) = 0
+mmap2(NULL, 66276, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb6e16000
+brk(0x863f000)                          = 0x863f000
+munmap(0xb6e16000, 66276)               = 0
+close(5)                                = 0
+open("/usr/lib/libxml2.so.2", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=1274504, ...}) = 0
+mmap2(NULL, 1274504, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb6cef000
+munmap(0xb6cef000, 1274504)             = 0
+close(5)                                = 0
+munmap(0xb6f70000, 63230)               = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/setenvif.load", {st_mode=S_IFREG|0644, st_size=68, ...}) = 0
+open("/etc/apache2/mods-enabled/setenvif.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=68, ...}) = 0
+read(4, "LoadModule setenvif_module /usr/l"..., 4096) = 68
+open("/usr/lib/apache2/modules/mod_setenvif.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\260\t\0\0004\0\0\0\264"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=8644, ...}) = 0
+mmap2(NULL, 11488, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb6f7d000
+mmap2(0xb6f7f000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x1) = 0xb6f7f000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_setenvif.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=8644, ...}) = 0
+mmap2(NULL, 8644, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb6f7a000
+munmap(0xb6f7a000, 8644)                = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/status.load", {st_mode=S_IFREG|0644, st_size=64, ...}) = 0
+open("/etc/apache2/mods-enabled/status.load", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=64, ...}) = 0
+read(4, "LoadModule status_module /usr/lib"..., 4096) = 64
+open("/usr/lib/apache2/modules/mod_status.so", O_RDONLY) = 5
+read(5, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\300\f\0\0004\0\0\0\204"..., 512) = 512
+fstat64(5, {st_mode=S_IFREG|0644, st_size=18364, ...}) = 0
+mmap2(NULL, 17080, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 5, 0) = 0xb6f78000
+mmap2(0xb6f7c000, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 5, 0x4) = 0xb6f7c000
+close(5)                                = 0
+open("/usr/lib/apache2/modules/mod_status.so", O_RDONLY) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=18364, ...}) = 0
+mmap2(NULL, 18364, PROT_READ, MAP_PRIVATE, 5, 0) = 0xb6f73000
+munmap(0xb6f73000, 18364)               = 0
+close(5)                                = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/mods-enabled", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 4
+fstat64(4, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(4, /* 28 entries */, 4096)     = 696
+getdents(4, /* 0 entries */, 4096)      = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/alias.conf", {st_mode=S_IFREG|0644, st_size=815, ...}) = 0
+open("/etc/apache2/mods-enabled/alias.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=815, ...}) = 0
+read(4, "<IfModule alias_module>\n#\n# Alias"..., 4096) = 815
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/autoindex.conf", {st_mode=S_IFREG|0644, st_size=3265, ...}) = 0
+open("/etc/apache2/mods-enabled/autoindex.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=3265, ...}) = 0
+read(4, "<IfModule mod_autoindex.c>\n#\n# Di"..., 4096) = 3265
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/deflate.conf", {st_mode=S_IFREG|0644, st_size=107, ...}) = 0
+open("/etc/apache2/mods-enabled/deflate.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=107, ...}) = 0
+read(4, "<IfModule mod_deflate.c>\n        "..., 4096) = 107
+brk(0x8662000)                          = 0x8662000
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/dir.conf", {st_mode=S_IFREG|0644, st_size=122, ...}) = 0
+open("/etc/apache2/mods-enabled/dir.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=122, ...}) = 0
+read(4, "<IfModule mod_dir.c>\n\n          D"..., 4096) = 122
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/mime.conf", {st_mode=S_IFREG|0644, st_size=6362, ...}) = 0
+open("/etc/apache2/mods-enabled/mime.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=6362, ...}) = 0
+read(4, "<IfModule mod_mime.c>\n\n#\n# TypesC"..., 4096) = 4096
+read(4, "atin8\nAddCharset ISO-8859-15  .is"..., 4096) = 2266
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/negotiation.conf", {st_mode=S_IFREG|0644, st_size=666, ...}) = 0
+open("/etc/apache2/mods-enabled/negotiation.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=666, ...}) = 0
+read(4, "<IfModule mod_negotiation.c>\n#\n# "..., 4096) = 666
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/php5.conf", {st_mode=S_IFREG|0644, st_size=133, ...}) = 0
+open("/etc/apache2/mods-enabled/php5.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=133, ...}) = 0
+read(4, "<IfModule mod_php5.c>\n  AddType a"..., 4096) = 133
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/setenvif.conf", {st_mode=S_IFREG|0644, st_size=1122, ...}) = 0
+open("/etc/apache2/mods-enabled/setenvif.conf", O_RDONLY|O_LARGEFILE) = 4
+brk(0x8684000)                          = 0x8684000
+fstat64(4, {st_mode=S_IFREG|0644, st_size=1122, ...}) = 0
+read(4, "<IfModule mod_setenvif.c>\n\n#\n# Th"..., 4096) = 1122
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/mods-enabled/status.conf", {st_mode=S_IFREG|0644, st_size=398, ...}) = 0
+open("/etc/apache2/mods-enabled/status.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=398, ...}) = 0
+read(4, "<IfModule mod_status.c>\n#\n# Allow"..., 4096) = 398
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/httpd.conf", {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+open("/etc/apache2/httpd.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/ports.conf", {st_mode=S_IFREG|0644, st_size=513, ...}) = 0
+open("/etc/apache2/ports.conf", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=513, ...}) = 0
+read(4, "# If you just change the port or "..., 4096) = 513
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+read(3, "ur ServerAdmin email address rega"..., 4096) = 1912
+stat64("/etc/apache2/conf.d/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/conf.d/", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 4
+fstat64(4, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(4, /* 4 entries */, 4096)      = 72
+getdents(4, /* 0 entries */, 4096)      = 0
+close(4)                                = 0
+stat64("/etc/apache2/conf.d/charset", {st_mode=S_IFREG|0644, st_size=269, ...}) = 0
+open("/etc/apache2/conf.d/charset", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=269, ...}) = 0
+read(4, "# Read the documentation before e"..., 4096) = 269
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/conf.d/security", {st_mode=S_IFREG|0644, st_size=1464, ...}) = 0
+open("/etc/apache2/conf.d/security", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=1464, ...}) = 0
+brk(0x86a6000)                          = 0x86a6000
+read(4, "#\n# Disable access to the entire "..., 4096) = 1464
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+stat64("/etc/apache2/sites-enabled/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/sites-enabled/", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 4
+fstat64(4, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(4, /* 3 entries */, 4096)      = 56
+getdents(4, /* 0 entries */, 4096)      = 0
+close(4)                                = 0
+stat64("/etc/apache2/sites-enabled/000-default", {st_mode=S_IFREG|0644, st_size=950, ...}) = 0
+open("/etc/apache2/sites-enabled/000-default", O_RDONLY|O_LARGEFILE) = 4
+fstat64(4, {st_mode=S_IFREG|0644, st_size=950, ...}) = 0
+read(4, "<VirtualHost *:80>\n\tServerAdmin w"..., 4096) = 950
+read(4, ""..., 4096)                    = 0
+close(4)                                = 0
+read(3, ""..., 4096)                    = 0
+close(3)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 3
+fcntl64(3, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(3, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(3)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 3
+fcntl64(3, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(3, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(3)                                = 0
+open("/etc/nsswitch.conf", O_RDONLY)    = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=513, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(3, "# /etc/nsswitch.conf\n#\n# Example "..., 4096) = 513
+read(3, ""..., 4096)                    = 0
+close(3)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+open("/etc/ld.so.cache", O_RDONLY)      = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=63230, ...}) = 0
+mmap2(NULL, 63230, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6e17000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/i686/cmov/libnss_compat.so.2", O_RDONLY) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\20\16\0\0004\0\0\0\204"..., 512) = 512
+fstat64(3, {st_mode=S_IFREG|0644, st_size=30436, ...}) = 0
+mmap2(NULL, 33356, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6e0e000
+mmap2(0xb6e15000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x6) = 0xb6e15000
+close(3)                                = 0
+open("/lib/i686/cmov/libnss_compat.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=30436, ...}) = 0
+mmap2(NULL, 30436, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6f70000
+munmap(0xb6f70000, 30436)               = 0
+close(3)                                = 0
+munmap(0xb6e17000, 63230)               = 0
+open("/etc/ld.so.cache", O_RDONLY)      = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=63230, ...}) = 0
+mmap2(NULL, 63230, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6e17000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/i686/cmov/libnss_nis.so.2", O_RDONLY) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\20\31\0\0004\0\0\0\314"..., 512) = 512
+fstat64(3, {st_mode=S_IFREG|0644, st_size=38444, ...}) = 0
+mmap2(NULL, 41532, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6e03000
+mmap2(0xb6e0c000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x8) = 0xb6e0c000
+close(3)                                = 0
+access("/etc/ld.so.nohwcap", F_OK)      = -1 ENOENT (No such file or directory)
+open("/lib/i686/cmov/libnss_files.so.2", O_RDONLY) = 3
+read(3, "\177ELF\1\1\1\0\0\0\0\0\0\0\0\0\3\0\3\0\1\0\0\0\320\30\0\0004\0\0\0\250"..., 512) = 512
+fstat64(3, {st_mode=S_IFREG|0644, st_size=42504, ...}) = 0
+mmap2(NULL, 45720, PROT_READ|PROT_EXEC, MAP_PRIVATE|MAP_DENYWRITE, 3, 0) = 0xb6df7000
+mmap2(0xb6e01000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_FIXED|MAP_DENYWRITE, 3, 0x9) = 0xb6e01000
+close(3)                                = 0
+open("/lib/i686/cmov/libnss_nis.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=38444, ...}) = 0
+mmap2(NULL, 38444, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6ded000
+munmap(0xb6ded000, 38444)               = 0
+close(3)                                = 0
+open("/lib/i686/cmov/libnss_files.so.2", O_RDONLY) = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=42504, ...}) = 0
+mmap2(NULL, 42504, PROT_READ, MAP_PRIVATE, 3, 0) = 0xb6dec000
+munmap(0xb6dec000, 42504)               = 0
+close(3)                                = 0
+munmap(0xb6e17000, 63230)               = 0
+open("/etc/passwd", O_RDONLY|O_CLOEXEC) = 3
+fcntl64(3, F_GETFD)                     = 0x1 (flags FD_CLOEXEC)
+mmap2(0x49c38000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c38000
+mprotect(0x49c38000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+_llseek(3, 0, [0], SEEK_CUR)            = 0
+fstat64(3, {st_mode=S_IFREG|0644, st_size=1209, ...}) = 0
+mmap2(NULL, 1209, PROT_READ, MAP_SHARED, 3, 0) = 0xb6f77000
+_llseek(3, 1209, [1209], SEEK_SET)      = 0
+munmap(0xb6f77000, 1209)                = 0
+close(3)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 3
+fcntl64(3, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(3, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(3)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 3
+fcntl64(3, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(3, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(3)                                = 0
+open("/etc/group", O_RDONLY|O_CLOEXEC)  = 3
+_llseek(3, 0, [0], SEEK_CUR)            = 0
+fstat64(3, {st_mode=S_IFREG|0644, st_size=696, ...}) = 0
+mmap2(NULL, 696, PROT_READ, MAP_SHARED, 3, 0) = 0xb6f77000
+_llseek(3, 696, [696], SEEK_SET)        = 0
+munmap(0xb6f77000, 696)                 = 0
+close(3)                                = 0
+mmap2(0x49c36000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c36000
+mprotect(0x49c36000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+socket(PF_NETLINK, SOCK_RAW, 0)         = 3
+bind(3, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(3, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(3, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(3)                                = 0
+socket(PF_NETLINK, SOCK_RAW, 0)         = 3
+bind(3, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(3, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(3, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(3, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(3)                                = 0
+open("/etc/gai.conf", O_RDONLY)         = 3
+fstat64(3, {st_mode=S_IFREG|0644, st_size=2689, ...}) = 0
+fstat64(3, {st_mode=S_IFREG|0644, st_size=2689, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(3, "# Configuration for getaddrinfo(3"..., 4096) = 2689
+read(3, ""..., 4096)                    = 0
+close(3)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+futex(0xb7ec5ad0, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+socket(PF_INET6, SOCK_DGRAM, IPPROTO_IP) = 3
+connect(3, {sa_family=AF_INET6, sin6_port=htons(80), inet_pton(AF_INET6, "::", &sin6_addr), sin6_flowinfo=0, sin6_scope_id=0}, 28) = 0
+getsockname(3, {sa_family=AF_INET6, sin6_port=htons(55579), inet_pton(AF_INET6, "::1", &sin6_addr), sin6_flowinfo=0, sin6_scope_id=0}, [28]) = 0
+connect(3, {sa_family=AF_UNSPEC, sa_data="\0\0\0\0\0\0\0\0\0\0\0\0\0\0"...}, 16) = 0
+connect(3, {sa_family=AF_INET, sin_port=htons(80), sin_addr=inet_addr("0.0.0.0")}, 16) = 0
+getsockname(3, {sa_family=AF_INET6, sin6_port=htons(53023), inet_pton(AF_INET6, "::ffff:127.0.0.1", &sin6_addr), sin6_flowinfo=0, sin6_scope_id=0}, [28]) = 0
+close(3)                                = 0
+socket(PF_INET6, SOCK_STREAM, IPPROTO_IP) = 3
+socket(PF_INET, SOCK_STREAM, IPPROTO_IP) = 4
+socket(PF_NETLINK, SOCK_RAW, 0)         = 5
+bind(5, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(5, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(5, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(5)                                = 0
+stat64("/var/www/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+mmap2(0x49c34000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c34000
+mprotect(0x49c34000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+uname({sys="Linux", node="inf-cs-ifw-client-1-05.ethz.ch.", ...}) = 0
+socket(PF_NETLINK, SOCK_RAW, 0)         = 5
+bind(5, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(5, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(5, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(5)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 5
+fcntl64(5, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(5, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(5)                                = 0
+socket(PF_FILE, SOCK_STREAM, 0)         = 5
+fcntl64(5, F_SETFL, O_RDWR|O_NONBLOCK)  = 0
+connect(5, {sa_family=AF_FILE, path="/var/run/nscd/socket"...}, 110) = -1 ENOENT (No such file or directory)
+close(5)                                = 0
+open("/etc/host.conf", O_RDONLY)        = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=9, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "multi on\n"..., 4096)          = 9
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+futex(0xb7ec6840, FUTEX_WAKE_PRIVATE, 2147483647) = 0
+open("/etc/resolv.conf", O_RDONLY)      = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=217, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "# Dynamic resolv.conf(5) file for"..., 4096) = 217
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+open("/etc/hosts", O_RDONLY|O_CLOEXEC)  = 5
+fcntl64(5, F_GETFD)                     = 0x1 (flags FD_CLOEXEC)
+fstat64(5, {st_mode=S_IFREG|0644, st_size=318, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "127.0.0.1\tlocalhost\n127.0.1.1\tinf"..., 4096) = 318
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+open("/etc/hosts", O_RDONLY|O_CLOEXEC)  = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=318, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "127.0.0.1\tlocalhost\n127.0.1.1\tinf"..., 4096) = 318
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+stat64("/etc/resolv.conf", {st_mode=S_IFREG|0644, st_size=217, ...}) = 0
+open("/etc/resolv.conf", O_RDONLY)      = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=217, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "# Dynamic resolv.conf(5) file for"..., 4096) = 217
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+open("/etc/hosts", O_RDONLY|O_CLOEXEC)  = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=318, ...}) = 0
+mmap2(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0xb6f77000
+read(5, "127.0.0.1\tlocalhost\n127.0.1.1\tinf"..., 4096) = 318
+close(5)                                = 0
+munmap(0xb6f77000, 4096)                = 0
+brk(0x86c7000)                          = 0x86c7000
+brk(0x86e9000)                          = 0x86e9000
+setsockopt(3, SOL_SOCKET, SO_REUSEADDR, [1], 4) = 0
+setsockopt(3, SOL_SOCKET, SO_KEEPALIVE, [1], 4) = 0
+setsockopt(3, SOL_IPV6, IPV6_V6ONLY, [0], 4) = 0
+setsockopt(3, SOL_TCP, TCP_NODELAY, [1], 4) = 0
+bind(3, {sa_family=AF_INET6, sin6_port=htons(80), inet_pton(AF_INET6, "::", &sin6_addr), sin6_flowinfo=0, sin6_scope_id=0}, 28) = 0
+listen(3, 511)                          = 0
+setsockopt(3, SOL_TCP, TCP_DEFER_ACCEPT, [1], 4) = 0
+pipe([5, 6])                            = 0
+fcntl64(5, F_GETFL)                     = 0 (flags O_RDONLY)
+fcntl64(5, F_SETFL, O_RDONLY|O_NONBLOCK) = 0
+open("/var/log/apache2/error.log", O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, 0666) = 7
+dup2(7, 2)                              = 2
+close(7)                                = 0
+open("/var/log/apache2/other_vhosts_access.log", O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, 0666) = 7
+open("/var/log/apache2/access.log", O_WRONLY|O_CREAT|O_APPEND|O_LARGEFILE, 0666) = 8
+mmap2(0x49c32000, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x49c32000
+mprotect(0x49c32000, 8192, PROT_READ|PROT_WRITE|PROT_EXEC) = 0
+open("/etc/mime.types", O_RDONLY|O_LARGEFILE) = 9
+fstat64(9, {st_mode=S_IFREG|0644, st_size=21373, ...}) = 0
+read(9, "#################################"..., 4096) = 4096
+read(9, "accpac.simply.imp\napplication/vnd"..., 4096) = 4096
+read(9, "\napplication/vnd.noblenet-sealer\n"..., 4096) = 4096
+read(9, "\napplication/x-dms\t\t\t\tdms\napplica"..., 4096) = 4096
+read(9, "cal/x-galactic-spc\t\t\t\tspc\nchemica"..., 4096) = 4096
+read(9, "\ntext/x-setext\t\t\t\t\tetx\ntext/x-sh\t"..., 4096) = 893
+read(9, ""..., 4096)                    = 0
+close(9)                                = 0
+close(6)                                = 0
+close(5)                                = 0
+socket(PF_NETLINK, SOCK_RAW, 0)         = 5
+bind(5, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 0
+getsockname(5, {sa_family=AF_NETLINK, pid=18098, groups=00000000}, [12]) = 0
+time(NULL)                              = 1256867859
+sendto(5, "\24\0\0\0\26\0\1\3\23H\352J\0\0\0\0\0\0\0\0"..., 20, 0, {sa_family=AF_NETLINK, pid=0, groups=00000000}, 12) = 20
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"0\0\0\0\24\0\2\0\23H\352J\262F\0\0\2\10\200\376\1\0\0\0\10\0\1\0\177\0\0\1\10"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 108
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"@\0\0\0\24\0\2\0\23H\352J\262F\0\0\n\200\200\376\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 128
+recvmsg(5, {msg_name(12)={sa_family=AF_NETLINK, pid=0, groups=00000000}, msg_iov(1)=[{"\24\0\0\0\3\0\2\0\23H\352J\262F\0\0\0\0\0\0\1\0\0\0\24\0\1\0\0\0\0\0\0"..., 4096}], msg_controllen=0, msg_flags=0}, 0) = 20
+close(5)                                = 0
+stat64("/etc/apache2/apache2.conf", {st_mode=S_IFREG|0644, st_size=10104, ...}) = 0
+open("/etc/apache2/apache2.conf", O_RDONLY|O_LARGEFILE) = 5
+fstat64(5, {st_mode=S_IFREG|0644, st_size=10104, ...}) = 0
+read(5, "#\n# Based upon the NCSA server co"..., 4096) = 4096
+stat64("/etc/apache2", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+read(5, "t number of worker threads in eac"..., 4096) = 4096
+stat64("/etc/apache2/mods-enabled", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/mods-enabled", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 6
+fstat64(6, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(6, /* 28 entries */, 4096)     = 696
+getdents(6, /* 0 entries */, 4096)      = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/alias.load", {st_mode=S_IFREG|0644, st_size=62, ...}) = 0
+open("/etc/apache2/mods-enabled/alias.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=62, ...}) = 0
+read(6, "LoadModule alias_module /usr/lib/"..., 4096) = 62
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/auth_basic.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/auth_basic.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(6, "LoadModule auth_basic_module /usr"..., 4096) = 72
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/authn_file.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authn_file.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(6, "LoadModule authn_file_module /usr"..., 4096) = 72
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_default.load", {st_mode=S_IFREG|0644, st_size=78, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_default.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=78, ...}) = 0
+read(6, "LoadModule authz_default_module /"..., 4096) = 78
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_groupfile.load", {st_mode=S_IFREG|0644, st_size=82, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_groupfile.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=82, ...}) = 0
+read(6, "LoadModule authz_groupfile_module"..., 4096) = 82
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_host.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_host.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(6, "LoadModule authz_host_module /usr"..., 4096) = 72
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/authz_user.load", {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+open("/etc/apache2/mods-enabled/authz_user.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=72, ...}) = 0
+read(6, "LoadModule authz_user_module /usr"..., 4096) = 72
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/autoindex.load", {st_mode=S_IFREG|0644, st_size=70, ...}) = 0
+open("/etc/apache2/mods-enabled/autoindex.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=70, ...}) = 0
+read(6, "LoadModule autoindex_module /usr/"..., 4096) = 70
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/cgi.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/cgi.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(6, "LoadModule cgi_module /usr/lib/ap"..., 4096) = 58
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/deflate.load", {st_mode=S_IFREG|0644, st_size=66, ...}) = 0
+open("/etc/apache2/mods-enabled/deflate.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=66, ...}) = 0
+read(6, "LoadModule deflate_module /usr/li"..., 4096) = 66
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/dir.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/dir.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(6, "LoadModule dir_module /usr/lib/ap"..., 4096) = 58
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/env.load", {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+open("/etc/apache2/mods-enabled/env.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=58, ...}) = 0
+read(6, "LoadModule env_module /usr/lib/ap"..., 4096) = 58
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/mime.load", {st_mode=S_IFREG|0644, st_size=60, ...}) = 0
+open("/etc/apache2/mods-enabled/mime.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=60, ...}) = 0
+read(6, "LoadModule mime_module /usr/lib/a"..., 4096) = 60
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/negotiation.load", {st_mode=S_IFREG|0644, st_size=74, ...}) = 0
+open("/etc/apache2/mods-enabled/negotiation.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=74, ...}) = 0
+read(6, "LoadModule negotiation_module /us"..., 4096) = 74
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/php5.load", {st_mode=S_IFREG|0644, st_size=59, ...}) = 0
+open("/etc/apache2/mods-enabled/php5.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=59, ...}) = 0
+read(6, "LoadModule php5_module /usr/lib/a"..., 4096) = 59
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/setenvif.load", {st_mode=S_IFREG|0644, st_size=68, ...}) = 0
+open("/etc/apache2/mods-enabled/setenvif.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=68, ...}) = 0
+read(6, "LoadModule setenvif_module /usr/l"..., 4096) = 68
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/status.load", {st_mode=S_IFREG|0644, st_size=64, ...}) = 0
+open("/etc/apache2/mods-enabled/status.load", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=64, ...}) = 0
+read(6, "LoadModule status_module /usr/lib"..., 4096) = 64
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/mods-enabled", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 6
+fstat64(6, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(6, /* 28 entries */, 4096)     = 696
+getdents(6, /* 0 entries */, 4096)      = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/alias.conf", {st_mode=S_IFREG|0644, st_size=815, ...}) = 0
+open("/etc/apache2/mods-enabled/alias.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=815, ...}) = 0
+read(6, "<IfModule alias_module>\n#\n# Alias"..., 4096) = 815
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/autoindex.conf", {st_mode=S_IFREG|0644, st_size=3265, ...}) = 0
+open("/etc/apache2/mods-enabled/autoindex.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=3265, ...}) = 0
+read(6, "<IfModule mod_autoindex.c>\n#\n# Di"..., 4096) = 3265
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/deflate.conf", {st_mode=S_IFREG|0644, st_size=107, ...}) = 0
+open("/etc/apache2/mods-enabled/deflate.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=107, ...}) = 0
+read(6, "<IfModule mod_deflate.c>\n        "..., 4096) = 107
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/dir.conf", {st_mode=S_IFREG|0644, st_size=122, ...}) = 0
+open("/etc/apache2/mods-enabled/dir.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=122, ...}) = 0
+read(6, "<IfModule mod_dir.c>\n\n          D"..., 4096) = 122
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/mime.conf", {st_mode=S_IFREG|0644, st_size=6362, ...}) = 0
+open("/etc/apache2/mods-enabled/mime.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=6362, ...}) = 0
+read(6, "<IfModule mod_mime.c>\n\n#\n# TypesC"..., 4096) = 4096
+read(6, "atin8\nAddCharset ISO-8859-15  .is"..., 4096) = 2266
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/negotiation.conf", {st_mode=S_IFREG|0644, st_size=666, ...}) = 0
+open("/etc/apache2/mods-enabled/negotiation.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=666, ...}) = 0
+read(6, "<IfModule mod_negotiation.c>\n#\n# "..., 4096) = 666
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/php5.conf", {st_mode=S_IFREG|0644, st_size=133, ...}) = 0
+open("/etc/apache2/mods-enabled/php5.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=133, ...}) = 0
+read(6, "<IfModule mod_php5.c>\n  AddType a"..., 4096) = 133
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/setenvif.conf", {st_mode=S_IFREG|0644, st_size=1122, ...}) = 0
+open("/etc/apache2/mods-enabled/setenvif.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=1122, ...}) = 0
+read(6, "<IfModule mod_setenvif.c>\n\n#\n# Th"..., 4096) = 1122
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/mods-enabled/status.conf", {st_mode=S_IFREG|0644, st_size=398, ...}) = 0
+open("/etc/apache2/mods-enabled/status.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=398, ...}) = 0
+read(6, "<IfModule mod_status.c>\n#\n# Allow"..., 4096) = 398
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/httpd.conf", {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+open("/etc/apache2/httpd.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=0, ...}) = 0
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/ports.conf", {st_mode=S_IFREG|0644, st_size=513, ...}) = 0
+open("/etc/apache2/ports.conf", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=513, ...}) = 0
+read(6, "# If you just change the port or "..., 4096) = 513
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+read(5, "ur ServerAdmin email address rega"..., 4096) = 1912
+stat64("/etc/apache2/conf.d/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/conf.d/", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 6
+fstat64(6, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(6, /* 4 entries */, 4096)      = 72
+getdents(6, /* 0 entries */, 4096)      = 0
+close(6)                                = 0
+stat64("/etc/apache2/conf.d/charset", {st_mode=S_IFREG|0644, st_size=269, ...}) = 0
+open("/etc/apache2/conf.d/charset", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=269, ...}) = 0
+read(6, "# Read the documentation before e"..., 4096) = 269
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/conf.d/security", {st_mode=S_IFREG|0644, st_size=1464, ...}) = 0
+open("/etc/apache2/conf.d/security", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=1464, ...}) = 0
+read(6, "#\n# Disable access to the entire "..., 4096) = 1464
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+stat64("/etc/apache2/sites-enabled/", {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+open("/etc/apache2/sites-enabled/", O_RDONLY|O_NONBLOCK|O_LARGEFILE|O_DIRECTORY|O_CLOEXEC) = 6
+fstat64(6, {st_mode=S_IFDIR|0755, st_size=4096, ...}) = 0
+getdents(6, /* 3 entries */, 4096)      = 56
+getdents(6, /* 0 entries */, 4096)      = 0
+close(6)                                = 0
+stat64("/etc/apache2/sites-enabled/000-default", {st_mode=S_IFREG|0644, st_size=950, ...}) = 0
+open("/etc/apache2/sites-enabled/000-default", O_RDONLY|O_LARGEFILE) = 6
+fstat64(6, {st_mode=S_IFREG|0644, st_size=950, ...}) = 0
+read(6, "<VirtualHost *:80>\n\tServerAdmin w"..., 4096) = 950
+read(6, ""..., 4096)                    = 0
+close(6)                                = 0
+read(5, ""..., 4096)                    = 0
+close(5)                                = 0
+chdir("/")                              = 0
+clone(child_stack=0, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0xb74de748) = 18101
+exit_group(0)                           = ?
+Process 18098 detached

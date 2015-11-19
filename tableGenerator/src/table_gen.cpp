@@ -112,6 +112,9 @@ void generateTables(std::ofstream& out, std::string prefix)
 	out << " * tables for one and two byte opcodes." << std::endl;
 	out << " */" << std::endl << std::endl;
 
+	generateOpcodeTable(out, prefix, "table for two byte opcodes with 0x66 (Operand-size override) PREFIX", 0x660F00, 256, 0x01);
+	generateOpcodeTable(out, prefix, "table for two byte opcodes with 0xF2 (REPZ override) PREFIX", 0xF20F00, 256, 0x01);
+	generateOpcodeTable(out, prefix, "table for two byte opcodes with 0xF3 (REPZ override) PREFIX", 0xF30F00, 256, 0x01);
 	generateOpcodeTable(out, prefix, "table for two byte opcodes", 0x0F00, 256, 0x01);
 	generateOpcodeTable(out, prefix, "table for one byte opcodes", 0x00, 256, 0x01);
 
@@ -237,7 +240,7 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 
 		/* last check for prefix and escapes */
 		/* these overwrite any other flags */
-		if (disasmInst.table != NULL) {
+		if (disasmInst.table != NULL && !(isOpcodePrefix)) {
 			if (opcodeInfo == OI_opcodeExtendsIntoModRM) {
 				opcodeFlags = "OPCODE_RM";
 			} else if (opcodeInfo == OI_opcodeExtendsIntoFPU) {
@@ -260,10 +263,13 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 
 
 		/* fix a follow up table if there is any */
-		if (disasmInst.table != NULL) {
+		/* if we have a special prefix (e.g. 0x66 op size ovr, or 0xF2 or 0xF3)
+		   then we escape to another special table (special 3byte
+		   opcode extension) */
+		if (isOpcodePrefix && (opcode==0x66 || opcode==0xf2 || opcode==0xf3)) {
+		    opcodeTable = generateTableName(prefix, (opcode<<8)|0x0f, opcodeSize+1);
+		} else if (disasmInst.table != NULL) { /* normal escape if a table is referenced */
 			opcodeTable = generateTableName(prefix, opcode, opcodeSize);
-		} else if (isOpcodePrefix) {
-			opcodeTable = generateTableName(prefix, 0x00, 0);
 		} else {
 			opcodeTable = "0";
 		}
@@ -465,6 +471,10 @@ instr_t getDisasmTableEntry (const unsigned char* byte, const instr_t* table, co
 		return *entry;
 	}
 
+	/* special prefix to 3byte opcode that we need to handle */
+	if ((*byte==0x66 || *byte==0xf2 || *byte==0xf3) && *(byte+1)==0x0F) {
+	    return getDisasmTableEntry(byte+2, entry->table, opcodeSize-1, opcodeInfo);
+	}
 	/* otherwise call recursive since this byte is either a escape or a prefix */
 	return getDisasmTableEntry(byte+1, entry->table, opcodeSize-1, opcodeInfo);
 }
@@ -493,10 +503,12 @@ std::string generateTableName(const std::string &prefix, const unsigned int opco
 		}
 		name += uppercase(temp.str());
 
+		if (opcode != 0x660F && opcode != 0xF20F && opcode != 0xF30F) {
 		if (opcode >= 0xD8 && opcode <= 0xDF) {
 			name += "_fpu";
 		} else {
 			name += "_rm";
+		}
 		}
 	}
 
