@@ -71,10 +71,10 @@ char* printnbytes(unsigned char *addr, unsigned int n);
  * The implementation and the nasty stuff is in debug_impl.h
  */
 #ifdef ERROR
-	#define PRINT_ERROR(...)						PRINT_N_IMPL(ERROR_TYPE, 1, __VA_ARGS__)
-	#define PRINT_ERROR_N(N, ...)					PRINT_N_IMPL(ERROR_TYPE, N, __VA_ARGS__)
-	#define PRINT_ERROR_FUNCTION_START(...)			PRINT_FUNCTION_START_IMPL(ERROR_TYPE, __VA_ARGS__)
-	#define PRINT_ERROR_FUNCTION_END(...)			PRINT_FUNCTION_END_IMPL(ERROR_TYPE, __VA_ARGS__)
+	#define PRINT_ERROR(...)		PRINT_N_IMPL(ERROR_TYPE, 1, __VA_ARGS__)
+	#define PRINT_ERROR_N(N, ...)		PRINT_N_IMPL(ERROR_TYPE, N, __VA_ARGS__)
+	#define PRINT_ERROR_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(ERROR_TYPE, __VA_ARGS__)
+	#define PRINT_ERROR_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(ERROR_TYPE, __VA_ARGS__)
 #else
 	#define PRINT_ERROR(...)
 	#define PRINT_ERROR_N(N, ...)
@@ -83,10 +83,10 @@ char* printnbytes(unsigned char *addr, unsigned int n);
 #endif
 
 #ifdef WARNING
-	#define PRINT_WARNING(...)						PRINT_N_IMPL(WARNING_TYPE, 1, __VA_ARGS__)
-	#define PRINT_WARNING_N(N, ...)					PRINT_N_IMPL(WARNING_TYPE, N, __VA_ARGS__)
-	#define PRINT_WARNING_FUNCTION_START(...)		PRINT_FUNCTION_START_IMPL(WARNING_TYPE, __VA_ARGS__)
-	#define PRINT_WARNING_FUNCTION_END(...)			PRINT_FUNCTION_END_IMPL(WARNING_TYPE, __VA_ARGS__)
+	#define PRINT_WARNING(...)		PRINT_N_IMPL(WARNING_TYPE, 1, __VA_ARGS__)
+	#define PRINT_WARNING_N(N, ...)		PRINT_N_IMPL(WARNING_TYPE, N, __VA_ARGS__)
+	#define PRINT_WARNING_FUNCTION_START(...) PRINT_FUNCTION_START_IMPL(WARNING_TYPE, __VA_ARGS__)
+	#define PRINT_WARNING_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(WARNING_TYPE, __VA_ARGS__)
 #else
 	#define PRINT_WARNING(...)
 	#define PRINT_WARNING_N(N, ...)
@@ -95,10 +95,10 @@ char* printnbytes(unsigned char *addr, unsigned int n);
 #endif
 
 #ifdef INFO
-	#define PRINT_INFO(...)							PRINT_N_IMPL(INFO_TYPE, 1, __VA_ARGS__)
-	#define PRINT_INFO_N(N, ...)					PRINT_N_IMPL(INFO_TYPE, N, __VA_ARGS__)
-	#define PRINT_INFO_FUNCTION_START(...)			PRINT_FUNCTION_START_IMPL(INFO_TYPE, __VA_ARGS__)
-	#define PRINT_INFO_FUNCTION_END(...)			PRINT_FUNCTION_END_IMPL(INFO_TYPE, __VA_ARGS__)
+	#define PRINT_INFO(...)			PRINT_N_IMPL(INFO_TYPE, 1, __VA_ARGS__)
+	#define PRINT_INFO_N(N, ...)		PRINT_N_IMPL(INFO_TYPE, N, __VA_ARGS__)
+	#define PRINT_INFO_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(INFO_TYPE, __VA_ARGS__)
+	#define PRINT_INFO_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(INFO_TYPE, __VA_ARGS__)
 #else
 	#define PRINT_INFO(...)
 	#define PRINT_INFO_N(N, ...)
@@ -107,10 +107,10 @@ char* printnbytes(unsigned char *addr, unsigned int n);
 #endif
 
 #ifdef DEBUG
-	#define PRINT_DEBUG(...)						PRINT_N_IMPL(DEBUG_TYPE, 1, __VA_ARGS__)
-	#define PRINT_DEBUG_N(N, ...)					PRINT_N_IMPL(DEBUG_TYPE, N, __VA_ARGS__)
-	#define PRINT_DEBUG_FUNCTION_START(...)			PRINT_FUNCTION_START_IMPL(DEBUG_TYPE, __VA_ARGS__)
-	#define PRINT_DEBUG_FUNCTION_END(...)			PRINT_FUNCTION_END_IMPL(DEBUG_TYPE, __VA_ARGS__)
+	#define PRINT_DEBUG(...)		PRINT_N_IMPL(DEBUG_TYPE, 1, __VA_ARGS__)
+	#define PRINT_DEBUG_N(N, ...)		PRINT_N_IMPL(DEBUG_TYPE, N, __VA_ARGS__)
+	#define PRINT_DEBUG_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(DEBUG_TYPE, __VA_ARGS__)
+	#define PRINT_DEBUG_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(DEBUG_TYPE, __VA_ARGS__)
 #else
 	#define PRINT_DEBUG(...)
 	#define PRINT_DEBUG_N(N, ...)
@@ -136,17 +136,14 @@ char* printnbytes(unsigned char *addr, unsigned int n);
     
 
 #ifdef DUMP_GENERATED_CODE
-	#define DUMP_START											DUMP_START_IMPL
-	#define DUMP_END											DUMP_END_IMPL
-	#define DUMP_CODE(addr, len)						DUMP_CODE_IMPL(0, 0, addr, len)
-
-	#define DUMP_CODE_BOTH(org_addr, org_len, transl_addr, transl_len)    	DUMP_CODE_IMPL(org_addr, org_len, transl_addr, transl_len)
+	#define DUMP_START			DUMP_START_IMPL
+	#define DUMP_END			DUMP_END_IMPL
+	#define DUMP_CODE(ts, instr_len, transl_len)   	DUMP_CODE_IMPL(ts, instr_len, transl_len)
 	#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)			DUMP_JMP_TABLE_ENTRY_IMPL(org_addr, transl_addr)
 #else
 	#define DUMP_START
 	#define DUMP_END
-	#define DUMP_CODE(addr, len)
-	#define DUMP_CODE_BOTH(org_addr, org_len, transl_addr, transl_len)
+	#define DUMP_CODE(ts, instr_len, transl_len)
 	#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)
 #endif
 

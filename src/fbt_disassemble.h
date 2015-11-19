@@ -33,10 +33,9 @@
  */
 #define MASK_ARG 0x0F
 
-
-
 /* disassembles one instruction */
 void disasm_instr(translate_struct_t *ts);
 
+unsigned int operandSize(unsigned int operandFlags, unsigned char prefix);
 
 #endif /* FBT_DISASSEMBLE_H */

@@ -30,20 +30,6 @@
 #include "fbt_mem_protection.h"
 #include "fbt_asm_offsets.h"
 
-#ifdef FBT_FIND_FAST
-#  define TCACHE_FIND tcache_find_fast
-#  define SAVE_EDX_FIND
-#  define RESTORE_EDX_FIND
-#  define SAVE_EDX_FIND_FAST pushl %edx 
-#  define RESTORE_EDX_FIND_FAST popl %edx
-#else
-#  define TCACHE_FIND  tcache_find
-#  define SAVE_EDX_FIND pushl %edx 
-#  define RESTORE_EDX_FIND popl %edx
-#  define SAVE_EDX_FIND_FAST
-#  define RESTORE_EDX_FIND_FAST
-#endif
-
 #ifdef SECU_MPROTECT_IDS
 #  define MPROTECT_UNLOCK_SAFE(tld) \
 	pushl	%eax; \
@@ -160,11 +146,13 @@ PREDICTMISS:
 	.global	prepare_sysenter
 	.type	prepare_sysenter, @function
 
+#ifdef SECU_SYSCALL_AUTH
 	.global	authorize_sysenter
 	.type	authorize_sysenter, @function
 
 	.global	authorize_int0x80
 	.type	authorize_int0x80, @function
+#endif
 
 	.global	end_transaction
 	.type	end_transaction, @function
@@ -243,7 +231,6 @@ ind_jump:
 	pushfl
 	pushl	%eax
 	pushl	%ecx
-	SAVE_EDX_FIND
 
 #if defined(FBT_STATISTIC)
 	# long long increment
@@ -276,16 +263,16 @@ ind_jump:
 #else
 	pushl	TARGETIP
 	pushl	TLDPTR
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	addl	$8, %esp 	# re-adjust the stack
 	testl	%eax, %eax
 	jne,pt .translated_ij	# ,pt = branch prediction hint: take
-	SAVE_EDX_FIND_FAST
+	pushl	%edx
 	pushl	TARGETIP
 	pushl	TLDPTR
 	call	translate_noexecute
 	addl	$8, %esp
-	RESTORE_EDX_FIND_FAST
+	popl	%edx
 #endif
 .translated_ij:
 	# write ind_jump location
@@ -300,7 +287,6 @@ ind_jump:
 	movl	$0, TLDPTR
 
 	# pop caller-save and eflags registers
-	RESTORE_EDX_FIND
 	popl	%ecx
 	popl	%eax
 	popfl
@@ -329,7 +315,6 @@ ind_jump:
 	jmp	.load_compare_ij
 
 .null_ij:	
-#	SAVE_EDX_FIND_FAST
 	pushl	%edx
 	pushl	TARGETIPEDX
 	pushl	TLDPTREDX
@@ -345,7 +330,6 @@ ind_jump:
 	popl	%eax
 #endif	
 	addl	$8, %esp
-#	RESTORE_EDX_FIND_FAST
 	popl	%edx
 	jmp	.translated_ij
 #endif
@@ -377,7 +361,6 @@ ind_jump_remove:
 	pushfl
 	pushl	%eax
 	pushl	%ecx
-	SAVE_EDX_FIND
 
 #if defined(FBT_STATISTIC)
 	# long long increment
@@ -388,18 +371,18 @@ ind_jump_remove:
 	# translate the target IP if necessary
 	pushl	16(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_ijr	# ,pt = branch prediction hint: take
 	
-	SAVE_EDX_FIND_FAST
+	pushl	%edx
 	MPROTECT_UNLOCK(8(%ebp))
 	pushl	16(%ebp)
 	pushl	8(%ebp)
 	call	translate_noexecute
 	addl	$8, %esp
 	MPROTECT_LOCKDOWN_SAFE(8(%ebp))
-	RESTORE_EDX_FIND_FAST
+	popl	%edx
 
 .translated_ijr:
 	
@@ -421,7 +404,6 @@ ind_jump_remove:
 	movl	$0, 8(%ebp)
 
 	# pop caller-save and eflags registers
-	RESTORE_EDX_FIND
 	popl	%ecx
 	popl	%eax
 	popfl
@@ -479,7 +461,7 @@ ind_jump_backpatch:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt	.translated_ijb	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -561,7 +543,7 @@ ind_jump_backpatch_abs:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt	.translated_ijba	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -665,7 +647,7 @@ ind_jump_chaining:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pn	.translated_ijc	# ,pn = branch prediction hint: do not take
 	
@@ -780,7 +762,7 @@ fix_ind_call_prediction:
 	# translate the target IP if necessary
 	pushl	20(%ebp)
 	pushl	16(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_ficp	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -938,7 +920,7 @@ fix_ind_jmp_prediction:
 	# translate the target IP if necessary
 	pushl	16(%ebp)
 	pushl	12(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_fijp	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -1058,7 +1040,7 @@ fix_ret_predict:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_frp	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -1180,7 +1162,7 @@ ret_predict:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_rp	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -1262,7 +1244,7 @@ ret_predict_remove:
 	# translate the target IP if necessary
 	pushl	16(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_rpr	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -1409,7 +1391,6 @@ tcache_find_fast:
 	andl	$HASH_PATTERN, %eax
 	movl	4(%esp), %ecx		# entry = tld->hashtable + offset
 	addl	OFFSETOF_TLD_HASHTABLE(%ecx), %eax
-	
 .load_compare_tff:
 	movl	OFFSETOF_TCACHE_ENTRY_SRC(%eax), %ecx
 
@@ -1417,7 +1398,6 @@ tcache_find_fast:
 	jne .fallback_tff
 	movl	OFFSETOF_TCACHE_ENTRY_DST(%eax), %eax		# return entry->dst
 	ret
-
 .fallback_tff:
 	jecxz .null_tff						# if (entry->src == 0) goto null_tff
 #if defined(FBT_STATISTIC)
@@ -1425,7 +1405,7 @@ tcache_find_fast:
 	addl	$0x1, (fbt_nr_tcache_fast_miss)
 	adcl	$0x0, (fbt_nr_tcache_fast_miss+0x4)
 #endif
-	#use tcache_find (slow and c!)
+	#use tcache_find (slow and c! - but more statistics or reorder optimization)
  	#pushl %edx				# save %edx
  	#pushl 12(%esp)				# pass on parameters
  	#pushl 12(%esp)
@@ -1437,13 +1417,7 @@ tcache_find_fast:
 	addl	$SIZEOF_HASHTABLE_ENTRY, %eax	# iterate eax to the next row
 	cmpl	$0x1, %ecx			# check for guard
 	jne,pt	.load_compare_tff
-#	movl	4(%esp), %ecx			# entry = tld->hashtable + offset
-#	movl	OFFSETOF_TLD_HASHTABLE(%ecx), %ecx
-#	addl	$HASHTABLE_SIZE, %ecx		# get maximum hash_value
-#	cmpl	%ecx, %eax
-#	jne,pt	.load_compare_tff
 	subl	$HASHTABLE_SIZE, %ecx
-#	subl	$HASHTABLE_SIZE, %ecx
 	jmp	.load_compare_tff
 
 .null_tff:
@@ -1493,7 +1467,7 @@ prepare_sysenter:
 	# translate the target IP if necessary
 	pushl	20(%ebp)
 	pushl	4(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne .translated_se
 	call	translate_noexecute
@@ -1526,7 +1500,7 @@ prepare_sysenter:
 	sysenter
 	.size	prepare_sysenter, .-prepare_sysenter
 
-
+#ifdef SECU_SYSCALL_AUTH
 # This is not a real function anymore. To use authorize_sysenter, you must NOT 
 # call it, but jump to it. There must not be a return instruction pointer on 
 # the stack, or authorize_sysenter will segfault.
@@ -1578,7 +1552,7 @@ authorize_sysenter:
 	# translate the target IP if necessary
 	pushl	20(%ebp)
 	pushl	4(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne .translated_ase
 	call	translate_noexecute		# translate
@@ -1632,9 +1606,9 @@ authorize_sysenter:
 	leal 4(%esp), %esp	# pop tld-pointer from stack
 	sysenter
 	.size	authorize_sysenter, .-authorize_sysenter
+#endif
 
-
-
+#ifdef SECU_SYSCALL_AUTH
 #     +-------------+
 #   8 | tld-pointer | (gets removed by ret $4)
 #   4 | eip (call)  | 
@@ -1711,6 +1685,7 @@ authorize_int0x80:
 	leave
 	ret $4
 	.size	authorize_int0x80, .-authorize_int0x80
+#endif
 
 
 end_transaction:
@@ -1738,7 +1713,6 @@ end_transaction:
 	leave
 	ret
 	.size	end_transaction, .-end_transaction
-
 
 
 	
@@ -1890,7 +1864,7 @@ ind_jump_signal:
 	# translate the target IP if necessary
 	pushl	12(%ebp)
 	pushl	8(%ebp)
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_ijs	# ,pt = branch prediction hint: take
 	call	translate_noexecute
@@ -1956,7 +1930,7 @@ dlsym_handler:
 	# translate the return IP if necessary
 	pushl	4(%ebp)
 	pushl	%eax
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_dsh	# ,pt = branch prediction hint: take
 	MPROTECT_UNLOCK((%esp))
@@ -2046,7 +2020,7 @@ dlvsym_handler:
 	# translate the return IP if necessary
 	pushl	4(%ebp)
 	pushl	%eax
-	call	TCACHE_FIND
+	call	tcache_find_fast
 	testl	%eax, %eax
 	jne,pt .translated_dvh	# ,pt = branch prediction hint: take
 	call	translate_noexecute

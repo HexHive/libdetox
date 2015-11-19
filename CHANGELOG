@@ -1,0 +1,32 @@
+fastBT 0.2.0 - 2010-03-10
+- Removal of the bastard disassembler
+- Change of the layout of the translation table (added more auxiliary information)
+- Debugging mode includes dynamic code dumping and automatic disassembly using
+  the same tables that are used for the translation process
+- Better documentation of the security features in the Makefile
+- Clearer structure and removal of dead code
+
+fastBT 0.1.0 - 2009-11-19
+- Lots of bug fixing and straigthening of the security features
+- Public release at 26c3 (26th chaos communication congress in Berlin)
+- Lots of new optimizations
+  - Return cache and fast return
+  - Optimizations for indirect calls and indirect jumps
+  - Adaptive optimizations that first cache then redirect to fast lookup
+  - Table optimizations
+  
+fastBT 0.1.0pre2 - 2009-10-22
+- Lots of bug fixing
+- Some security extensions (nx enforcement, secuBT stuff)
+- Lots of new optimizations
+  - Jumptable optimization
+  - Fast return optimization
+- Special optimization for low-level functions to be independent from libc
+  memory management
+- Special IO functions to be independent from libc (not reentrant)
+
+fastBT 0.1.0pre - 2009-05-31
+- Initial public release
+- Used bastard disassembler
+- Complete support for ia32 tables
+- Handle pthreads

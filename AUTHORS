@@ -1,0 +1,42 @@
+Hall of fame:
+=============
+
+Mathias Payer <mathias.payer@nebelwelt.net>
+- Project leader and coordinator
+- Worked on fastBT since 2007
+- Implemented and authored most of the optimizations
+  - Fast indirect jump and prediction
+  - Fast indirect call and prediction
+  - Adaptive combination of prediction and fast optimization
+  - Return cache and fast return
+- Implemented the new disassembler component
+- Pirimary human debugger
+
+
+Former developers:
+
+Antonio Barresi <abarresi@student.ethz.ch>
+- Worked hard on the security extensions during his master thesis in 2009
+- Implemented trust component on top of BT and patched some security extensions
+- Implemented the first version of the shadow jumptable optimization
+
+Marcel Wirth <mawirth@student.ethz.ch>
+- Worked hard on the BT during his semester thesis in 2007 and his master
+  thesis in 2009
+- Worked on the first version of the BT without optimization during his
+  semester thesis
+- Continued his work and added security extensions during his master thesis
+- Fixed lots and lots of bugs
+- Worked on some former optimizations
+
+Peter Suter <suterpet@student.ethz.ch>
+- Used the BT for the GCC STM extension during his master thesis in 2008
+- Worked on the integration of the STM component and the BT into a modern
+  optimizing compiler
+
+Stephan Classen <scl@soft-eng.ch>
+- Worked on the BT during his master thesis in 2007
+- Used fastBT to implement a STM library
+- Tested early versions of fastBT and fixed lots of bugs
+- Authored the tableGenerator to generate STM tables that redirect all
+  memory accessing instructions to an STM.

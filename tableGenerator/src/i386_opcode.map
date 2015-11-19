@@ -178,7 +178,7 @@ instr_t table_opcode_onebyte[] = {
 
 /* 0x98 */ { 0, "cwde", SZCONV, NONE, NONE, NONE, 0, 0, 0, "action_copy", "" },
 /* 0x99 */ { 0, "cdq", SZCONV, NONE, NONE, NONE, 0, 0, 0, "action_copy", "" },
-/* 0x9A */ { 0, "callf", CALL, ADDRM_A | OPT_p | EXECUTE, NONE, NONE, 0, 0, 0, "action_warn", "" },
+/* 0x9A */ { 0, "callf", CALL, ADDRM_A | OPT_p | EXECUTE, NONE, NONE, 0, 0, 0, "action_fail", "no far calls in current kernels" },
 /* 0x9B */ { 0, "wait", SYSTEM, NONE, NONE, NONE, 0, 0, 0, "action_copy", "" },
 /* 0x9C */ { 0, "pushfd", PUSHFLAGS, NONE, NONE, NONE, 0, 0, 0, "action_copy", "" },
 /* 0x9D */ { 0, "popfd", POPFLAGS, NONE, NONE, NONE, 0, 0, 0, "action_copy", "" },
@@ -333,10 +333,10 @@ instr_t table_opcode_twobytes[] = {
 /* 0x0F1E */ { 0, "", 0, NONE, NONE, NONE, 0, 0, 0, "action_fail", "undefined opcode" },
 /* 0x0F1F */ { 0, "nop", OTHER, ADDRM_E | OPT_v | READ, NONE, NONE, 0, 0, 0, "action_copy", "" },
 
-/* 0x0F20 */ { 0, "mov", MOV, ADDRM_R | OPT_d | WRITE, ADDRM_C | OPT_d | READ, NONE, 0, 0, 0, "action_copy", "" },
-/* 0x0F21 */ { 0, "mov", MOV, ADDRM_R | OPT_d | WRITE, ADDRM_D | OPT_d | READ, NONE, 0, 0, 0, "action_copy", "" },
-/* 0x0F22 */ { 0, "mov", MOV, ADDRM_C | OPT_d | WRITE, ADDRM_R | OPT_d | READ, NONE, 0, 0, 0, "action_copy", "" },
-/* 0x0F23 */ { 0, "mov", MOV, ADDRM_D | OPT_d | WRITE, ADDRM_R | OPT_d | READ, NONE, 0, 0, 0, "action_copy", "" },
+/* 0x0F20 */ { 0, "mov", MOV, ADDRM_R | OPT_d | WRITE, ADDRM_C | OPT_d | READ, NONE, 0, 0, 0, "action_fail", "ring 0 priv. needed" },
+/* 0x0F21 */ { 0, "mov", MOV, ADDRM_R | OPT_d | WRITE, ADDRM_D | OPT_d | READ, NONE, 0, 0, 0, "action_fail", "ring 0 priv. needed" },
+/* 0x0F22 */ { 0, "mov", MOV, ADDRM_C | OPT_d | WRITE, ADDRM_R | OPT_d | READ, NONE, 0, 0, 0, "action_fail", "ring 0 priv. needed" },
+/* 0x0F23 */ { 0, "mov", MOV, ADDRM_D | OPT_d | WRITE, ADDRM_R | OPT_d | READ, NONE, 0, 0, 0, "action_fail", "ring 0 priv. needed" },
 /* 0x0F24 */ { 0, "", 0, NONE, NONE, NONE, 0, 0, 0, "action_fail", "undefined opcode" },
 /* 0x0F25 */ { 0, "", 0, NONE, NONE, NONE, 0, 0, 0, "action_fail", "undefined opcode" },
 /* 0x0F26 */ { 0, "", 0, NONE, NONE, NONE, 0, 0, 0, "action_fail", "undefined opcode" },

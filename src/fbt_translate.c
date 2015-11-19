@@ -25,6 +25,7 @@
 #include <pthread.h>
 #include <assert.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "fbt_private_datatypes.h"
 #include "fbt_asm_functions.h"
@@ -260,8 +261,7 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
 	    PRINT_INFO("transl_insn_addr: %p", old_transl_instr);
 	    PRINT_DEBUG("trans_ins: %s", printnbytes(old_transl_instr, ts->transl_instr - old_transl_instr));
 	    PRINT_INFO("tu_state: %d\n", tu_state); /* debug */
-	    DUMP_CODE_BOTH(ts->cur_instr, old_next_instr_dump - ts->cur_instr,
-			   old_transl_instr_dump, ts->transl_instr - old_transl_instr_dump);
+	    DUMP_CODE(ts, (old_next_instr_dump - ts->cur_instr), (ts->transl_instr - old_transl_instr_dump));
 	    BREAK_ON_TRANSL(ts->cur_instr, old_transl_instr_dump);
 	}
 
@@ -298,6 +298,7 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
  */
 void check_transl_allowed(void* tu_address, struct mem_info *info)
 {
+#if defined(SECU_ENFORCE_NX) || defined(INFO_OUTPUT)
     if (fbt_memprotect_execquery(tu_address)) {
         if (!fbt_memprotect_info(tu_address, info)) {
             printf("Unknown error in check_transl_allowed.\n");
@@ -325,6 +326,7 @@ void check_transl_allowed(void* tu_address, struct mem_info *info)
         _exit(EXIT_FAILURE);
 #endif /* SECU_ENFORCE_NX */
     }
+#endif
 
 }
 

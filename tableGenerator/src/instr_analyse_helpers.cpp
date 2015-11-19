@@ -42,7 +42,7 @@ bool mayOperandAccessRegister (unsigned int operandFlags) {
 			return true;
 	}
 
-	if (operandFlags & IMPL != 0) {
+	if ((operandFlags & IMPL) != 0) {
 		return true;
 	}
 

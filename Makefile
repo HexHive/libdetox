@@ -27,6 +27,7 @@ export LIBRARY_PATH = $(CURRENT_DIR)/lib
 
 # cflags for productive use
 export CFLAGS = -O3 -Wall -g -DNDEBUG
+# -DDUMP_GENERATED_CODE
 
 # optimizations
 export CFLAGS += -Winline -finline-limit=30000 --param inline-unit-growth=512 --param large-function-growth=2048 -funit-at-a-time
@@ -54,27 +55,21 @@ export CFLAGS += -DFBT_INLINE_CALLS
 export CFLAGS += -DFBT_IND_CALL_PREDICTION
 export CFLAGS += -DFBT_IND_CALL_FAST
 
-# use fast implementation of tcache_find (assembly)
-export CFLAGS += -DFBT_FIND_FAST
-
 # inline find fast into the indirect jump function
 # that gets called for missed targets
 export CFLAGS += -DFBT_IND_JUMP_INLINE_FIND_FAST
 
-# NOTE: use just one of the following ind jump optimizations: FBT_IND_JUMP_FAST or FBT_IND_PREDICTION or FBT_IND_JUMP_MULTIPLE
-# use an inlined indirect jump function for ind. jumps
-#export CFLAGS += -DFBT_IND_JUMP_FAST no longer exists!
-# jmp r/m32 and call r/32 optimization
-# buggy!
+# NOTE: use one of the following ind jump optimizations: FBT_IND_PREDICTION or FBT_IND_JUMP_MULTIPLE
+# if none of these two is selected then a IND_JUMP_FAST default is used.
 export CFLAGS += -DFBT_IND_PREDICTION
 # use multiple indirect jump optimizations with jump prediction, jump fast and jump tables
 # multiple depends on FBT_IND_PREDICTION as well
-#export CFLAGS += -DFBT_IND_JUMP_MULTIPLE
+export CFLAGS += -DFBT_IND_JUMP_MULTIPLE
 
 # align all functions (that start with pusl %ebp) to 16b
-#export CFLAGS += -DFBT_ALIGN_FUNCTIONS
+export CFLAGS += -DFBT_ALIGN_FUNCTIONS
 # check for every instruction if it has been translated before
-#export CFLAGS += -DFBT_CHECK_TRANSLATED
+export CFLAGS += -DFBT_CHECK_TRANSLATED
 
 # include LDPRELOAD code (signal replacement and so on)
 export CFLAGS += -DLDPRELOAD
@@ -83,7 +78,7 @@ export CFLAGS += -DLDPRELOAD
 export CFLAGS += -DHIJACKCONTROL
 
 # should we make it possible to attach a debugger in case of a segfault?
-#export CFLAGS += -DSLEEP_ON_FAIL
+export CFLAGS += -DSLEEP_ON_FAIL
 
 # should we force a pause on startup to make it possible to attach a debugger 
 # at the beginning?
@@ -107,7 +102,7 @@ export CFLAGS += -DHIJACKCONTROL
 # secuBT: do not allow execution of code in memory that is not marked as 
 # executable or in a section of the program or library that is not marked 
 # as containing executable code
-export CFLAGS += -DSECU_ENFORCE_NX
+#export CFLAGS += -DSECU_ENFORCE_NX
 
 # secuBT: allow execution of code in runtime-allocated memory if it was marked 
 # as executable with mprotect or mmap. Requires SECU_SYSCALL_AUTH
@@ -116,7 +111,7 @@ export CFLAGS += -DSECU_ALLOW_RUNTIME_ALLOC
 # secuBT: use system call authorization
 # use functions that grant or deny a system call based on its arguments. This 
 # flag is currently required for SECU_ALLOW_RUNTIME_ALLOC to work
-export CFLAGS += -DSECU_SYSCALL_AUTH
+#export CFLAGS += -DSECU_SYSCALL_AUTH
 
 # secuBT: mark the memory of the program as not executable while the binary 
 # translator is running. This can prevent jailbreaks which try to return to 
@@ -167,30 +162,18 @@ library:
 	$(MAKE) -C src
 
 
-all: library demoprog
+all: library
 
-force: clean library install demoprog
+force: clean library install
 
 
-
-demoprog:
-	$(MAKE) -C demoprog
 
 install: library
 	$(MAKE) -C src install
 
-benchmarks:	export run_all = false
-benchmarks:
-	$(MAKE) -C benchmarks
-
-all_benchmarks:	export run_all = true
-all_benchmarks:
-	$(MAKE) -C benchmarks
-
 clean:
 	$(MAKE) -C src clean
-	$(MAKE) -C demoprog clean
-	$(MAKE) -C benchmarks clean
+	$(MAKE) -C tableGenerator clean
 
 uninstall:
 	$(MAKE) -C src uninstall

@@ -31,6 +31,7 @@ std::string generateOperandString(const unsigned int operandFlags, const unsigne
 std::string generateImplizitOperandString(const unsigned int implOperandFlags);
 std::string uppercase(const std::string &str);
 std::string imm2Flag(const unsigned int size);
+std::string flag2string(const unsigned int flags);
 bool is_modrm_table (const instr_t * const table);
 bool is_fpu_table (const instr_t * const table);
 instr_t* getComplementFPUTable(const instr_t * const table);
@@ -157,14 +158,8 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 		opcodeSize = 4;
 	}
 
-// DEBUG
-//	std::cout << "generating table name -> ";
-
 	/* generate the table name */
 	tableName = generateTableName(prefix, start >> 8, opcodeSize-1);
-
-// DEBUG
-//	std::cout << tableName << std::endl;
 
 	/* output the the table header */
 	out << "/** " << comment << " */" << std::endl;
@@ -182,43 +177,23 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 		/* the current opcode */
 		opcode = start + opcodeIdx*step;
 
-// DEBUG
-//		std::cout << std::hex << opcode << "     ";
-
 		/* init the buffer with the current opcode */
 		buf[0] = (opcode >> 8*(opcodeSize-1)) & 0xFF;
 		buf[1] = (opcode >> 8*(opcodeSize-2)) & 0xFF;
 		buf[2] = (opcode >> 8*(opcodeSize-3)) & 0xFF;
 		buf[3] = (opcode >> 8*(opcodeSize-4)) & 0xFF;
 
-// DEBUG
-/*
-		std::cout << std::hex << ((unsigned int)buf[0] >> 4);
-		std::cout << std::hex << ((unsigned int)buf[0] & 0x0F) << " ";
-		std::cout << std::hex << ((unsigned int)buf[1] >> 4);
-		std::cout << std::hex << ((unsigned int)buf[1] & 0x0F) << " ";
-		std::cout << std::hex << ((unsigned int)buf[2] >> 4);
-		std::cout << std::hex << ((unsigned int)buf[2] & 0x0F) << " ";
-		std::cout << std::hex << ((unsigned int)buf[3] >> 4);
-		std::cout << std::hex << ((unsigned int)buf[3] & 0x0F) << " ";
-		std::cout << std::endl;
-*/
-
 		/* get the disasm table entry for this instruction */
 		instr disasmInst = getDisasmTableEntry(buf, table_opcode_onebyte, opcodeSize, opcodeInfo);
-
-// DEBUG
-//		std::cout << "entry found" << std::endl;
-
 
 		isOpcodePrefix = (disasmInst.opcodeFlags & INS_PREFIX_MASK) != 0;
 
 		/* get the flags together... */
-		opcodeFlags = "ARG_NONE";
+		opcodeFlags = "NO_MODRM";
 
 
 		/* first immediate arguments */
-		if (isImmediateOperand(disasmInst.destFlags)) {
+		/*if (isImmediateOperand(disasmInst.destFlags)) {
 			opcodeFlags += " | " + imm2Flag(disasmInst.destFlags);
 		}
 		if (isImmediateOperand(disasmInst.srcFlags)) {
@@ -226,7 +201,7 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 		}
 		if (isImmediateOperand(disasmInst.auxFlags)) {
 			opcodeFlags += " | " + imm2Flag(disasmInst.auxFlags);
-		}
+		}*/
 
 		/* second modrm arguments */
 		flags = 0;
@@ -235,32 +210,22 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 		if (isModRMOperand(disasmInst.auxFlags))  flags = disasmInst.auxFlags;
 
 		if (flags != 0) {
-			opcodeFlags += " | ARG_RM";
+			opcodeFlags = "HAS_MODRM";
 		}
 
 		/* last check for prefix and escapes */
 		/* these overwrite any other flags */
 		if (disasmInst.table != NULL && !(isOpcodePrefix)) {
 			if (opcodeInfo == OI_opcodeExtendsIntoModRM) {
-				opcodeFlags = "OPCODE_RM";
+				opcodeFlags = "OPCODE_MODRM_ESC";
 			} else if (opcodeInfo == OI_opcodeExtendsIntoFPU) {
-				opcodeFlags = "FPU_ESC";
+				opcodeFlags = "OPCODE_FPU_ESC";
 			} else {
 				opcodeFlags = "OPCODE_ESC";
 			}
 		} else if (isOpcodePrefix) {
-			opcodeFlags = "PREFIX_ESC";
+			opcodeFlags = "OPCODE_PREFIX_ESC";
 		}
-
-		/* remove a ARG_NONE if it is followed by more arguments */
-		if (opcodeFlags.find("ARG_NONE | ", 0) != std::string::npos) {
-			opcodeFlags = opcodeFlags.substr(11);
-		}
-
-
-// DEBUG
-//		std::cout << "flags fixed" << std::endl;
-
 
 		/* fix a follow up table if there is any */
 		/* if we have a special prefix (e.g. 0x66 op size ovr, or 0xF2 or 0xF3)
@@ -273,12 +238,6 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 		} else {
 			opcodeTable = "0";
 		}
-
-
-// DEBUG
-//		std::cout << "follow up table fixed" << std::endl;
-
-
 
 		/* generate a comment */
 		std::stringstream temp;
@@ -318,11 +277,6 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 			}
 		}
 
-
-// DEBUG
-//		std::cout << "comment generated" << std::endl;
-
-
 		/* decide what action to use */
 		opcodeAction = disasmInst.defaultAction;
 		bool cont = true;
@@ -332,14 +286,17 @@ void generateOpcodeTable(std::ofstream& out, const std::string &prefix, const st
 			it++;
 		}
 
-
-// DEBUG
-//		std::cout << "action fixed" << std::endl;
-
-
 		// output the line.
 		out << "\t{ ";
-		out << opcodeFlags << ", " << opcodeTable << ", " << opcodeAction;
+		out << flag2string(disasmInst.destFlags) << ", " << flag2string(disasmInst.srcFlags) << ", " << flag2string(disasmInst.auxFlags) << ", ";
+		out << disasmInst.implDestFlags << ", " << disasmInst.implSrcFlags << ", " << disasmInst.implAuxFlags << ", " << opcodeFlags << ", ";
+		if (opcodeTable.compare("0")!=0) {
+		  out << "{.table = " << opcodeTable << "}, ";
+		} else {
+		  out << "{.handler = " << opcodeAction << "}, ";
+		}
+		out << "\"" << disasmInst.mnemonic << "\"";
+		//out << opcodeTable << ", " << opcodeAction;
 		if (opcodeIdx != length-1)
 		  out << " },\t/* " << opcodeComment << " */" << std::endl;
 		else
@@ -652,5 +609,178 @@ std::string imm2Flag(const unsigned int flags)
 	return result;
 }
 
+std::string flag2string(const unsigned int flags)
+{
+	std::string result = "";
+	bool addPipe = true;
+	switch (flags & OP_USE_MASK) {
+		case MODIFY:
+			result = "MODIFY";
+			break;
+		case READ:
+			result = "READ";
+			break;
+		case WRITE:
+			result = "WRITE";
+			break;
+		case EXECUTE:
+			result = "EXECUTE";
+			break;
+		default: 
+		  std::cout << "Unsupported RWX type!" << std::endl;
+	  case 0:
+	    addPipe = false;
+	    break;
+	}
+  if (addPipe && (flags & ADDRM_ALL)) result += " | ";
+  addPipe = true;
+	switch (flags & OP_ADDRM_MASK) {
+		case ADDRM_A:
+			result += "ADDRM_A";
+			break;
+		case ADDRM_C:
+			result += "ADDRM_C";
+			break;
+		case ADDRM_D:
+			result += "ADDRM_D";
+			break;
+		case ADDRM_E:
+			result += "ADDRM_E";
+			break;
+		case ADDRM_F:
+			result += "ADDRM_F";
+			break;
+		case ADDRM_G:
+			result += "ADDRM_G";
+			break;
+		case ADDRM_I:
+			result += "ADDRM_I";
+			break;
+		case ADDRM_J:
+			result += "ADDRM_J";
+			break;
+		case ADDRM_M:
+			result += "ADDRM_M";
+			break;
+		case ADDRM_N:
+			result += "ADDRM_N";
+			break;
+		case ADDRM_O:
+			result += "ADDRM_O";
+			break;
+		case ADDRM_P:
+			result += "ADDRM_P";
+			break;
+		case ADDRM_Q:
+			result += "ADDRM_Q";
+			break;
+		case ADDRM_R:
+			result += "ADDRM_R";
+			break;
+		case ADDRM_S:
+			result += "ADDRM_S";
+			break;
+		case ADDRM_U:
+			result += "ADDRM_U";
+			break;
+		case ADDRM_V:
+			result += "ADDRM_V";
+			break;
+		case ADDRM_W:
+			result += "ADDRM_W";
+			break;
+		case ADDRM_X:
+			result += "ADDRM_X";
+			break;
+		case ADDRM_Y:
+			result += "ADDRM_Y";
+			break;
+		default:
+		  std::cout << "Unsupported ADDRM type!" << std::endl;		
+	  case 0:
+	    addPipe = false;
+	    break;
+	}
+  if (addPipe && (flags & OPT_ALL)) result += " | ";
+  addPipe = true;
+	switch (flags & OPT_MASK) {
+		case OPT_a:
+			result += "OPT_a";
+			break;
+		case OPT_b:
+			result += "OPT_b";
+			break;
+		case OPT_c:
+			result += "OPT_c";
+			break;
+		case OPT_d:
+			result += "OPT_d";
+			break;
+		case OPT_dq:
+			result += "OPT_dq";
+			break;
+		case OPT_p:
+			result += "OPT_p";
+			break;
+		case OPT_pd:
+			result += "OPT_pd";
+			break;
+		case OPT_pi:
+			result += "OPT_pi";
+			break;
+		case OPT_ps:
+			result += "OPT_ps";
+			break;
+		case OPT_q:
+			result += "OPT_q";
+			break;
+		case OPT_s:
+			result += "OPT_s";
+			break;
+		case OPT_ss:
+			result += "OPT_ss";
+			break;
+		case OPT_sd:
+			result += "OPT_sd";
+			break;
+		case OPT_si:
+			result += "OPT_si";
+			break;
+		case OPT_v:
+			result += "OPT_v";
+			break;
+		case OPT_w:
+			result += "OPT_w";
+			break;
+		case OPT_z:
+			result += "OPT_z";
+			break;
+		case OPT_fs:
+			result += "OPT_fs";
+			break;
+		case OPT_fd:
+			result += "OPT_fd";
+			break;
+		case OPT_fe:
+			result += "OPT_fe";
+			break;
+		case OPT_fp:
+			result += "OPT_fp";
+			break;
+		case OPT_fv:
+			result += "OPT_fv";
+			break;
+		case OPT_fst:
+			result += "OPT_fst";
+			break;
+		default:
+		  std::cout << "Unsupported OPT type!" << std::endl;		
+	  case 0:
+	    addPipe = false;
+	    break;
+	}
+	if (result.length()==0) result = "ARG_NONE";
+	return result;
+}
 
 

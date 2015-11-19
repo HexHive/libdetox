@@ -55,6 +55,7 @@ typedef struct instr {
 
 
 /* how is the opeand used in this instruction */
+#define		RWX					  0x00000007
 #define		READ					0x00000001		/* operand is read */
 #define		WRITE					0x00000002		/* operand is written */
 #define		MODIFY					READ | WRITE	/* operand is modified */
@@ -66,6 +67,7 @@ typedef struct instr {
 #define		SIGEND					0x00000040		/* operand is signed */
 
 /* addresing methods - taken from intel manual */
+#define		ADDRM_ALL			  0x00001F00
 #define		ADDRM_A					0x00000100
 #define		ADDRM_C					0x00000200
 #define		ADDRM_D					0x00000300
@@ -88,39 +90,39 @@ typedef struct instr {
 #define		ADDRM_Y					0x00001400
 
 /* operand types - taken from intel manual */
+#define		OPT_ALL				0x003F0000
 #define		OPT_a					0x00010000
 #define		OPT_b					0x00020000
 #define		OPT_c					0x00030000
 #define		OPT_d					0x00040000
-#define		OPT_dq					0x00050000
+#define		OPT_dq				0x00050000
 #define		OPT_p					0x00060000
-#define		OPT_pd					0x00070000
-#define		OPT_pi					0x00080000
-#define		OPT_ps					0x00090000
+#define		OPT_pd				0x00070000
+#define		OPT_pi				0x00080000
+#define		OPT_ps				0x00090000
 #define		OPT_q					0x000A0000
 #define		OPT_s					0x000B0000
-#define		OPT_ss					0x000C0000
-#define		OPT_sd					0x000D0000 /* this one is not in the intel manual! */
-#define		OPT_si					0x000E0000
+#define		OPT_ss				0x000C0000
+#define		OPT_sd				0x000D0000 /* this one is not in the intel manual! */
+#define		OPT_si				0x000E0000
 #define		OPT_v					0x000F0000
 #define		OPT_w					0x00100000
 #define		OPT_z					0x00110000
-
 /* operand types for FPU - these are not found in the intel manual */
-#define		OPT_fs					0x00200000		/* single-real*/
-#define		OPT_fd					0x00210000		/* double-real */
-#define		OPT_fe					0x00220000		/* extended-real */
-#define		OPT_fp					0x00230000		/* packed-BCD */
-#define		OPT_fv					0x00240000		/* FPU env (14/28 bytes) */
-#define		OPT_fst					0x00250000		/* FPU state (98/108 bytes) */
+#define		OPT_fs				0x00200000		/* single-real*/
+#define		OPT_fd				0x00210000		/* double-real */
+#define		OPT_fe				0x00220000		/* extended-real */
+#define		OPT_fp				0x00230000		/* packed-BCD */
+#define		OPT_fv				0x00240000		/* FPU env (14/28 bytes) */
+#define		OPT_fst				0x00250000		/* FPU state (98/108 bytes) */
 
 
 /*******************************************************\
  * implizit operand flags                              *
 \*******************************************************/
 /* implizit operand masks */
-#define		REG_IDX_MASK			0x0000000F
-#define		REG_TYPE_MASK			0x000000F0
+#define		REG_IDX_MASK		0x0000000F
+#define		REG_TYPE_MASK		0x000000F0
 
 /* register types */
 #define		BYTE_REG				0x00000010
@@ -234,7 +236,7 @@ typedef struct instr {
 #define		FLAG					0x00009000
 #define		FPU						0x0000A000
 #define		TRAPS					0x0000D000
-#define		SYSTEM					0x0000E000
+#define		SYSTEM				0x0000E000
 #define		OTHER					0x0000F000
 
 /* EXEC group */

@@ -6,13 +6,14 @@ CC=gcc
 LIBFLAGS=-fPIC -c
 
 # our objects
-OBJS=libfastbt.o fbt_translate.o fbt_asm_functions.o fbt_tcache.o fbt_disassemble.o fbt_actions.o fbt_trampoline.o fbt_debug.o fbt_signals.o fbt_statistic.o fbt_rbtree.o fbt_mem_protection.o fbt_sec_syscalls.o fbt_syscall_table.o fbt_llio.o fbt_mem_alloc.o
+OBJS=libfastbt.o fbt_translate.o fbt_asm_functions.o fbt_tcache.o fbt_disassemble.o fbt_actions.o fbt_trampoline.o fbt_debug.o fbt_signals.o fbt_statistic.o fbt_rbtree.o fbt_mem_protection.o fbt_llio.o fbt_mem_alloc.o
+# fbt_sec_syscalls.o fbt_syscall_table.o 
 
 LIBNAME=libfastbt.so
 # major version
 LIBVERS=0
 # minor version
-LIBMIN=1.0
+LIBMIN=2.0
 
 # place for the static library
 STATICLIB=../lib/libfastbt.a

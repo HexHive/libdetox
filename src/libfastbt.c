@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <dlfcn.h>
-
+#include <string.h>
 
 
 #include "libfastbt.h"
@@ -37,7 +37,8 @@
 #include "fbt_tcache.h"
 #include "fbt_signals.h"
 #include "fbt_trampoline.h"
-#include "fbt_sec_syscalls.h"
+//TODO sec syscalls trustVM
+//#include "fbt_sec_syscalls.h"
 #include "fbt_debug.h"
 
 #if defined(FBT_STATISTIC)
@@ -76,7 +77,8 @@ void fbt_init (ia32_opcode_t *opcode_table)
     fbt_memprotect_init();
 
     /* secuBT: call init function for the secure system call mechanism */
-    fbt_init_sec_syscalls();
+    //TODO trustVM
+    //fbt_init_sec_syscalls();
 
     /* init the pthread key for the thread local data */
     if (tld_key!=0 && pthread_getspecific(tld_key)!=NULL) {

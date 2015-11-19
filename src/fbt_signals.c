@@ -24,6 +24,7 @@
 #include <dlfcn.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <string.h>
 
 #include "libfastbt.h"
 #include "fbt_debug.h"
@@ -181,7 +182,7 @@ int fbt_sigaction(int signum, const struct sigaction *act, struct sigaction *old
     FIX_BACK2TRANSLATED
 
     PRINT_DEBUG("sigaction(%d)\n", signum);
-    printf("sigaction(%d)\n", signum);
+    //printf("sigaction(%d)\n", signum);
 
     int result = 0;
 
@@ -275,8 +276,6 @@ int fbt_pthread_create(pthread_t *__restrict __newthread,
   tramptr+=4;
 
   *tramptr++ = 0xc3;  // ret
-
-  DUMP_CODE(pthread_trampoline, 40);
 
   INFO_PRINTF("Created trampoline: %p (orig start: %p)\n", pthread_trampoline, __start_routine);
 

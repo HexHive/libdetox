@@ -1,2 +1,0 @@
-mode:blacklist
-getuid32():return(0)

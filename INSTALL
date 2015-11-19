@@ -1,19 +1,18 @@
-The Makefile depends on "GNU libtool". This tool is easily installable
-with "aptitude install libtool" under any debian/ubuntu based system.
-For 64bit systems, you need the 32bit libc: "aptitude install libc6-dev-i386"
+This file describes how to install and work with fastBT.
 
-To install, run make in the "libstm" directory
-(not in the subdirectory "library"):
+To compile your own translation table go into the directory tableGenerator and
+use "make" (have a look at example.cpp to generate a plain translation table)
+The resulting translation table must then be copied into the src directory of
+fastBT.
 
-To build the library use:
-make library
+To compile the binary translator you must choose your optimizations in the
+top level Makefile. After the correct settings are selected use "make" to
+generate the library.
 
-To install the library use:
-make install
+For a test run you might use:
+LD_PRELOAD=./src/libfastbt.so.0.2.0 /usr/lib/openoffice/program/soffice.bin 
 
-To build some demo programs use:
-(optionally)
-make demoprog
 
-the default installation location is /usr/lib
+For 64bit systems, you need the 32bit libc: "aptitude install libc6-dev-i386.
+The default installation location is /usr/lib
 

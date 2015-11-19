@@ -1,8 +1,0 @@
-Tests the symbol collision detection of secuBT. Guest code may not use symbols that occur in the binary translator (with the execption of a few whitelisted symbols).
-
-execute with LD_LIBRARY_PATH=. (or, at your option, copy the library files 
-to /usr/lib/ or so):
-
-LD_LIBRARY_PATH=. ./symbols
-LD_LIBRARY_PATH=. LD_PRELOAD=libfastbt.so ./symbols
-

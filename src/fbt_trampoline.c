@@ -32,6 +32,7 @@
 #include <assert.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <string.h>
 
 #include "fbt_private_datatypes.h"
 #include "fbt_trampoline.h"
@@ -121,7 +122,6 @@ void *trampoline_put_handler(thread_local_data_t *tld, void *call_target, void *
     PUSHL_IMM32(curr_addr, (uint32_t)tld);
     CALL_REL32(curr_addr, (uint32_t) handler);
     
-    DUMP_CODE(ret_val, curr_addr - (unsigned char*)ret_val);
     return ret_val;
 }
 
