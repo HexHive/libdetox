@@ -1,0 +1,18 @@
+The Makefile depends on "GNU libtool". This tool is easily installable
+with "aptitude install libtool" under any debian/ubuntu based system.
+
+To install, run make in the "libstm" directory
+(not in the subdirectory "library"):
+
+To build the library use:
+make library
+
+To install the library use:
+make install
+
+To build some demo programs use:
+(optionally)
+make demoprog
+
+the default installation location is /usr/lib
+

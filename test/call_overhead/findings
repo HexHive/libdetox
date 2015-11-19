@@ -1,0 +1,5 @@
+
+findings
+--------
+
+additional overhead for function calls as measured in this test is about 2 to 3 cycles

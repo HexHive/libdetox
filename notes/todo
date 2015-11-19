@@ -1,0 +1,159 @@
+
+to do
+-----
+
+
+CURRENT EXPERIMENTAL FALLTHROUGH OPTIMIZATION FAILS because we assume that the next instruction that will be written into the tcache 
+is the instruction after the last one of the current TU. However, this is not the case if by chance there is already a translated TU 
+that begins exactly at that instruction.
+--> we need another version of ind_jmp that either makes a chaining optimization (jump to translated) or fallthrough if not already 
+	translated
+
+
+
+profiling results indicated chaining optimization might be very beneficial. 
+
+1. build libstm with cflags for productive use and install (done)
+
+2. fix benchmark suite to include initialization times of binary translator in times measured (done)
+
+3. run benchmarks --> save results as results_no_chaining.xhtml (done)
+
+4. implement chaining optimization
+	
+	4. a) find out where chaining could be utilized (done)
+	
+		- glue code that is added when instruction limit is hit in translate_noexecute (fbt_translate.c:133)
+		
+		- none of the action functions in fbt_actions.c, because there is some kind of inlining 
+		  optimization (that is superior to chaining) performed where a chaining optimization would be possible
+			
+	
+	4. b) write chaining function, for example called ind_jmp_chaining, 
+	      that backpatches calls to itself to jump to translated version
+	
+	4. c) use function in places determined in step 4. a)
+
+5. run benchmarks --> save results as results_chaining.xhtml
+
+6. compare
+
+
+other things to do:
+
+
+? queue subsequent calls to translate_noexecute (for example when translating call instructions)
+	--> more efficient memory usage
+
+? should probably make safer fix for calls at end of TU: set a new state and for example use a trampoline to invoke translator
+
+- chaining (with jumps and, where possible, fallthrough) --> for this, we need 
+
+- code cleanup
+
+- profiling 
+	- gprof cannot be used on shared objects --> could try on statically linked version (but that fails for benchmark tests, exits translated code prematurely, segfaults)
+	- generating profiling data using LD_PROFILE=libfastbt.so.0 works somewhat, but sprof fails "failed to load shared object libfastbt.so.0: no such file or directory". profiling data generated seems empty
+	- now trying sysprof (not good enough...)
+	- oprofile worked, successfully producing annotated code, but precision could be better
+	- will also try valgrind / callgrind
+	- perfmon
+
+
+
+
+answered questions
+------------------
+
+-- jmp and jcc (cc=condition code) near jumps have two different forms: one takes a 8bit offset, the other a 32bit offset
+	--> should we make two functions that do nearly the same, or one function, that checks the opcode, or maybe two functions
+		that both call a third function for the common code (call overhead vs. if-then-else overhead)
+	--> the resulting translated instruction should always be in the 32bit form, as we cannot guarantee that we stay within 
+		255 bytes of the current eip
+ = one function, that uses/translates both and translates them into 'smallest possible' (e.g. if target is close enough use 1byte instr)
+ = if instruction prefix:
+  = do not stop translation here (only after 'real' instructions)
+  = copy them and set global status (last instruction was XX-prefix)
+  = after a non-prefix instruction function returns: drop prefixes ('cleanup-macro' in all translate functions?)
+  = check for prefixes in jmps (do we use 16 instead of 32b?)
+  = watch out for E3 (no analog jump with 2byte opcode)
+  
+- jcc near jump: should we translate the beginnings of both branches, or only the one that we take?
+
+	
+	conditional jump
+	----------------
+	
+		cmp %esi, %ecx
+		jl somewhere
+	continue:	
+		
+	translated conditional jump
+	---------------------------
+		
+		cmp %esi, %ecx
+	a1:	jl take_jump
+		
+		pushl continue
+		call translate_execute
+		
+		;(not reached)
+		
+	take_jump:
+		pushl a1
+		pushl somewhere
+		call translate_execute_fix
+		
+	
+
+
+	translated (like vmware paper)
+	------------------------------
+	
+		cmp %esi, %ecx
+	a1:	jl [take_jump]
+	a2:	jmp [fallthrough]
+		
+		
+	somewhere else in memory
+	
+	[take_jump]:
+		pushl a1
+		pushl somewhere
+		call translate_execute_fix
+	[fallthrough]:
+		pushl a2
+		pushl continue
+		call translate_execute_fix
+		
+ = single linked list with trampolines
+   = allocate some memory at start and initialize the linked list
+   = struct trampolineList { struct trampolineList *next; int foo[3]; } *top;
+   = allocate struct trampolineList array[200] -> iterate and initialize next...
+		
+- branches not taken could eventually be taken (e. g. if-then-else inside a loop)
+	--> jump instructions in already translated code could be modified to point to the newly translated branch
+# translated code / real code mapping table
+ 
+- jumps into the middle of a translation unit --> if code already translated, jump into translated code... --> where?
+	(or duplicate translations?)
+  such could jumps occur for example in switch-statements --> jump table
+# table of chunks that have already been translated -> mapping... and before translation is started the translate function
+  must do a lookup if the part has already been translated
+ = we don't want mapping tables -> we take the double-translate overhead (state this fact in thesis)
+
+- do we discard CCFs? (if so, we would need to fix other CCFs that jump to the deleted one)
+ = flush buffer if we run out of memory (code buffer has fixed limit)
+ = but we know return pointer = upon return jump - flush buffer and construct 'translate code' that translates the return address
+ => do not implement now... future improvement ;)
+ 
+- regarding STM: how can you predict values of variables?
+ = the called speculative function does not use the fraction that is changed by the normal thread
+
+
+- how expensive are function calls, malloc, ...? 
+# (depends: if system call -> border kernel/userspace. otherwise depends on used libc, malloc e.g. is part of the libc)
+
+
+- suggestion: function pointers in opcode table to handle the instructions
+

@@ -1,0 +1,25 @@
+
+conditional jump
+----------------
+
+	cmp %esi, %ecx
+	jl somewhere
+continue:	
+	
+translated conditional jump
+---------------------------
+	
+	cmp %esi, %ecx
+	jl take_jump
+	
+	pushl continue
+	call translate
+	
+	;(not reached)
+	
+take_jump:
+	pushl somewhere
+	call translate
+	
+continue:	
+

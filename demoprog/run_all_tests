@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# get demoprog directory
+export DIR=$(dirname "$0")
+
+# the sed comand addes whitespace to the begining of a line for nicer output
+
+echo
+echo simpletest
+$DIR/simpletest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo mediumtest
+$DIR/mediumtest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo longertest
+$DIR/longertest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo ind_jmp_test
+$DIR/ind_jmp_test | sed -e's/\(.*\)/   \1/'
+
+echo
+echo ind_jmp_reg_test
+$DIR/ind_jmp_reg_test | sed -e's/\(.*\)/   \1/'
+
+echo
+echo jcctest
+$DIR/jcctest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo functiontest
+$DIR/functiontest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo adv_functiontest
+$DIR/adv_functiontest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo pretranslated_functiontest
+$DIR/pretranslated_functiontest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo bintree
+$DIR/bintree | sed -e's/\(.*\)/   \1/'
+
+echo
+echo printftest
+$DIR/printftest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo floattest
+$DIR/floattest | sed -e's/\(.*\)/   \1/'
+
+echo
+echo ret_predict_test
+$DIR/ret_predict_test | sed -e's/\(.*\)/   \1/'
+
+echo
+echo powtest
+$DIR/powtest | sed -e's/\(.*\)/   \1/'
+
