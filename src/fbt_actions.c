@@ -24,35 +24,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <malloc.h>
-#include <sys/mman.h>
+#include <unistd.h> /* sleep */
 
 #include "fbt_private_datatypes.h"
 #include "fbt_translate.h"
 #include "fbt_actions.h"
 #include "fbt_asm_functions.h"
+#include "fbt_asm_macros.h"
 #include "fbt_tcache.h"
 #include "fbt_trampoline.h"
 #include "fbt_mem_alloc.h"
+#include "fbt_libc.h"
 
 #include "fbt_debug.h"
-
 #include "fbt_statistic.h"
 
-#include "fbt_asm_macros.h"
 
 #ifdef SECU_MPROTECT_IDS
 #include "fbt_mem_protection.h"
 #endif
-extern void (*fbt_commit_address)();
 
-extern void print_eip();
+/* standard action helpers */
+#if !defined(FBT_IND_CALL_FAST)
+static void prepare_action_call_indirect      (translate_struct_t *ts);
+static void finish_action_call_indirect       (translate_struct_t *ts);
+#endif
+
+
 /**
  * Copies the current instruction verbatim from the TU to the CCF
  * @param ts is a pointer to the translation struct of the current thread
@@ -67,7 +65,7 @@ finalize_tu_t action_copy(translate_struct_t *ts)
 
     PRINT_DEBUG_FUNCTION_START("action_copy(*addr=%p, *transl_addr=%p, length=%i)", addr, transl_addr, length);
     /* copy instruction verbatim to translated version */
-    memcpy(transl_addr, addr, length);
+    fbt_memcpy(transl_addr, addr, length);
 
     PRINT_DEBUG_FUNCTION_END("-> neutral, transl_length=%i", length);
     ts->transl_instr += length;
@@ -91,8 +89,7 @@ finalize_tu_t action_copy(translate_struct_t *ts)
 #if defined(FBT_RET_STACK) && defined(FBT_RET_STACK_OVERFLOW_CHECK)
 static void ret_stack_handle_overflow()
 {
-    PRINT_ERROR("Translated return address stack overflow!");
-    exit(1);
+    fbt_suicide_str("Translated return address stack overflow (ret_stack_handle_overflow: fbt_actions.c!\n");
 }
 #endif
 
@@ -214,6 +211,7 @@ finalize_tu_t action_call(translate_struct_t *ts)
     PRINT_DEBUG("translated call_target: %p", transl_target);
 
 #if defined(FBT_RET_CACHE)
+    /* TODO: move upper tu_open return after the ret cahce?!?! */
     unsigned int retcache_offset = (((int32_t)ts->next_instr))&0xff; /* lowest byte */
     /**
      * MOVL ret_cache_trampo, tld->retcache+retcache_offset
@@ -271,11 +269,12 @@ finalize_tu_t action_call(translate_struct_t *ts)
     return tu_close;
 }
 
+#if !defined(FBT_IND_CALL_FAST)
 /**
  * Prepares near indirect calls. Only pushes the arguments to the ind_jump(_*) routine.
  * This separation is needed in libSTM.
  */
-void prepare_action_call_indirect(translate_struct_t *ts)
+static void prepare_action_call_indirect(translate_struct_t *ts)
 {
     unsigned char *addr = ts->cur_instr;
     unsigned char *first_byte_after_opcode = ts->first_byte_after_opcode;
@@ -310,7 +309,7 @@ void prepare_action_call_indirect(translate_struct_t *ts)
 
     /* if there follows a SIB byte and/or displacement, copy this to the CCF */
     if ((length - prefix_length) > 2) {
-	memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
+	fbt_memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
 	transl_addr += length - 2 - prefix_length;
 	
 	
@@ -360,7 +359,7 @@ void prepare_action_call_indirect(translate_struct_t *ts)
  *  Use the prepared value on the stack instead.)
  * This is needed in libSTM.
  */
-void finish_action_call_indirect(translate_struct_t *ts)
+static void finish_action_call_indirect(translate_struct_t *ts)
 {
     unsigned char* transl_addr = ts->transl_instr;
 
@@ -407,6 +406,7 @@ void finish_action_call_indirect(translate_struct_t *ts)
 
     ts->transl_instr = transl_addr;
 }
+#endif /* !defined(FBT_IND_CALL_FAST */
 
 /**
  * Handles near indirect calls.
@@ -455,10 +455,8 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
 
 #if defined(FBT_RET_CACHE)
     unsigned int retcache_offset = (((int32_t)ts->next_instr))&0xff; /* lowest byte */
-    /**
-     * MOVL ret_cache_trampo, tld->retcache+retcache_offset
-     * Whereas the offset is determined by the 'hash' function in the ret (movzbl)
-     */
+    /* MOVL ret_cache_trampo, tld->retcache+retcache_offset */
+    /* Whereas the offset is determined by the 'hash' function in the ret (movzbl) */
     MOVL_IMM32_IMM32RM32(transl_addr, 0x05, (int32_t)(ts->tld->retcache_jump), (int32_t)(ts->tld->retcache+retcache_offset));
     
     void *backpatch = (void*)((int32_t)transl_addr-4);
@@ -505,13 +503,13 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
      */
     
     /* first compare */
-    memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
+    fbt_memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
     transl_addr+=prefix_length;
     *transl_addr++ = 0x81; /* cmpl r/m32, imm32 */
     *transl_addr++ = (*first_byte_after_opcode & 0xC7) | 0x38; /* use modrm, but modify opcode extension to 111 */
     /* if there follows SIB byte and/or displacement copy this to the CCF */
     if ((length-prefix_length) > 2) {
-	memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
+	fbt_memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
 	transl_addr += length - 2 - prefix_length;
     }
     *((int32_t*) transl_addr) = 0x0;		/* to be patched. predicted target addr. */
@@ -523,13 +521,13 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
     
     
     /* second compare */
-    memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
+    fbt_memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
     transl_addr+=prefix_length;
     *transl_addr++ = 0x81; /* cmpl r/m32, imm32 */
     *transl_addr++ = (*first_byte_after_opcode & 0xC7) | 0x38; /* use modrm, but modify opcode extension to 111 */
     /* if there follows SIB byte and/or displacement copy this to the CCF */
     if ((length-prefix_length) > 2) {
-	memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
+	fbt_memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
 	transl_addr += length - 2 - prefix_length;
     }
     *((int32_t*) transl_addr) = 0x0;		/* to be patched. predicted 2nd target addr. */
@@ -541,13 +539,13 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
     
     /** MISS **/
     /**********/
-    memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
+    fbt_memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
     transl_addr+=prefix_length;
     *transl_addr++ = 0xFF; /* write: push indirect target */
     *transl_addr++ = (*(first_byte_after_opcode) & 0xC7) | 0x30; /* use modrm, but modify opcode extension to 110 */
     /* if there follows a SIB byte and/or displacement, copy this to the CCF */
     if ((length - prefix_length) > 2) {
-	memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
+	fbt_memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
 	transl_addr += length - 2 - prefix_length;
     }
     /* write: push pointer to the thread local data & call dislocate function*/
@@ -578,7 +576,7 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
 	 */
 
 	/* write: push indirect target */
-	memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
+	fbt_memcpy(transl_addr, ts->cur_instr, prefix_length); /* copy prefixes */
 	transl_addr+=prefix_length;
 	*transl_addr++ = 0xFF;
 	
@@ -591,7 +589,7 @@ finalize_tu_t action_call_indirect(translate_struct_t *ts)
 	
 	/* if there follows a displacement copy this to the ccf */
 	if ((length - prefix_length) > 2) {
-	    memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
+	    fbt_memcpy(transl_addr, (first_byte_after_opcode + 1), length - 2 - prefix_length);
 	    transl_addr += length - 2 - prefix_length;
 	
 	    
@@ -852,20 +850,6 @@ finalize_tu_t action_jmp(translate_struct_t *ts)
 }
 
 /**
- * Finishes near indirect jmp. Only calls the ind_jump routine.
- * This is needed in libSTM.
- */
-void finish_action_jmp_indirect(translate_struct_t *ts)
-{
-    unsigned char* transl_addr = ts->transl_instr;
-
-    /* write: call to ind_jump */
-    CALL_REL32(transl_addr, (int32_t)&ind_jump);
-
-    ts->transl_instr = transl_addr;
-}
-
-/**
  * Handles indirect jumps.
  * Indirect jumps are translated into a PUSH of the addr and a call to the
  * function "ind_jump"
@@ -949,7 +933,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	POPFL(transl_addr);
 
 	/* copy indirect jump instruction and modify displacement -> jumptable base address */
-	memcpy(transl_addr, addr, length);
+	fbt_memcpy(transl_addr, addr, length);
 	transl_addr += length;
 	int32_t* jmptbl = ((int32_t*)(transl_addr-4));
 	
@@ -972,7 +956,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	
 	/* if there follows a displacement copy this to the ccf */
 	if (length > 2) {
-	    memcpy(transl_addr, (addr + 2), length - 2);
+	    fbt_memcpy(transl_addr, (addr + 2), length - 2);
 	    transl_addr += length - 2;
 	}
 	
@@ -1076,7 +1060,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	    
 	    /* if there follows a displacement copy this to the ccf */
 	    if (length > 2) {
-		memcpy(fixupaddr, (addr + 2), length - 2);
+		fbt_memcpy(fixupaddr, (addr + 2), length - 2);
 		fixupaddr += length - 2;
 	    }
 	    
@@ -1115,7 +1099,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	    POPFL(fixupaddr);
 	    
 	    /* copy indirect jump instruction and modify displacement -> jumptable base address */
-	    memcpy(fixupaddr, addr, length);
+	    fbt_memcpy(fixupaddr, addr, length);
 	    fixupaddr += length;
 	    *((int32_t*)(fixupaddr-4)) = (int32_t)jt_el->table_base;
 	    
@@ -1181,7 +1165,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	*transl_addr++ = (*first_byte_after_opcode & 0xC7) | 0x38;
 	/* if there follows a displacement copy this to the ccf */
 	if (length > 2) {
-		memcpy(transl_addr, (addr + 2), length - 2);
+		fbt_memcpy(transl_addr, (addr + 2), length - 2);
 		transl_addr += length - 2;
 		/* no need for SIB replacement because no SIB is used! */
 	}
@@ -1208,7 +1192,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 
 	/* if there follows a displacement copy this to the ccf */
 	if (length > 2) {
-		memcpy(transl_addr, (addr + 2), length - 2);
+		fbt_memcpy(transl_addr, (addr + 2), length - 2);
 		transl_addr += length - 2;
 	}
 	
@@ -1252,7 +1236,7 @@ finalize_tu_t action_jmp_indirect(translate_struct_t *ts)
 	
 	/* if there follows a displacement copy this to the ccf */
 	if (length > 2) {
-	    memcpy(transl_addr, (addr + 2), length - 2);
+	    fbt_memcpy(transl_addr, (addr + 2), length - 2);
 	    transl_addr += length - 2;
 	}
 
@@ -1372,7 +1356,7 @@ finalize_tu_t action_ret(translate_struct_t *ts)
      *	movzx 4(%esp), %ebx             # 5b
      *	jmpl  *retcache(, %ebx, 4)      # 7b
      */
-    if (*addr==0xc3) {
+	if (*addr==0xc3) {
 	//PUSHL_EBX(transl_addr);
 	//MOVZBL_IMM8RM8SIB_R32(transl_addr, 0x5c, 0x24, 0x04); /* movzbl 0x4(%esp), %ebx */
 	//JMP_IND_IMM32RM(transl_addr, 0x9d, (int32_t)(ts->tld->retcache));  /* jmpl *retcache(, %ebx, 4) */
@@ -1570,7 +1554,7 @@ finalize_tu_t action_ret(translate_struct_t *ts)
     PUSHL_IMM32(transl_addr, (int32_t)ts->tld); /* pushl tld */
 
     if (*addr!=0xc2 && *addr!=0xc3) {
-        printf("something weird happened: 0x%x %p\n", *addr, addr);
+        llprintf("something weird happened: 0x%x %p\n", *addr, addr);
     }
     /* call slow function */
     if (*addr == 0xc2) {
@@ -1695,8 +1679,8 @@ finalize_tu_t action_warn(translate_struct_t *ts)
 {
     PRINT_DEBUG_FUNCTION_START("action_warn(*ts=%p)", ts);
 
-    PRINT_ERROR("unhandled opcode encountered in TU at %p: %s", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
-    PRINT_ERROR("Will try if it works to simply copy the instruction into the CCF, but something bad could happen now...");
+    PRINT_DEBUG("unhandled opcode encountered in TU at %p: %s", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
+    PRINT_DEBUG("Will try if it works to simply copy the instruction into the CCF, but something bad could happen now...");
 
     PRINT_DEBUG_FUNCTION_END("-> ???");
     return action_copy(ts);
@@ -1711,18 +1695,18 @@ finalize_tu_t action_fail(translate_struct_t *ts)
 {
     PRINT_DEBUG_FUNCTION_START("action_fail(*ts=%p)", ts);
 
-    PRINT_ERROR("unhandled opcode encountered in TU at %p: %s", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
-    PRINT_ERROR("giving up!!!");
+    PRINT_DEBUG("unhandled opcode encountered in TU at %p: %s", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
+    PRINT_DEBUG("giving up!!!");
     PRINT_DEBUG_FUNCTION_END("-> FAIL");
 
-    PRINT_ERROR("\n\n\t\tERROR: unhandled opcode encountered in TU at %p: %s\n\n", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
-    printf("\nERROR: unhandled opcode encountered in TU at %p: %s\nsecuBT will exit now!\n", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
+    PRINT_DEBUG("\n\n\t\tERROR: unhandled opcode encountered in TU at %p: %s\n\n", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
+    llprintf("\nERROR: unhandled opcode encountered in TU at %p: %s\nsecuBT will exit now!\n", ts->cur_instr, printnbytes(ts->cur_instr, ts->next_instr-ts->cur_instr));
 #if defined(SLEEP_ON_FAIL)
-    printf("Something bad happened (action_fail) - attach a debugger now!\n");
+    llprintf("Something bad happened (action_fail) - attach a debugger now!\n");
     sleep(5);
 #endif
     assert(0==1);
-    _exit(139);
+    fbt_suicide();
     return tu_close;
 }
 

@@ -20,11 +20,9 @@
  * MA  02110-1301, USA.
  */
 #define _GNU_SOURCE
-#include <stdio.h>
+#include <signal.h>
 #include <dlfcn.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <string.h>
+#include <pthread.h>
 
 #include "libfastbt.h"
 #include "fbt_debug.h"
@@ -32,10 +30,10 @@
 #include "fbt_trampoline.h"
 #include "fbt_signals.h"
 #include "fbt_asm_functions.h"
-#include "fbt_tcache.h"
 #include "fbt_translate.h"
 #include "fbt_mem_protection.h"
 #include "fbt_mem_alloc.h"
+#include "fbt_libc.h"
 
 #if defined(RTLD_NEXT)
 #define REAL_LIBC RTLD_NEXT
@@ -83,18 +81,18 @@
 /* special shared library hacks to replace some nasty functions */
 static void seghandler (unsigned int sn, siginfo_t  si, struct ucontext *sc);
 
-void (*(*o_signal) ( int signum, void (*handler)(int)))(int)=0;
-int (*o_sigaction) ( int signum, const struct sigaction *act, struct sigaction *oldact)=0;
-int (*o_pthread_create)(pthread_t *__restrict __newthread,
+static void (*(*o_signal) ( int signum, void (*handler)(int)))(int)=0;
+static int (*o_sigaction) ( int signum, const struct sigaction *act, struct sigaction *oldact)=0;
+static int (*o_pthread_create)(pthread_t *__restrict __newthread,
 				 __const pthread_attr_t *__restrict __attr,
 				 void *(*__start_routine) (void *),
 				 void *__restrict __arg)=0;
-void (*o_nptl_deallocate_tsd)(void)=0;
+static void (*o_nptl_deallocate_tsd)(void)=0;
 
 void initSignals()
 {
   struct sigaction m;
-  memset(&m, 0, sizeof(struct sigaction));
+  fbt_memset(&m, 0x0, sizeof(struct sigaction));
   m.sa_flags = SA_SIGINFO;
   m.sa_sigaction = (void *)seghandler;
   /* let us call the real sigaction function */
@@ -118,38 +116,38 @@ static void seghandler(unsigned int sn , siginfo_t  si , struct ucontext *sc)
 {
   int *gregs = sc->uc_mcontext.gregs;
 
-  printf("ERROR: Tried to access unmapped memory. secuBT will exit now\n");
+  llprintf("ERROR: Tried to access unmapped memory. secuBT will exit now\n");
 
-  printf("I'll try to show some debug output (might catch another segv):\n");
-  printf(" Signal number = %d (%d), status = %d\n", si.si_signo, sn, si.si_status);
+  llprintf("I'll try to show some debug output (might catch another segv):\n");
+  llprintf(" Signal number = %d (%d), status = %d\n", si.si_signo, sn, si.si_status);
   switch(si.si_code) {
-    case 1: printf(" SI code = %d (Address not mapped to object)\n", si.si_code);
+    case 1: llprintf(" SI code = %d (Address not mapped to object)\n", si.si_code);
       break;
-    case 2: printf(" SI code = %d (Invalid permissions for mapped object)\n",si.si_code);
+    case 2: llprintf(" SI code = %d (Invalid permissions for mapped object)\n",si.si_code);
       break;
-    default: printf(" SI code = %d (Unknown SI Code)\n",si.si_code);
+    default: llprintf(" SI code = %d (Unknown SI Code)\n",si.si_code);
       break;
   }
-  printf(" Intruction pointer = 0x%08x \n", gregs[REG_EIP]);
-  printf(" Fault addr = 0x%p \n",si.si_addr);
-  printf(" trap = 0x%08x \n", gregs[REG_TRAPNO]);
-  printf(" err  = 0x%08x \n", gregs[REG_ERR]);
-  printf("*** Registers ***\n");
-  printf("    EAX: 0x%08x\n", gregs[REG_EAX]);
-  printf("    EBX: 0x%08x\n", gregs[REG_EBX]);
-  printf("    ECX: 0x%08x\n", gregs[REG_ECX]);
-  printf("    EDX: 0x%08x\n", gregs[REG_EDX]);
-  printf("    EDI: 0x%08x\n", gregs[REG_EDI]);
-  printf("    ESI: 0x%08x\n", gregs[REG_ESI]);
-  printf("    EBP: 0x%08x\n", gregs[REG_EBP]);
-  printf("    ESP: 0x%08x\n", gregs[REG_ESP]);
-  printf("     SS: 0x%08x\n", gregs[REG_SS]);
-  printf(" EFLAGS: 0x%08x\n", gregs[REG_EFL]);
+  llprintf(" Intruction pointer = 0x%.08x \n", gregs[REG_EIP]);
+  llprintf(" Fault addr = 0x%p \n",si.si_addr);
+  llprintf(" trap = 0x%.08x \n", gregs[REG_TRAPNO]);
+  llprintf(" err  = 0x%.08x \n", gregs[REG_ERR]);
+  llprintf("*** Registers ***\n");
+  llprintf("    EAX: 0x%.08x\n", gregs[REG_EAX]);
+  llprintf("    EBX: 0x%.08x\n", gregs[REG_EBX]);
+  llprintf("    ECX: 0x%.08x\n", gregs[REG_ECX]);
+  llprintf("    EDX: 0x%.08x\n", gregs[REG_EDX]);
+  llprintf("    EDI: 0x%.08x\n", gregs[REG_EDI]);
+  llprintf("    ESI: 0x%.08x\n", gregs[REG_ESI]);
+  llprintf("    EBP: 0x%.08x\n", gregs[REG_EBP]);
+  llprintf("    ESP: 0x%.08x\n", gregs[REG_ESP]);
+  llprintf("     SS: 0x%.08x\n", gregs[REG_SS]);
+  llprintf(" EFLAGS: 0x%.08x\n", gregs[REG_EFL]);
 #if defined(SLEEP_ON_FAIL)
-  printf("Something bad happened, you might want to attach a debugger now!\n");
+  llprintf("Something bad happened, you might want to attach a debugger now!\n");
   sleep(5);
 #endif
-  _exit(139);
+  fbt_suicide();
 }
 
 typedef void (*sighandler_t)(int);
@@ -158,7 +156,6 @@ sighandler_t fbt_signal(int signum, sighandler_t handler)
     FIX_BACK2TRANSLATED
 
     PRINT_DEBUG("signal(%d)\n", signum);
-    //printf("signal(%d)\n", signum);
     if (signum==SIGSEGV || signum==SIGBUS || signum==SIGILL) {
         PRINT_DEBUG("Blocked SIGSEGV replacement\n");
         FBT_IDS_LOCKDOWN(tld);
@@ -182,14 +179,13 @@ int fbt_sigaction(int signum, const struct sigaction *act, struct sigaction *old
     FIX_BACK2TRANSLATED
 
     PRINT_DEBUG("sigaction(%d)\n", signum);
-    //printf("sigaction(%d)\n", signum);
 
     int result = 0;
 
     if (signum==SIGSEGV) {
         PRINT_DEBUG("Blocked SIGSEGV replacement\n");
         struct sigaction m;
-        memset(&m, 0, sizeof(struct sigaction));
+	fbt_memset(&m, 0x0, sizeof(struct sigaction));
         m.sa_flags = SA_SIGINFO;
         m.sa_sigaction = (void *)seghandler;
         result = (*o_sigaction)(SIGSEGV,&m,(struct sigaction *)NULL);
@@ -218,11 +214,12 @@ int fbt_pthread_create(pthread_t *__restrict __newthread,
 		    void *__restrict __arg)
 {
   FIX_BACK2TRANSLATED
-  INFO_PRINTF("pthread_create inside transaction - using fixup! (in fbt_signals.c)\n");
+  llprintf("pthread_create inside transaction - using fixup! (in fbt_signals.c)\n");
   FBT_IDS_LOCKDOWN(tld);
 
   /* allocate trampoline on a page; set as executable and readonly later on */
-  char *pthread_trampoline = (char*) allocpages(1);
+  char *pthread_trampoline;
+  allocpages(1, pthread_trampoline);
   fbt_memprotect_add_valid((void*) (pthread_trampoline + 24), 36);
 
   /* push	$0x0	        # push parameter (0)
@@ -277,12 +274,14 @@ int fbt_pthread_create(pthread_t *__restrict __newthread,
 
   *tramptr++ = 0xc3;  // ret
 
-  INFO_PRINTF("Created trampoline: %p (orig start: %p)\n", pthread_trampoline, __start_routine);
+  llprintf("Created trampoline: %p (orig start: %p)\n", pthread_trampoline, __start_routine);
 
   // set memory protection of trampoline
-  mprotect(pthread_trampoline, sysconf(_SC_PAGESIZE), PROT_READ | PROT_EXEC);
+  int ret;
 
-  int ret = o_pthread_create(__newthread, __attr, (void *(*) (void *))pthread_trampoline, __arg);
+  fbt_mprotect(pthread_trampoline, PAGESIZE, PROT_READ | PROT_EXEC, ret);
+
+  ret = o_pthread_create(__newthread, __attr, (void *(*) (void *))pthread_trampoline, __arg);
 
   return ret;
 }
@@ -296,7 +295,7 @@ int fbt_pthread_create(pthread_t *__restrict __newthread,
  */
 int dlclose(void *handle)
 {
-  INFO_PRINTF("fbt_signals.c: dlclose intercepted!\n");
+  llprintf("fbt_signals.c: dlclose intercepted!\n");
   return 0;
 }
 
@@ -304,43 +303,16 @@ int dlclose(void *handle)
  * The following functions might be unsafe inside transactions!
  */
 /*
-#include <sys/types.h>
-#include <unistd.h>
-
-off_t lseek(int fd, off_t offset, int whence)
-{
-  printf("XXX lseek (%d)called\n", fd);
-  static off_t (*o_lseek)(int fd, off_t offset, int whence)=0;
-  o_lseek = (off_t (*)(int fd, off_t offset, int whence)) dlsym(REAL_LIBC, "lseek");
-  return o_lseek(fd, offset, whence);
-}
-
-int dup(int oldfd)
-{
-  printf("XXX dup (%d) called\n", oldfd);
-  static int (*o_dup)(int oldfd)=0;
-  o_dup = (int (*)(int oldfd)) dlsym(REAL_LIBC, "dup");
-  return o_dup(oldfd);
-}
-
-int dup2(int oldfd, int newfd)
-{
-  printf("XXX dup2 (%d, %d) called\n", oldfd, newfd);
-  static int (*o_dup2)(int oldfd, int newfd)=0;
-  o_dup2 = (int (*)(int oldfd, int newfd)) dlsym(REAL_LIBC, "dup2");
-  return o_dup2(oldfd, newfd);
-}
-
 void pthread_exit(void *retval)
 {
-  printf("exit %p\n", retval);
+  llprintf("exit %p\n", retval);
 }
 int pthread_cancel(pthread_t thread) {
-  printf("cancel request\n");
+  llprintf("cancel request\n");
 }
 
 void __nptl_deallocate_tsd (void) {
-  printf("Deallocating my local storage - let's better bail out!\n");
+  llprintf("Deallocating my local storage - let's better bail out!\n");
   fbt_commit_transaction();
   o_nptl_deallocate_tsd();
 }

@@ -29,9 +29,8 @@
 
 #if !defined(_ASSEMBLER_)
 
-#include <stdlib.h>
-#include <stddef.h>
 #include <pthread.h>
+
 #include "fbt_datatypes.h"
 #include "fbt_tcache.h"
 #include "fbt_rbtree.h"
@@ -52,6 +51,9 @@
  * precomputing constant expressions such as (HASHTABLE_SIZE - 1)
  */
 
+/* pagesize of the system we are running on */
+/* we don't use sysconf as this would introduce an additional dependency on libc */
+#define PAGESIZE 0x1000
 
 /*
  * We take bits with exponents 2 to 21 (inclusive) of the source address to determine the position in
@@ -68,6 +70,13 @@
 #define C_HASH_FUNCTION(addr)  ((addr<<3) & HASH_PATTERN)
 #define C_HASH_LOWER_COL(addr) ((((addr<<3) & ~(HASH_PATTERN))>>3)&7)
 #define C_HASH_UPPER_COL(addr) ((((addr<<3) & ~(HASH_PATTERN))>>20)&(-1^HASH_PATTERN))
+
+/* some often used datatypes */
+#define uint32_t unsigned int
+#define int32_t  int
+#define uint16_t unsigned short
+#define int16_t  short
+#define uint8_t  unsigned char
 
 #if !defined(_ASSEMBLER_)
 
@@ -198,10 +207,8 @@ struct thread_local_data {
     // remove or implement
     // void *translate_stack;              /* stack for all bt internal functions */
     // void *rip;                          /* return instruction pointer used for fbt -> prog transition */
-    unsigned int rand_state;            /* state struct of the reentrant random function rand_r(3) */
     unsigned int *ind_jump_trampoline;  /* fast version of indirect jumps (target is pushed before, remaining code is here) */
     unsigned int *ind_call_trampoline;  /* fast version of indirect calls/rets (target is pushed before, remaining code is here) */
-    void *next_map;                     /* address where we try next to allocate memory */
 #ifdef FBT_RET_CACHE
     unsigned int *retcache;             /* cache of return addresses, set by the corresponding call instructions */
     unsigned int *retcache_jump;        /* small trampoline that defaults to an ind call dispatch */

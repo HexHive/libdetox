@@ -23,6 +23,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
+#ifdef FBT_STATISTIC
+
 #ifndef FBT_STATISTIC_H
 #define FBT_STATISTIC_H
 
@@ -114,3 +116,5 @@ unsigned long long fbt_nr_ind_calls_miss;
 void print_statistics();
 
 #endif
+
+#endif /* FBT_STATISTIC */

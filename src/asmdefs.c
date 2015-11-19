@@ -1,6 +1,7 @@
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stddef.h>
 #include "fbt_private_datatypes.h"
 #include "fbt_mem_protection.h"
 

@@ -1,8 +1,6 @@
 #ifndef FBT_RBTREE_H
 #define FBT_RBTREE_H
 
-#include <inttypes.h>
-
 typedef void* rb_key;
 enum rb_color {
     COLOR_RED,

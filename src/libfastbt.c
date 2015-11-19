@@ -22,13 +22,9 @@
 * MA  02110-1301, USA.
 */
 #define _GNU_SOURCE
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
 #include <pthread.h>
 #include <dlfcn.h>
-#include <string.h>
-
+#include <signal.h>
 
 #include "libfastbt.h"
 #include "fbt_private_datatypes.h"
@@ -37,6 +33,7 @@
 #include "fbt_tcache.h"
 #include "fbt_signals.h"
 #include "fbt_trampoline.h"
+#include "fbt_libc.h"
 //TODO sec syscalls trustVM
 //#include "fbt_sec_syscalls.h"
 #include "fbt_debug.h"
@@ -52,6 +49,8 @@ extern ia32_opcode_t opcode_table_onebyte[];
 
 /* allows us not to push the real tld address onto the stack */
 void *fbt_random_tld_offset;
+
+#pragma GCC visibility push(default)
 
 inline thread_local_data_t* get_tld ()
 {
@@ -82,8 +81,9 @@ void fbt_init (ia32_opcode_t *opcode_table)
 
     /* init the pthread key for the thread local data */
     if (tld_key!=0 && pthread_getspecific(tld_key)!=NULL) {
-    printf("TLD already exists - seems as if we want to run a transaction inside a transaction (%p - %p)!\n", (void*)tld_key, pthread_getspecific(tld_key));
-    exit(1);
+	llprintf("TLD already exists - seems as if we want to run a transaction inside a transaction (%p - %p)!\n", (void*)tld_key, pthread_getspecific(tld_key));
+	ffflush();
+	fbt_suicide();
     }
 
     DUMP_START;
@@ -99,7 +99,7 @@ void fbt_init (ia32_opcode_t *opcode_table)
     * at compile time
     */
     if (opcode_table != NULL) {
-        memcpy(opcode_table_onebyte, opcode_table, 0x100*sizeof(ia32_opcode_t));
+        fbt_memcpy(opcode_table_onebyte, opcode_table, 0x100*sizeof(ia32_opcode_t));
     }
 
     /*
@@ -117,8 +117,7 @@ void fbt_init (ia32_opcode_t *opcode_table)
 #else
     if (pthread_key_create(&tld_key, NULL) != 0) {
 #endif
-        perror("Error creating thread local\n");
-        exit(1);
+        fbt_suicide_str("Error creating thread local\n");
     }
     } else { PRINT_DEBUG("TLD key already exists\n"); }
 }
@@ -141,7 +140,6 @@ void fbt_exit()
 void fbt_start_transaction (void (*commit_function)())
 {
     PRINT_DEBUG_FUNCTION_START("fbt_start_transaction(commit_function = %p)", (void*)commit_function);
-    //printf("FBT Starting transaction\n");
 
     /* get thread local data */
     thread_local_data_t *tld = get_tld();
@@ -267,7 +265,7 @@ void* fbt_get_thread_specific_app_data ()
 
 void fbt_commit_transaction ()
 {
-    printf("WARNING: Guest code managed to break out of secuBT sandbox!\n"
+    llprintf("WARNING: Guest code managed to break out of secuBT sandbox!\n"
                 "If you can read this message, this means that untranslated "
                 "code was executed between fbt_start_transaction() and "
                 "fbt_commit_transaction().\n");
@@ -277,3 +275,4 @@ void fbt_commit_transaction ()
 }
 
 
+#pragma GCC visibility pop

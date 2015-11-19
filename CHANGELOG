@@ -1,3 +1,14 @@
+fastBT 0.2.1 - 2010-03-25
+- Fixed a bug in the opcode tables (added correct src operands for movs* and cmps*)
+- Fixup of includes (removed lots of <> includes and some "" includes)
+- Bugfixing of disassembler and low level output
+- Removed dependencies on libc printf, added buffering for faster output
+- Extended debugging information and output available (for binary analysis)
+- Reimplementation of lots of system calls and library functions in libc.c and libc.h
+  * System calls are possible via int 80 and sysenter
+- Removed dependencies from the libc (str functions, sysconf, memcpy)
+- Reimplementation of some system calls to reduce libc dependencies (mmap, munmap)
+
 fastBT 0.2.0 - 2010-03-10
 - Removal of the bastard disassembler
 - Change of the layout of the translation table (added more auxiliary information)

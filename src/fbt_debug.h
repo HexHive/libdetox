@@ -39,116 +39,73 @@
  * MA  02110-1301, USA.
  */
 
-/**
- * The file names for the output
- */
-#define DEBUG_FILE_NAME					"debug.txt"
-#define CODE_DUMP_FILE_NAME				"code_dump.txt"
-#define JMP_TABLE_DUMP_FILE_NAME		"jmpTable_dump.txt"
-
-
-#include "fbt_debug_impl.h"
+#include "fbt_datatypes.h"
 #include "fbt_llio.h"
 
+#ifdef DEBUG
+
+#include <assert.h>
+
+/* use debug */
+void debug_start();
+void debug_end();
+void debug_print_function_start(char *str, ...);
+void debug_print_function_end(char *str, ...);
+void debug_print_n(int N, char *str, ...);
+
+#define DEBUG_START debug_start()
+#define DEBUG_END   debug_end()
+#define PRINT_DEBUG(...) debug_print_n(1, __VA_ARGS__)
+#define PRINT_DEBUG_N(N, ...) debug_print_n(N, __VA_ARGS__)
+#define PRINT_DEBUG_FUNCTION_START(...) debug_print_function_start(__VA_ARGS__)
+#define PRINT_DEBUG_FUNCTION_END(...) debug_print_function_end(__VA_ARGS__)
+#else
+/* no debug */
+#define assert(...)
+#define DEBUG_START
+#define DEBUG_END
+#define PRINT_DEBUG(...)
+#define PRINT_DEBUG_N(N, ...)
+#define PRINT_DEBUG_FUNCTION_START(...)
+#define PRINT_DEBUG_FUNCTION_END(...)
+#endif
+
+/* todo remove */
 char* printnbytes(unsigned char *addr, unsigned int n);
 
-/**
- * If there is any debug output enabled then ERROR is defined.
- * If not there will never be any debug output...
- */
-#ifdef ERROR
-	#define DEBUG_START							DEBUG_START_IMPL
-	#define DEBUG_END							DEBUG_END_IMPL
-#else
-	#define DEBUG_START
-	#define DEBUG_END
-#endif
-
-
-
-/**
- * The definition of the functions which should be used in the application
- * The implementation and the nasty stuff is in debug_impl.h
- */
-#ifdef ERROR
-	#define PRINT_ERROR(...)		PRINT_N_IMPL(ERROR_TYPE, 1, __VA_ARGS__)
-	#define PRINT_ERROR_N(N, ...)		PRINT_N_IMPL(ERROR_TYPE, N, __VA_ARGS__)
-	#define PRINT_ERROR_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(ERROR_TYPE, __VA_ARGS__)
-	#define PRINT_ERROR_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(ERROR_TYPE, __VA_ARGS__)
-#else
-	#define PRINT_ERROR(...)
-	#define PRINT_ERROR_N(N, ...)
-	#define PRINT_ERROR_FUNCTION_START(...)
-	#define PRINT_ERROR_FUNCTION_END(...)
-#endif
-
-#ifdef WARNING
-	#define PRINT_WARNING(...)		PRINT_N_IMPL(WARNING_TYPE, 1, __VA_ARGS__)
-	#define PRINT_WARNING_N(N, ...)		PRINT_N_IMPL(WARNING_TYPE, N, __VA_ARGS__)
-	#define PRINT_WARNING_FUNCTION_START(...) PRINT_FUNCTION_START_IMPL(WARNING_TYPE, __VA_ARGS__)
-	#define PRINT_WARNING_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(WARNING_TYPE, __VA_ARGS__)
-#else
-	#define PRINT_WARNING(...)
-	#define PRINT_WARNING_N(N, ...)
-	#define PRINT_WARNING_FUNCTION_START(...)
-	#define PRINT_WARNING_FUNCTION_END(...)
-#endif
-
-#ifdef INFO
-	#define PRINT_INFO(...)			PRINT_N_IMPL(INFO_TYPE, 1, __VA_ARGS__)
-	#define PRINT_INFO_N(N, ...)		PRINT_N_IMPL(INFO_TYPE, N, __VA_ARGS__)
-	#define PRINT_INFO_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(INFO_TYPE, __VA_ARGS__)
-	#define PRINT_INFO_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(INFO_TYPE, __VA_ARGS__)
-#else
-	#define PRINT_INFO(...)
-	#define PRINT_INFO_N(N, ...)
-	#define PRINT_INFO_FUNCTION_START(...)
-	#define PRINT_INFO_FUNCTION_END(...)
-#endif
-
-#ifdef DEBUG
-	#define PRINT_DEBUG(...)		PRINT_N_IMPL(DEBUG_TYPE, 1, __VA_ARGS__)
-	#define PRINT_DEBUG_N(N, ...)		PRINT_N_IMPL(DEBUG_TYPE, N, __VA_ARGS__)
-	#define PRINT_DEBUG_FUNCTION_START(...)	PRINT_FUNCTION_START_IMPL(DEBUG_TYPE, __VA_ARGS__)
-	#define PRINT_DEBUG_FUNCTION_END(...)	PRINT_FUNCTION_END_IMPL(DEBUG_TYPE, __VA_ARGS__)
-#else
-	#define PRINT_DEBUG(...)
-	#define PRINT_DEBUG_N(N, ...)
-	#define PRINT_DEBUG_FUNCTION_START(...)
-	#define PRINT_DEBUG_FUNCTION_END(...)
-#endif
-
-#ifdef INFO_OUTPUT
-    #define INFO_PRINTF(...)            printf(__VA_ARGS__)
-    #define INFO_LLPRINT(str)           llprintf(str)
-    #define INFO_LLPRINTF(...)   fllprintf(STDERR_FILENO, __VA_ARGS__)
-#else
-    #define INFO_PRINTF(...)
-    #define INFO_LLPRINT(str)
-    #define INFO_LLPRINTF(...)
-#endif
-
-#ifdef INFO_OUTPUT_VERBOSE
-    #define INFO_LLPRINTF_VERBOSE(...)   fllprintf(STDERR_FILENO, __VA_ARGS__)
-#else
-    #define INFO_LLPRINTF_VERBOSE(...)
-#endif
-    
-
 #ifdef DUMP_GENERATED_CODE
-	#define DUMP_START			DUMP_START_IMPL
-	#define DUMP_END			DUMP_END_IMPL
-	#define DUMP_CODE(ts, instr_len, transl_len)   	DUMP_CODE_IMPL(ts, instr_len, transl_len)
-	#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)			DUMP_JMP_TABLE_ENTRY_IMPL(org_addr, transl_addr)
+/* dump generated code */
+void debug_dump_start();
+void debug_dump_end();
+void debug_dump_code(struct translate_struct *ts, int instr_len, int transl_len);
+void debug_dump_jmptable(char *orig_addr, char *transl_addr);
+#define DUMP_START debug_dump_start()
+#define DUMP_END debug_dump_end()
+#define DUMP_CODE(ts, instr_len, transl_len) debug_dump_code(ts, instr_len, transl_len)
+#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr) debug_dump_jmptable(org_addr, transl_addr)
 #else
-	#define DUMP_START
-	#define DUMP_END
-	#define DUMP_CODE(ts, instr_len, transl_len)
-	#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)
+/* do not dump generated code */
+#define DUMP_START
+#define DUMP_END
+#define DUMP_CODE(ts, instr_len, transl_len)
+#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)
 #endif
 
 #ifdef PBREAKGDB
-	#define BREAK_ON_TRANSL(org_addr, transl_addr) BREAK_ON_TRANSL_IMPL(org_addr, transl_addr)
+#define BREAK_ON_TRANSL(org_addr, transl_addr)		\
+do {							\
+    if(break_on_transl_addr == (org_addr))		\
+	break_on_transl(org_addr, transl_addr);		\
+ } while (0)
+/*
+ * Useful in gdb to break on translation of a certain address:
+ * break break_on_transl
+ * p pbreak(address)
+ */
+extern void *break_on_transl_addr;
+extern void pbreak(void *break_addr);
+extern void break_on_transl(void *org_addr, void *transl_addr);
 #else
-	#define BREAK_ON_TRANSL(org_addr, addr)
+
+#define BREAK_ON_TRANSL(org_addr, addr)
 #endif

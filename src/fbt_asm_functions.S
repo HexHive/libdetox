@@ -29,7 +29,8 @@
 #include "fbt_private_datatypes.h"
 #include "fbt_mem_protection.h"
 #include "fbt_asm_offsets.h"
-
+//#include "fbt_llio.h"
+	
 #ifdef SECU_MPROTECT_IDS
 #  define MPROTECT_UNLOCK_SAFE(tld) \
 	pushl	%eax; \
@@ -160,9 +161,10 @@ PREDICTMISS:
 	.global	end_transaction_clean
 	.type	end_transaction_clean, @function
 
+#if 0
 	.global	print_eip
 	.type	print_eip, @function
-
+#endif
 	.global ind_jump_signal
 	.type	ind_jump_signal, @function
 
@@ -1698,7 +1700,7 @@ end_transaction:
 	pushl	%edx
 
 #	pushl	$SUCCSTR	# print success message
-#	call	printf
+#	call	llprintf
 #	addl	$4, %esp	# clear stack (printf argument)
 
 	popl	%edx	# pop caller-save and eflags registers
@@ -1737,7 +1739,7 @@ end_transaction_clean:
 	pushl	%edx
 
 #	pushl	$SUCCSTR	# print success message
-#	call	printf
+#	call	llprintf
 #	addl	$4, %esp	# clear stack (printf argument)
 
 	# clean allocated non-persistent memory
@@ -1758,7 +1760,7 @@ end_transaction_clean:
 	ret
 	.size	end_transaction_clean, .-end_transaction_clean
 
-
+#if 0
 
 # Prints some debug message
 # Does not change stack!
@@ -1826,7 +1828,8 @@ print_eip2:
 	leave
 	ret
 	.size	print_eip2, .-print_eip2
-
+#endif
+	
 # This function fixes an indirect jump
 # checks if the target is already translated and fixes
 # the return instruction pointer
@@ -2099,7 +2102,7 @@ fbt_do_nothing:
 # and
 # .section .fini
 # to let LD_PRELOAD magic happen
-
+#pragma GCC visibility push(default)
 .section .init
 	pushf
 	pusha
@@ -2128,6 +2131,6 @@ fbt_do_nothing:
 #endif /* SLEEP_ON_FINI */
 	popa
 	popf
-
+#pragma GCC visibility pop
 #endif // hijack control
 #endif // ld preload fun

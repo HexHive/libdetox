@@ -3,8 +3,6 @@
 
 #ifndef _ASSEMBLER_
 
-#include <inttypes.h>
-
 #include "fbt_rbtree.h"
 #include "fbt_private_datatypes.h"
 
@@ -25,7 +23,6 @@ struct mem_info {
 };
 
 void fbt_memprotect_init();
-void fbt_memprotect_rescan();
 void fbt_memprotect_add_valid(void *addr_begin, int len);
 
 /* check if an address is in executable memory */

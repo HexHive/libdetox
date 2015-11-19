@@ -21,17 +21,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
-#include <stdint.h>
-#include <pthread.h>
-#include <assert.h>
-
-#include "fbt_private_datatypes.h"
-#include "fbt_translate.h"
-#include "fbt_datatypes.h"
+//#include "fbt_private_datatypes.h"
 #include "fbt_actions.h"
 #include "fbt_disassemble.h"
 #include "fbt_opcode_tables.h"
-
+#include "fbt_libc.h"
 #include "fbt_debug.h"
 
 /* bit test masks for ModR/M byte */
@@ -99,7 +93,7 @@ void disasm_instr(translate_struct_t *ts)
 	    /* for performance reasons we _now_ only support 1 out of ADDR or OP SZ OVR prefix. more can be added. */
 	    if (!(ts->num_prefixes<=1 || ((prefix!=PREFIX_ADDR_SZ_OVR) && (prefix!=PREFIX_OP_SZ_OVR)))) {
 		/* we only support one prefix atm */
-		_exit(139);
+		fbt_suicide_str("Only one prefix supported (disasm_instr: fbt_disassemble.c)\n");
 	    }
 	    prefix = *cur;
 	    /* go back to the first table if it is not a special escape prefix! */
@@ -187,7 +181,7 @@ void disasm_instr(translate_struct_t *ts)
 		if ((MASK_ARG & opcode->opcode_flags)==ARG_D) {
 		    cur += 8;
 		} else {
-		    printf("unhandled rexw prefix!\n");
+		    llprint("unhandled rexw prefix!\n");
 		}
 	    } else {
 #endif
@@ -255,7 +249,7 @@ unsigned int operandSize(unsigned int operandFlags, unsigned char prefix)
 	/* 32bit (16b addr mode), 48bit (32b addr mode) or 80b (64b addr mode) ptr */
     case OPT_si:
 	/* doubleword register - unhandled */
-	_exit(139);
+	fbt_suicide_str("Doubleword register, unhandled (operandSize: fbt_disassemble.c)\n");
 	return -1;
     }
     return 0;

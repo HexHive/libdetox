@@ -2,13 +2,12 @@
     #define SMALLOC_PAGES 4
 #endif
 
-#include <assert.h>
-#include <unistd.h>
-#include "fbt_mem_alloc.h"
 #include "fbt_private_datatypes.h"
+#include "fbt_mem_alloc.h"
 #include "fbt_debug.h"
 #include "fbt_rbtree.h"
 #include "fbt_mem_protection.h"
+#include "fbt_libc.h"
 
 /**
  * allocate small amount of memory.
@@ -30,6 +29,16 @@ void *fbt_smalloc(struct thread_local_data *tld, int bytes)
     struct mem_alloc_data *mem_alloc = &(tld->mem_alloc);
     void *retval = 0;
 
+    /* TODO */
+/*     static int c8=0, c36=0, max=0, allocs=0, others=0, tot=0; */
+/*     if (bytes==8) c8++; else */
+/* 	if (bytes==36) c36++; else others++; */
+/*     if (bytes>max) max = bytes; */
+/*     allocs++; */
+/*     tot+=bytes; */
+/*     if (allocs%100==0) printf("8: %d 36: %d others: %d max: %d total: %d\n", c8, c36, others, max, tot); */
+    
+    
     bytes = (bytes+3)&(~3); /* align to 4 bytes */
     
     if (bytes <= mem_alloc->free_bytes) {
@@ -39,27 +48,22 @@ void *fbt_smalloc(struct thread_local_data *tld, int bytes)
         mem_alloc->free_bytes -= bytes;
     } else {
         // we actually need to allocate more memory
-        int pagesize = sysconf(_SC_PAGESIZE);
         int numpages = SMALLOC_PAGES;
-        int alloc_size = SMALLOC_PAGES * pagesize;
+        int alloc_size = SMALLOC_PAGES * PAGESIZE;
 
         if ((bytes + sizeof(struct alloc_chunk)) > alloc_size) {
             /*
              * our preferred allocation size is not sufficient
              * --> calculate a suitable allocation size
              */
-            numpages = (bytes + sizeof(struct alloc_chunk)) / pagesize + 1;
-            alloc_size = numpages * pagesize;
+            numpages = (bytes + sizeof(struct alloc_chunk)) / PAGESIZE + 1;
+            alloc_size = numpages * PAGESIZE;
         }
         // allocate memory
-        tld->next_map -= numpages * pagesize;
-        void *mem = mmap(tld->next_map,
-                          numpages * pagesize,
-                          PROT_READ|PROT_WRITE,
-                          MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+        void *mem;
+	fbt_mmap(NULL, alloc_size, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0, mem);
         if (MAP_FAILED == mem) {
-            llprint("BT failed to allocate memory\n");
-            perror("failure in fbt_smalloc()");
+            fbt_suicide_str("BT failed to allocate memory (smalloc: fbt_mem_alloc.c)\n");
         }
 
         struct alloc_chunk *chunk = 0;
@@ -128,27 +132,23 @@ void *fbt_smalloc_pers(struct thread_local_data *tld, int bytes)
         mem_alloc->free_pers_bytes -= bytes;
     } else {
         // we actually need to allocate more memory
-        int pagesize = sysconf(_SC_PAGESIZE);
         int numpages = SMALLOC_PAGES;
-        int alloc_size = SMALLOC_PAGES * pagesize;
+        int alloc_size = SMALLOC_PAGES * PAGESIZE;
 
         if (bytes > alloc_size) {
             /*
              * our preferred allocation size is not sufficient
              * --> calculate a suitable allocation size
              */
-            numpages = (bytes / pagesize) + 1;
-            alloc_size = numpages * pagesize;
+            numpages = (bytes / PAGESIZE) + 1;
+            alloc_size = numpages * PAGESIZE;
         }
         // allocate memory
-        tld->next_map -= alloc_size;
-        retval = mmap(tld->next_map,
-                          alloc_size,
-                          PROT_READ|PROT_WRITE,
-                          MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+	fbt_mmap(NULL, alloc_size,
+		 PROT_READ|PROT_WRITE,
+		 MAP_PRIVATE|MAP_ANONYMOUS, -1, 0, retval);
         if (MAP_FAILED == retval) {
-            llprint("BT failed to allocate memory\n");
-            perror("failure in fbt_smalloc_pers()");
+            fbt_suicide_str("BT failed to allocate memory (smalloc: fbt_mem_alloc.c)\n");
         }
 
         // insert it into the tree of internal data structures
@@ -179,30 +179,21 @@ void *fbt_smalloc_pers(struct thread_local_data *tld, int bytes)
 void *fbt_lalloc(struct thread_local_data *tld, int pages)
 {
     assert(pages > 0);
-    int alloc_size = pages * sysconf(_SC_PAGESIZE);
+    int alloc_size = pages * PAGESIZE;
 
     struct alloc_chunk *chunk = fbt_smalloc(tld, sizeof(struct alloc_chunk));
 
-//     void *retval = mmap((void*) rand_r(&(tld->rand_state)),
-//                          pages * sysconf(_SC_PAGESIZE),
-//                          PROT_READ|PROT_WRITE,
-//                          MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
-    tld->next_map -= alloc_size;
-    void *retval = mmap(tld->next_map,
-                        alloc_size,
-                        PROT_READ|PROT_WRITE,
-                        MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    void *retval;
+    fbt_mmap(NULL,
+	     alloc_size,
+	     PROT_READ|PROT_WRITE,
+	     MAP_PRIVATE|MAP_ANONYMOUS, -1, 0, retval);
     if (MAP_FAILED == retval) {
-            llprint("BT failed to allocate memory\n");
-            perror("failure in fbt_lalloc()");
-        }
-
-    if ((void*) -1 == retval) {
         /*
          * something went wrong, and we certainly don't want to put -1 into
          * the list of allocated memory, and later call munmap on -1
          */
-        return retval;
+	fbt_suicide_str("BT failed to allocate memory (lalloc: fbt_mem_alloc.c)\n");
     }
     chunk->node.addr_begin = retval;
     chunk->node.addr_end = retval + alloc_size;
@@ -215,7 +206,6 @@ void *fbt_lalloc(struct thread_local_data *tld, int pages)
     // insert alloc_chunk structure into red-black tree
     tld->mem_alloc.chunks_tree = rb_insert(tld->mem_alloc.chunks_tree,
                                             (struct rb_node*) chunk);
-//     INFO_LLPRINTF("lalloc allocated memory at %p\n", retval);
     return retval;
 }
 
@@ -242,8 +232,9 @@ void fbt_free_all(struct thread_local_data *tld)
         void *addr = mem_alloc->chunks->node.addr_begin;
         long length = (long) mem_alloc->chunks->node.addr_end - (long) addr;
         mem_alloc->chunks = mem_alloc->chunks->next;
-        munmap(addr, length);
+	int ret;
+        fbt_munmap(addr, length, ret);
         kbytes_freed += length >> 10;
     }
-    INFO_LLPRINTF("KiB freed on thread termination: %d\n", kbytes_freed);
+    llprintf("KiB freed on thread termination: %d\n", kbytes_freed);
 }

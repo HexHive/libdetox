@@ -4012,10 +4012,10 @@ struct ia32_opcode opcode_table_onebyte[] = {
 	{ WRITE, READ | ADDRM_O | OPT_v, ARG_NONE, 48, 0, 0, NO_MODRM, {.handler = action_copy}, "mov" },	/* 0xA1 MOV (imm32), EAX */
 	{ WRITE | ADDRM_O | OPT_v, READ, ARG_NONE, 0, 16, 0, NO_MODRM, {.handler = action_copy}, "mov" },	/* 0xA2 MOV AL, (imm32) */
 	{ WRITE | ADDRM_O | OPT_v, READ, ARG_NONE, 0, 48, 0, NO_MODRM, {.handler = action_copy}, "mov" },	/* 0xA3 MOV EAX, (imm32) */
-	{ ARG_NONE, ARG_NONE, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "movsb" },	/* 0xA4 MOVSB */
-	{ ARG_NONE, ARG_NONE, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "movsd" },	/* 0xA5 MOVSD */
-	{ ARG_NONE, ARG_NONE, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "cmpsb" },	/* 0xA6 CMPSB */
-	{ ARG_NONE, ARG_NONE, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "cmpsd" },	/* 0xA7 CMPSD */
+	{ WRITE | ADDRM_X | OPT_b, READ | ADDRM_Y | OPT_b, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "movsb" },	/* 0xA4 MOVSB ,  */
+	{ WRITE | ADDRM_X | OPT_v, READ | ADDRM_Y | OPT_v, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "movsd" },	/* 0xA5 MOVSD ,  */
+	{ WRITE | ADDRM_X | OPT_b, READ | ADDRM_Y | OPT_b, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "cmpsb" },	/* 0xA6 CMPSB ,  */
+	{ WRITE | ADDRM_X | OPT_v, READ | ADDRM_Y | OPT_v, ARG_NONE, 0, 0, 0, NO_MODRM, {.handler = action_copy}, "cmpsd" },	/* 0xA7 CMPSD ,  */
 
 	{ READ, READ | ADDRM_I | OPT_b, ARG_NONE, 16, 0, 0, NO_MODRM, {.handler = action_copy}, "test" },	/* 0xA8 TEST imm8, AL */
 	{ READ, READ | ADDRM_I | OPT_v, ARG_NONE, 48, 0, 0, NO_MODRM, {.handler = action_copy}, "test" },	/* 0xA9 TEST imm32, EAX */

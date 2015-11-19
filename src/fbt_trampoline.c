@@ -26,23 +26,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
-#include <stdlib.h>
-#include <stdint.h>
-#include <pthread.h>
-#include <assert.h>
-#include <unistd.h>
-#include <sys/mman.h>
-#include <string.h>
-
 #include "fbt_private_datatypes.h"
 #include "fbt_trampoline.h"
 #include "fbt_asm_functions.h"
 #include "fbt_asm_macros.h"
-#include "fbt_translate.h"
 #include "fbt_debug.h"
 #include "fbt_mem_alloc.h"
 #include "fbt_mem_protection.h"
 #include "fbt_statistic.h"
+#include "fbt_libc.h"
 
 /**
  * Allocate a series of trampoline slots
@@ -53,11 +45,11 @@ void trampoline_allocate(thread_local_data_t *tld)
     
     /* allocate memory for trampoline list (page aligned, so we can make it executable) */
     tld->trampoline = fbt_lalloc(tld, TRAMPOLINE_PAGES);
-    int num_trampolines = TRAMPOLINE_PAGES * sysconf(_SC_PAGESIZE) / sizeof(trampoline_entry_t);
+    int num_trampolines = TRAMPOLINE_PAGES * PAGESIZE / sizeof(trampoline_entry_t);
     
 #if defined(DEBUG) || !defined(NDEBUG)
     /* fill with illegal HLT instructions */
-    memset(tld->trampoline, 0xF4, TRAMPOLINE_PAGES * sysconf(_SC_PAGESIZE));
+    fbt_memset(tld->trampoline, 0xf4, TRAMPOLINE_PAGES * PAGESIZE);
 #endif
     
     /* make executable */
@@ -211,7 +203,6 @@ void trampoline_free(thread_local_data_t *tld, trampoline_entry_t *slot)
 void create_jumpback_trampoline(thread_local_data_t *tld)
 {
     /* allocate memory for the trampoline, possibly later more structures */
-    int pagesize = sysconf(_SC_PAGESIZE);
     tld->ret_jumpback_tramp = fbt_lalloc(tld, 1);
     fbt_ids_setexec(tld, tld->ret_jumpback_tramp);
 
@@ -232,9 +223,10 @@ void create_jumpback_trampoline(thread_local_data_t *tld)
      * _readonly_ if write protection of internal data structures is not enabled,
      * because we don't need to be able to write here anymore.
      */
-    if (mprotect(tld->ret_jumpback_tramp, pagesize, (PROT_READ | PROT_EXEC)) != 0) {
-        perror("Could not set jump-back trampoline memory executable");
-        exit(1);
+    int ret;
+    fbt_mprotect(tld->ret_jumpback_tramp, PAGESIZE, (PROT_READ | PROT_EXEC), ret);
+    if (ret != 0) {
+        fbt_suicide_str("Could not set jump-back trampoline memory executable\n");
     }
 
 }
@@ -458,7 +450,7 @@ void create_ret_cache(thread_local_data_t *tld)
 #endif
 
     /* generate the cache */
-    assert(RET_CACHE_NR_ENTRIES*sizeof(*void)<=sysconf(_SC_PAGESIZE));
+    assert(RET_CACHE_NR_ENTRIES*sizeof(void*)<=PAGESIZE);
     unsigned int *retcache = fbt_lalloc(tld, 1);
     tld->retcache = retcache;
     

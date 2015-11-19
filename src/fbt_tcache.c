@@ -24,15 +24,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <sys/mman.h>
-#include <sys/time.h>
-#include <time.h>
-#include <errno.h>
+//#include <stdlib.h> /* free, malloc */
 
 #include "fbt_private_datatypes.h"
 #include "fbt_tcache.h"
@@ -42,13 +34,14 @@
 #include "fbt_mem_alloc.h"
 #include "fbt_mem_protection.h"
 #include "fbt_trampoline.h"
+#include "fbt_libc.h"
 
 /**
  * allocates one chunk of memory for the translation cache.
  * Allocates one chunk of memory of size ALLOC_SIZE and sets the transl_instr pointer to the beginning of the chunk.
  * @param tld state of current translator thread
  */
-inline void allocate_tcache(thread_local_data_t *tld)
+static inline void allocate_tcache(thread_local_data_t *tld)
 {
     PRINT_DEBUG_FUNCTION_START("tcache_alloc(tld=%p)", tld);
     
@@ -57,16 +50,13 @@ inline void allocate_tcache(thread_local_data_t *tld)
     tld->tcache_end = tld->ts.transl_instr + ALLOC_SIZE - CCF_GUARD;
     
     if (tld->ts.transl_instr == NULL) {
-	perror("tcache alloc failed");
-		exit(1);
+	fbt_suicide_str("tcache alloc failed (allocate_tcache: fbt_tcache.c)\n");
     }
-    //     INFO_LLPRINTF("allocated tcache at %p\n", tld->ts.transl_instr);
-    
-    PRINT_INFO("allocated tcache: %p -> %p", tld->ts.transl_instr, tld->tcache_end);
-    
+    PRINT_DEBUG("allocated tcache: %p -> %p", tld->ts.transl_instr, tld->tcache_end); 
+   
     /* fill tcache with illegal HLT instructions */
 #if defined(DEBUG) || !defined(NDEBUG)
-    memset(tld->ts.transl_instr, 0xF4, ALLOC_SIZE);
+    fbt_memset(tld->ts.transl_instr, 0xf4, ALLOC_SIZE);
 #endif
     /* lets make our code-buffer executable */
     // 	if (mprotect(tld->ts.transl_instr, ALLOC_SIZE, (PROT_READ | PROT_WRITE | PROT_EXEC))!=0) {
@@ -93,8 +83,7 @@ thread_local_data_t* tcache_init()
     
     /* allocate memory for thread local data struct */
     if ((tld = (thread_local_data_t*) malloc(sizeof(thread_local_data_t))) == NULL) {
-	perror("malloc: no free memory (tcache_init)!");
-	exit(1);
+	fbt_suicide_str("malloc: no free memory (tcache_init)!\n");
     }
     
     tld->trampoline = NULL;
@@ -115,28 +104,22 @@ thread_local_data_t* tcache_init()
     tld->jumptable_list = NULL;
 #endif
 
-    /* initialize state for rand_r */
-    struct timeval tv;
-    if (-1 == gettimeofday(&tv, NULL)) {
-        perror("Could not use time as rand seed");
-    }
-    tld->rand_state = (unsigned int) tv.tv_usec;
-    tld->next_map = (void*) (rand_r(&(tld->rand_state)) & (~(sysconf(_SC_PAGESIZE) - 1)));
-
     /* allocate memory for hashtable */
-    tld->hashtable = fbt_lalloc(tld, HASHTABLE_SIZE / sysconf(_SC_PAGESIZE) + 1); /* +4 for 0x1 guard for tcache_find_fast asm function */
+    tld->hashtable = fbt_lalloc(tld, HASHTABLE_SIZE / PAGESIZE + 1); /* +4 for 0x1 guard for tcache_find_fast asm function */
 
     /* initialize hashtable as empty */
-    PRINT_INFO("allocated hashtable: %p -> %p", tld->hashtable, tld->hashtable+HASHTABLE_SIZE);
-    memset(tld->hashtable, 0x0, HASHTABLE_SIZE+4); /* +4 for NULL guard for tcache_find_fast asm function */
+    PRINT_DEBUG("allocated hashtable: %p -> %p", tld->hashtable, tld->hashtable+HASHTABLE_SIZE);
+    /* lalloc uses mmap and map_anonymous, so the table is initialized with 0x0
+     * therefore we don't need to memset the whole table
+     * fbt_memset(tld->hashtable, 0x0, HASHTABLE_SIZE+4); +4 for NULL guard for tcache_find_fast asm function 
+     */
     *(int*)((int)(tld->hashtable)+HASHTABLE_SIZE) = 0x1; /* guard for find_fast-wraparound */
     
     /* allocate first chunk of memory */
     allocate_tcache(tld);
     
 #ifdef FBT_RET_STACK
-    tld->translated_call_stack = fbt_smalloc(tld,
-					     (FBT_RET_STACK_SIZE + 1) * sizeof(cache_free_list_t));
+    tld->translated_call_stack = fbt_smalloc(tld, (FBT_RET_STACK_SIZE + 1) * sizeof(cache_free_list_t));
     tld->translated_call_stack_end = tld->translated_call_stack + FBT_RET_STACK_SIZE;
     tld->translated_call_stack_tos = tld->translated_call_stack_end;
     /* empty stack contains guard element */
@@ -280,8 +263,7 @@ void tcache_add_entry(thread_local_data_t *tld, void *tu_address, void *ccf_addr
 		entry = tld->hashtable + offset;
 		count++;
 		if (count>=HASHTABLE_MAXENTRIES/10) {
-		  printf("ERROR: no more space in hashtable (fbt_tcache.c)\n");
-		  exit(1);
+		  fbt_suicide_str("ERROR: no more space in hashtable (fbt_tcache.c)\n");
 		}
 	}
 

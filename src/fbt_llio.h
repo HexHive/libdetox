@@ -1,37 +1,32 @@
 #ifndef FBT_LLIO_H
 #define FBT_LLIO_H
 
+#include <stdarg.h>
+#define STDOUT_FILENO 1
+
 /* low-level I/O and memory allocation functions */
 
-#include <unistd.h>     /* gives us the STDOUT_FILENO constant */
-#include <sys/mman.h>   /* for mmap and munmap */
-#include <stdarg.h>
-
 /* print a string to the file descriptor fd */
-int fllprint(int fd, const char* str);
+int fllwrite(int fd, const char* str);
 
 /** macro to use fllprint with stdout as file descriptor */
-#define llprint(str) fllprint(STDOUT_FILENO, str)
+#define llprint(str) fllprintf(STDOUT_FILENO, str)
 
 
-/* write a formatted string to the file descriptor fd */
-int fllprintf(int fd, const char* format, ...);
+/* write a formatted string to the file descriptor fd (might use a buffer) */
+int fllprintf(int fd, const char *format, ...);
+int fllprintfva(int fd, const char* format, va_list ap);
+/* flush printf buffers */
+void ffflush();
 
 /** macro to use fllprintf with stdout as file descriptor */
 #define llprintf(...) fllprintf(STDOUT_FILENO, __VA_ARGS__)
 
-/* write a decimal number to the string dest */
-int snllprintd(char *dest, int size, int d);
-
-/* write a pointer as hex number to the string dest */
-int snllprintp(char *dest, int size, void *p);
-
-
 /** macro to allocate one page of memory */
-#define allocpage() mmap(NULL, sysconf(_SC_PAGESIZE), PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)
+//#define allocpage() mmap(NULL, PAGESIZE, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)
 
 /** macro to free a page of memory that was allocated with allocpage() */
-#define freepage(addr) munmap(addr, sysconf(_SC_PAGESIZE))
+//#define freepage(addr) munmap(addr, PAGESIZE)
 
 
 

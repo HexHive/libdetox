@@ -20,15 +20,6 @@
  * MA  02110-1301, USA.
  */
 
-#include <signal.h>
-#ifndef __USE_GNU         // Deal with current ucontext ugliness.  The current
-#define __USE_GNU         // mess of asm/ucontext.h & sys/ucontext.h and their
-#include <sys/ucontext.h> // mutual exclusion on more recent versions of gcc
-#undef __USE_GNU          // dictates this ugly hack.
-#else
-#include <sys/ucontext.h>
-#endif
-
 typedef void (*sighandler_t)(int);
 sighandler_t fbt_signal(int signum, sighandler_t handler);
 int fbt_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);

@@ -6,13 +6,9 @@
  * The rb_clear() function assumes that the memory for the nodes has been
  * allocated using malloc() and calls free() to release it.
  */
-
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
 #include "fbt_rbtree.h"
 #include "fbt_debug.h"
+#include "fbt_libc.h"
 
 #ifndef NULL
     #define NULL 0
@@ -156,8 +152,8 @@ static struct rb_node *rb_insert_recursive(struct rb_node *root,
         }
     } else {
         /* we should not be here! do not insert nodes with the same key_begin */
-        INFO_LLPRINTF_VERBOSE("Warning: tried to insert two nodes with the same"
-                    " addr_begin key into a red-black tree. Ignored.\n");
+        fbt_suicide_str("Warning: tried to insert two nodes with the same"
+                    " addr_begin key into a red-black tree. Ignored. (rb_insert_recursive: fbt_rbtree.c)\n");
     }
     return root;
 }

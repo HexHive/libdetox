@@ -26,11 +26,13 @@ export LIBRARY_PATH = $(CURRENT_DIR)/lib
 #export CFLAGS = -O2 -Wall -DNDEBUG -g
 
 # cflags for productive use
-export CFLAGS = -O3 -Wall -g -DNDEBUG
-# -DDUMP_GENERATED_CODE
+export CFLAGS = -O3 -Wall -g -DNDEBUG 
 
 # optimizations
 export CFLAGS += -Winline -finline-limit=30000 --param inline-unit-growth=512 --param large-function-growth=2048 -funit-at-a-time
+# use special linker option to hide all unneded symbols
+#-fvisibility=hidden
+
 
 # relro without global offset table protection 
 # (default on ubuntu 8.10 and other recent distributions)
@@ -67,9 +69,9 @@ export CFLAGS += -DFBT_IND_PREDICTION
 export CFLAGS += -DFBT_IND_JUMP_MULTIPLE
 
 # align all functions (that start with pusl %ebp) to 16b
-export CFLAGS += -DFBT_ALIGN_FUNCTIONS
+#export CFLAGS += -DFBT_ALIGN_FUNCTIONS
 # check for every instruction if it has been translated before
-export CFLAGS += -DFBT_CHECK_TRANSLATED
+#export CFLAGS += -DFBT_CHECK_TRANSLATED
 
 # include LDPRELOAD code (signal replacement and so on)
 export CFLAGS += -DLDPRELOAD
@@ -78,7 +80,7 @@ export CFLAGS += -DLDPRELOAD
 export CFLAGS += -DHIJACKCONTROL
 
 # should we make it possible to attach a debugger in case of a segfault?
-export CFLAGS += -DSLEEP_ON_FAIL
+#export CFLAGS += -DSLEEP_ON_FAIL
 
 # should we force a pause on startup to make it possible to attach a debugger 
 # at the beginning?

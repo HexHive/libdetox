@@ -44,10 +44,4 @@ finalize_tu_t   action_int             (translate_struct_t *ts);
 finalize_tu_t   action_warn            (translate_struct_t *ts);
 finalize_tu_t   action_fail            (translate_struct_t *ts);
 
-/* standard action helpers */
-void prepare_action_call_indirect      (translate_struct_t *ts);
-void finish_action_call_indirect       (translate_struct_t *ts);
-void finish_action_jmp_indirect        (translate_struct_t *ts);
-void write_fast_jump_action_jmp_indirect        (translate_struct_t *ts);
-
 #endif /* FBT_ACTIONS_H */

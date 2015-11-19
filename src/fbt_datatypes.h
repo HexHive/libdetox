@@ -25,8 +25,6 @@
 #ifndef FBT_OPCODE_H
 #define FBT_OPCODE_H
 
-#include <stdint.h>
-
 /* REX bits */
 #define REXW 0x8
 
@@ -95,7 +93,7 @@
 \*******************************************************/
 /* operand not used by this instruction */
 #define		NONE				0x00000000
-#define		ARG_NONE				0x00000000
+#define		ARG_NONE			0x00000000
 
 /* operand masks */
 #define		OP_USE_MASK			0x0000000F		/* how is this operand used */

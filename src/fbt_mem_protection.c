@@ -1,19 +1,11 @@
 #define _GNU_SOURCE
 #include <link.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <inttypes.h>
+#include <stdlib.h> /* malloc free realloc */
 #include <elf.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 
 #include "fbt_mem_protection.h"
 #include "fbt_rbtree.h"
+#include "fbt_libc.h"
 #include "fbt_debug.h"
 
 #define ITERATE 5
@@ -76,19 +68,17 @@ void fbt_memprotect_init()
     if (0 == lib_list_capacity) {
         library_list = (struct lib_list_entry*) malloc(LIB_LIST_INITSIZE * sizeof(*library_list));
         if (NULL == library_list) {
-            perror("fbt_memprotect_init: could not allocate memory for library list");
-            exit(EXIT_FAILURE);
+            fbt_suicide_str("fbt_memprotect_init: could not allocate memory for library list (memprotect_init: fbt_mem_protection.c)\n");
         }
         lib_list_capacity = LIB_LIST_INITSIZE;
     }
 }
 
-void fbt_lib_list_resize()
+static void fbt_lib_list_resize()
 {
     library_list = (struct lib_list_entry*) realloc(library_list, 2 * lib_list_capacity * sizeof(*library_list));
     if (NULL == library_list) {
-        perror("fbt_lib_list_resize: could not reallocate memory for library list");
-        exit(EXIT_FAILURE);
+        fbt_suicide_str("fbt_lib_list_resize: could not reallocate memory for library list (lib_list_resize: fbt_mem_protection.c)\n");
     }
     lib_list_capacity *= 2;
 }
@@ -142,7 +132,7 @@ static fbt_sym *fbt_lookup_symbol(const char *name, void *hashtab, fbt_sym *symt
     for (hash1 &= ~1; ; sym++) {
         hash2 = *hashval++;
 
-        if ((hash1 == (hash2 & ~1)) && !strcmp(name, strtab + sym->st_name)) {
+        if ((hash1 == (hash2 & ~1)) && !fbt_strcmp(name, strtab + sym->st_name)) {
             return sym;
         }
 
@@ -179,14 +169,14 @@ static int fbt_check_sym_collision(fbt_sym *symtab, char *strtab, void *hashtab)
                 int j = 0;
                 int in_whitelist = 0;
                 for (j = 0; j < sizeof(fbt_sym_whitelist) / sizeof(char*); j++) {
-                    if (!strcmp(fbt_sym_whitelist[j],
+                    if (!fbt_strcmp(fbt_sym_whitelist[j],
                                 &fbt_dyn_strtab[sym.st_name])) {
                         in_whitelist = 1;
                         break;
                     }
                 }
                 if (!in_whitelist) {
-                    INFO_LLPRINTF("secuBT has detected a symbol collision! "
+                    INFO_PRINTF("secuBT has detected a symbol collision! "
                                 "Conflicting symbol is %s\n",
                               &fbt_dyn_strtab[sym.st_name]);
                     return 0;
@@ -198,7 +188,7 @@ static int fbt_check_sym_collision(fbt_sym *symtab, char *strtab, void *hashtab)
 }
 #endif
 
-void fbt_memprotect_rescan()
+static void fbt_memprotect_rescan()
 {
     /*
      * Loop over loaded shared objects to see if some additional ones
@@ -211,7 +201,7 @@ void fbt_memprotect_rescan()
         /* spin while waiting to acquire mutex */
         i++;
         if (0 == (i % 10000)) {
-            printf("waiting to acquire rescan lock: spinned %d times\n", i);
+            llprintf("waiting to acquire rescan lock: spinned %d times\n", i);
         }
     }
 
@@ -219,10 +209,10 @@ void fbt_memprotect_rescan()
     dl_iterate_phdr(&fbt_memprotect_callback, (void*) &objcount);
 
     for (i = 0; i < lib_list_size; i++) {
-        INFO_LLPRINTF_VERBOSE("%s from %p to %p\n",
-                       library_list[i].name,
-                       library_list[i].base_addr,
-                       library_list[i].base_addr + library_list[i].length);
+        PRINT_DEBUG("%s from %p to %p\n",
+		    library_list[i].name,
+		    library_list[i].base_addr,
+		    library_list[i].base_addr + library_list[i].length);
     }
 
     // release mutex
@@ -254,7 +244,7 @@ void fbt_memprotect_add_valid(void *addr_begin, int len)
  * @param size the size of the info structure
  * @param data is used to store the position in the list of libraries
  */
-int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
+static int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
 {
     int libnum = *((int*) data);
 
@@ -298,16 +288,16 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
 
         // add vdso to library table
         library_list[lib_list_size].base_addr = vdso_addr;
-        library_list[lib_list_size].length = sysconf(_SC_PAGESIZE);
+        library_list[lib_list_size].length = PAGESIZE;
         library_list[lib_list_size].name = (char *) malloc(5 * sizeof(char));
-        strcpy(library_list[lib_list_size].name, "vdso");
+        fbt_strcpy(library_list[lib_list_size].name, "vdso");
         lib_list_size++;
 
 
         // add vdso entry to sections tree
         struct mem_info *info = malloc(sizeof(*info));
         info->node.addr_begin = vdso_addr;
-        info->node.addr_end = vdso_addr + sysconf(_SC_PAGESIZE);
+        info->node.addr_end = vdso_addr + PAGESIZE;
         info->sec_name = library_list[lib_list_size - 1].name;
         info->lib_index = lib_list_size - 1;
         info->flags = INFO_RFLAG | INFO_XFLAG;
@@ -316,7 +306,7 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
         (*((int*)data))++;
         return 0;
     }
-    if (0 == strcmp(name, "")) {
+    if (0 == fbt_strcmp(name, "")) {
         (*((int*)data))++;
         return 0;
     }
@@ -324,8 +314,8 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
     // entry in library list
     library_list[lib_list_size].base_addr = (void*) info->dlpi_addr;
     library_list[lib_list_size].length = 0;
-    library_list[lib_list_size].name = malloc(strlen(name) + 1);
-    strcpy(library_list[lib_list_size].name, name);
+    library_list[lib_list_size].name = malloc(fbt_strnlen(name,0) + 1);
+    fbt_strcpy(library_list[lib_list_size].name, name);
     lib_list_size++;
 
     /*
@@ -334,25 +324,28 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
      * mapped to memory.
      */
     // open the file -> file descriptor
-    int fd = open(name, O_RDONLY);
+    int fd;
+    fbt_open(name, O_RDONLY, 0x0, fd);
     if (-1 == fd) {
-        perror("fbt_iterate_sections: could not open executable or library file");
+        fbt_suicide_str("fbt_iterate_sections: could not open executable or library file (memprotect_callback: fbt_mem_protection.c)\n");
         (*((int*)data))++;
         return -1;
     }
 
     // find out file size
-    struct stat filestat;
-    if (-1 == fstat(fd, &filestat)) {
-        perror("fbt_iterate_sections: fstat failure, cannot find out file size");
+    int filesize;
+    fbt_lseek(fd, 0, SEEK_END, filesize);
+    if (-1 == filesize) {
+        fbt_suicide_str("fbt_iterate_sections: fstat failure, cannot find out file size (memprotect_callback: fbt_mem_protection.c)\n");
         return -1;
     }
 
-    void *libmap = mmap(NULL, filestat.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+    void *libmap;
+    fbt_mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0, libmap);
     if ((void*) -1 == libmap) {
-        perror("fbt_iterate-sections: failed to map library to memory");
-        close(fd);
-        (*((int*)data))++;
+        fbt_suicide_str("fbt_iterate-sections: failed to map library to memory (memprotect_callback: fbt_mem_protection.c)\n");
+        //fbt_close(fd);
+        //(*((int*)data))++;
         return -1;
     }
 
@@ -364,7 +357,6 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
 
     if (0 != header->e_shnum) {
         Elf32_Shdr *section_header = (Elf32_Shdr*) (libmap + header->e_shoff);
-        //printf("\tsection header table: %p\n", (void*) section_header);
 
         int i = 0;
         for (i = 0; i < header->e_shnum; i++) {
@@ -384,7 +376,7 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
             // calculate start address of the executable
             if ((0 == libnum) && (0 == library_list[0].base_addr)) {
                 library_list[0].base_addr = (void*) ((long) (meminfo->node.addr_begin)
-                                & ~(sysconf(_SC_PAGESIZE) - 1));
+                                & ~(PAGESIZE - 1));
             }
 
             // section name
@@ -392,13 +384,13 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
                 const char *name_entry = (const char*) (libmap
                                  + section_header[header->e_shstrndx].sh_offset
                                  + section_header[i].sh_name);
-                char *section_name = (char*) malloc(strlen(name_entry) + 1);
-                strcpy(section_name, name_entry);
+                char *section_name = (char*) malloc(fbt_strnlen(name_entry,0) + 1);
+                fbt_strcpy(section_name, name_entry);
                 meminfo->sec_name = section_name;
             } else {
                 const char* no_sec_names = "no section name string table";
-                char *section_name = (char*) malloc(strlen(no_sec_names) + 1);
-                strcpy(section_name, no_sec_names);
+                char *section_name = (char*) malloc(fbt_strnlen(no_sec_names,0) + 1);
+                fbt_strcpy(section_name, no_sec_names);
                 meminfo->sec_name = section_name;
             }
             // update size in memory
@@ -435,12 +427,12 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
                     fbt_dyn_nsyms = section_header[i].sh_size / sizeof(fbt_sym);
                 }
             }
-            if (!strcmp(".dynstr", meminfo->sec_name)) {
+            if (!fbt_strcmp(".dynstr", meminfo->sec_name)) {
                 // string table for dynamic linking symbols
                 dyn_strtab = (char*) (info->dlpi_addr
                                                 + section_header[i].sh_addr);
             }
-            if (!strcmp(".gnu.hash", meminfo->sec_name)) {
+            if (!fbt_strcmp(".gnu.hash", meminfo->sec_name)) {
                 // hash table for dynamic linking symbols (gnu format)
                 dyn_hashtab = (void*) (info->dlpi_addr
                                                 + section_header[i].sh_addr);
@@ -455,8 +447,9 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
          * to the libraries, as we need some of them ourselves.
          */
 	/* TODO: protect libs as well and compile bt statically */
-        mprotect(library_list[0].base_addr, library_list[0].length,
-                  PROT_READ | PROT_WRITE);
+	int ret;
+        fbt_mprotect(library_list[0].base_addr, library_list[0].length,
+		     PROT_READ | PROT_WRITE, ret);
     }
 #endif
 #ifdef SECU_DETECT_SYMBOL_COLLISIONS
@@ -477,14 +470,14 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
             if (!fbt_check_sym_collision(exe_dyn_symtab, exe_dyn_strtab,
                                         exe_dyn_hashtab)) {
                 // symbol collision detected
-                llprint("Symbol collision in the executable\n");
-                _exit(1);
+                fbt_suicide_str("Symbol collision in the executable (memprotect_callback: fbt_mem_protection.c)\n");
             }
         } else if (libnum > 2) {
             // check symbols of library
             if (!fbt_check_sym_collision(dyn_symtab, dyn_strtab, dyn_hashtab)) {
                 llprintf("Symbol collision in %s\n", name);
-                _exit(1);
+		ffflush();
+                fbt_suicide();
             }
         }
     } else {
@@ -492,11 +485,13 @@ int fbt_memprotect_callback(struct dl_phdr_info *info, size_t size, void *data)
         llprintf("Fatal: One of the tables for symbol checking was not found!\n"
                  "symtab: %p, strtab: %p, hashtab: %p\n", dyn_symtab,
                   dyn_strtab, dyn_hashtab);
-        _exit(1);
+	ffflush();
+        fbt_suicide();
     }
 #endif
-    munmap(libmap, filestat.st_size);
-    close(fd);
+    int ret;
+    fbt_munmap(libmap, filesize, ret);
+    fbt_close(fd, ret);
     (*((int*)data))++;
     return 0;
 }
@@ -574,7 +569,8 @@ static void fbt_ids_unlock_helper(struct thread_local_data *tld,
 
     // unlock the memory
     int length = chunk->node.addr_end - chunk->node.addr_begin;
-    mprotect(chunk->node.addr_begin, length, PROT_READ | PROT_WRITE);
+    int ret;
+    fbt_mprotect(chunk->node.addr_begin, length, PROT_READ | PROT_WRITE, ret);
 
 //     // insert at the beginning of the lockdown list
 //     chunk->next_lockdown = mem_alloc->lockdown_list;
@@ -599,7 +595,7 @@ void fbt_ids_unlock(struct thread_local_data *tld)
     struct alloc_chunk *chunk = tld->mem_alloc.chunks;
     void *span_begin = NULL;
     void *span_end = NULL;
-
+    int ret;
     while (NULL != chunk) {
         if (chunk->node.addr_begin == span_end) {
             // we can add the chunk to the span
@@ -607,8 +603,8 @@ void fbt_ids_unlock(struct thread_local_data *tld)
         } else {
             // cannot add to existing span. unlock existing span
             if (NULL != span_begin) {
-                mprotect(span_begin, span_end - span_begin,
-                          PROT_READ | PROT_WRITE | PROT_EXEC);
+                fbt_mprotect(span_begin, span_end - span_begin,
+			     PROT_READ | PROT_WRITE | PROT_EXEC, ret);
             }
             // start new span with current chunk
 
@@ -619,8 +615,8 @@ void fbt_ids_unlock(struct thread_local_data *tld)
     }
     // unlock last span
     if (NULL != span_begin) {
-        mprotect(span_begin, span_end - span_begin,
-                  PROT_READ | PROT_WRITE | PROT_EXEC);
+        fbt_mprotect(span_begin, span_end - span_begin,
+		     PROT_READ | PROT_WRITE | PROT_EXEC, ret);
     }
 
 }
@@ -643,6 +639,7 @@ void fbt_ids_lockdown(struct thread_local_data *tld)
     void *span_end = NULL;
     char span_flags = 0;
     unsigned int qlen=0;
+    int ret;
     
     while (NULL != chunk) {
         if ((span_end == chunk->node.addr_begin)
@@ -663,7 +660,7 @@ void fbt_ids_lockdown(struct thread_local_data *tld)
                         flags |= PROT_EXEC;
                     }
                 }
-                mprotect(span_begin, span_end - span_begin, flags);
+                fbt_mprotect(span_begin, span_end - span_begin, flags, ret);
             }
             // open the new span
             span_begin = chunk->node.addr_begin;
@@ -685,10 +682,10 @@ void fbt_ids_lockdown(struct thread_local_data *tld)
                 flags |= PROT_EXEC;
             }
         }
-        mprotect(span_begin, span_end - span_begin, flags);
+        fbt_mprotect(span_begin, span_end - span_begin, flags, ret);
     }
 
-    INFO_LLPRINTF_VERBOSE("locked down %d allocation blocks\n", qlen);
+    PRINT_DEBUG("locked down %d allocation blocks\n", qlen);
 }
 
 
@@ -709,9 +706,9 @@ void fbt_ids_setexec(struct thread_local_data *tld, void *addr)
     }
 
     chunk->flags |= INFO_XFLAG;
-
-    mprotect(chunk->node.addr_begin,
+    int ret;
+    fbt_mprotect(chunk->node.addr_begin,
               chunk->node.addr_end - chunk->node.addr_begin,
-              PROT_READ | PROT_WRITE | PROT_EXEC);
+	     PROT_READ | PROT_WRITE | PROT_EXEC, ret);
 
 }

@@ -21,26 +21,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
-#include <stdint.h>
-#include <pthread.h>
-#include <assert.h>
-#include <unistd.h>
-#include <string.h>
-
 #include "fbt_private_datatypes.h"
-#include "fbt_asm_functions.h"
+#include "fbt_asm_macros.h"
 #include "fbt_translate.h"
 #include "fbt_disassemble.h"
-#include "fbt_tcache.h"
 #include "fbt_trampoline.h"
 #include "fbt_actions.h"
 #include "fbt_mem_alloc.h"
+#include "fbt_libc.h"
 
 #include "fbt_debug.h"
-
 #include "fbt_statistic.h"
-
-#include "fbt_asm_macros.h"
 
 #if defined(FBT_INLINE_CALLS)
 #define FBT_INLINE_MAX_LENGTH 64
@@ -48,39 +39,9 @@
 
 #include "fbt_mem_protection.h"
 
-#ifdef DISABLE_ME
-/* these functions are implemented in the fbt_asm_functions.S and replicated where needed */
-
-/**
- * Push caller-save registers and EFLAGS register onto the stack.
- * We need to do this if a function where the call to that function is inserted, such that the caller
- * does not save these registers.
- */
-#define push_reg()		\
-	do {			\
-	__asm__("pushfl");	\
-	__asm__("pushl %eax");	\
- 	__asm__("pushl %ecx");	\
-	__asm__("pushl %edx");	\
-	} while (0)
-
-
-/**
- * Pop caller-save registers and EFLAGS register from stack.
- * The converse thing to push_reg().
- */
-#define pop_reg()		\
-	do {			\
-	__asm__("popl %edx");	\
-	__asm__("popl %ecx");	\
-	__asm__("popl %eax");	\
-	__asm__("popfl");	\
-	} while (0)
-#endif /* DISABLE_ME */
-
 // function prototypes
-unsigned int check_inline(translate_struct_t *ts);
-void check_transl_allowed(void* tu_address, struct mem_info *info);
+static unsigned int check_inline(translate_struct_t *ts);
+static void check_transl_allowed(void* tu_address, struct mem_info *info);
 
 /**
  * translates a translation unit without jumping to the translated code.
@@ -111,7 +72,7 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
     /* make sure that we don't translate translated code */
     while(code_block!=NULL) {
 	if ((tu_address >= code_block->cache_block) && (tu_address <= code_block->cache_end)) {
-            printf("Translating translated code: %p (%p - %p (%p))\n", tu_address, code_block->cache_block, code_block->cache_end, code_block);
+            llprintf("Translating translated code: %p (%p - %p (%p))\n", tu_address, code_block->cache_block, code_block->cache_end, code_block);
 	}
 	code_block = code_block -> next;
     }
@@ -225,7 +186,7 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
 	    disasm_instr(ts);
 
 	    unsigned char *old_transl_instr = ts->transl_instr;
-#ifdef INFO
+#ifdef DEBUG
 	    unsigned char *old_cur_instr = ts->cur_instr;
 	    unsigned char *old_next_instr = ts->next_instr;
 #endif
@@ -256,11 +217,11 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
 #if defined(FBT_STATISTIC)
 	    fbt_nr_translated_instr++;
 #endif
-	    PRINT_INFO("orig_ins_addr: %p", ts->cur_instr);
+	    PRINT_DEBUG("orig_ins_addr: %p", ts->cur_instr);
 	    PRINT_DEBUG("orig_ins:  %s", printnbytes(old_cur_instr, old_next_instr - old_cur_instr));
-	    PRINT_INFO("transl_insn_addr: %p", old_transl_instr);
+	    PRINT_DEBUG("transl_insn_addr: %p", old_transl_instr);
 	    PRINT_DEBUG("trans_ins: %s", printnbytes(old_transl_instr, ts->transl_instr - old_transl_instr));
-	    PRINT_INFO("tu_state: %d\n", tu_state); /* debug */
+	    PRINT_DEBUG("tu_state: %d\n", tu_state); /* debug */
 	    DUMP_CODE(ts, (old_next_instr_dump - ts->cur_instr), (ts->transl_instr - old_transl_instr_dump));
 	    BREAK_ON_TRANSL(ts->cur_instr, old_transl_instr_dump);
 	}
@@ -296,34 +257,32 @@ void *translate_noexecute(thread_local_data_t *tld, void *tu_address)
  * @param tu_address the address that shall be checked
  * @return the address of the last byte in the current section
  */
-void check_transl_allowed(void* tu_address, struct mem_info *info)
+static void check_transl_allowed(void* tu_address, struct mem_info *info)
 {
 #if defined(SECU_ENFORCE_NX) || defined(INFO_OUTPUT)
     if (fbt_memprotect_execquery(tu_address)) {
         if (!fbt_memprotect_info(tu_address, info)) {
-            printf("Unknown error in check_transl_allowed.\n");
-            _exit(EXIT_FAILURE);
+            fbt_suicide_str("Unknown error in check_transl_allowed (check_transl_allowed: fbt_translate.c).\n");
         }
     } else {
         if (fbt_memprotect_info(tu_address, info)) {
-            printf("Tried to translate code at address %p in %s, section %s, "
-                   "which is not marked as executable.\n",
-                   tu_address,
-                   info->obj_name,
-                   info->sec_name);
+            llprintf("Tried to translate code at address %p in %s, section %s, "
+		     "which is not marked as executable.\n",
+		     tu_address,
+		     info->obj_name,
+		     info->sec_name);
         } else {
-            printf("Tried to translate code at address %p, which was determined"
-                   " not to be in a section of any loaded shared library or the"
-                   " executable.\n",
-                   tu_address);
+            llprintf("Tried to translate code at address %p, which was determined"
+		     " not to be in a section of any loaded shared library or the"
+		     " executable.\n",
+		     tu_address);
         }
 #ifdef SECU_ENFORCE_NX
 #ifdef SLEEP_ON_FAIL
         sleep(10);
 #endif /* SLEEP_ON_FAIL */
-        llprint("Exiting Program! If you believe this occurs in error, disable "
-                "the -DSECU_ENFORCE_NX CFLAG in the secuBT Makefile.\n");
-        _exit(EXIT_FAILURE);
+        fbt_suicide_str("Exiting Program! If you believe this occurs in error, disable "
+                "the -DSECU_ENFORCE_NX CFLAG in the secuBT Makefile (check_transl_allowed: fbt_translate.c).\n");
 #endif /* SECU_ENFORCE_NX */
     }
 #endif
@@ -336,11 +295,11 @@ void check_transl_allowed(void* tu_address, struct mem_info *info)
  * if we only find suitable (inlinable) instructions we tell the callee that this
  * function is inlinable, otherwise we fail.
  */
-unsigned int check_inline(translate_struct_t *ts)
+static unsigned int check_inline(translate_struct_t *ts)
 {
     /* static translate struct for internal use */
     translate_struct_t myts;
-    memcpy(&myts, ts, sizeof(translate_struct_t));
+    fbt_memcpy(&myts, ts, sizeof(translate_struct_t));
     unsigned int function_length = 0;
 
     /* extract relative call target from call. */
