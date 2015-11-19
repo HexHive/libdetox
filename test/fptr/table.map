@@ -1,8 +1,0 @@
-
-instr opcode_tbl[] = {
-{"foo", &default_action}, 		/* 0x0 */
-{"bar", &do_something_fancy}, 		/* 0x1 */
-{"op2", &default_action}, 		/* 0x2 */
-{"tre", &do_something_cool}, 		/* 0x3 */
-{"quad", &default_action},		/* 0x4 */
-};
