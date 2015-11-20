@@ -1,0 +1,102 @@
+Frequently asked questions:
+===========================
+* What kind of documentation exists?
+* What are the different trampolines? How are they used?
+* What is back patching?
+* Using threads: my program segfaults after a clone syscall (0x78)
+* Comparison with related work (TODO)
+* How to hijack control flow (TODO)
+* 32bit libraries and 64bit applications (TODO)
+
+What kind of documentation exists?
+==================================
+There are a couple of papers that describe the binary translator and the
+security framework:
+* Requirements for Fast Binary Translation (AMAS-BT'09)
+  http://nebelwelt.net/research/publications/amas-bt09/
+* Generating Low-Overhead Dynamic Binary Translators (SYSTOR'10)
+  http://doi.acm.org/10.1145/1815695.1815724
+  http://nebelwelt.net/research/publications/systor10/
+* Fine-Grained User-Space Security Through Virtualization (VEE'11)
+  https://portal.acm.org/citation.cfm?doid=1952682.1952703
+  http://nebelwelt.net/research/publications/vee11/
+* Source code documentation with doxygen
+  Execute doxygen doxygen.config in the root directory of libdetox
+* See the project page for more information
+  http://nebelwelt.net/projects/libdetox/
+
+
+What are the different trampolines? How are they used?
+======================================================
+A trampoline is a sequence of machine code instructions that transfers control
+from one location to another (with some intended side effects).
+
+Basically there are two kinds of trampolines in libdetox. The first kind is a
+bunch of code sequences referenced through the thread local data struct that is
+the core of the translation engine. The second kind is a short code sequence
+that holds data about untranslated code regions.
+
+The emitted trampolines (the first kind) are used to for untranslated code
+blocks. These trampolines store code locations and references to the original
+code and to thread local data structures, so whenever an untranslated block
+needs to be translated the translator can reconstruct the context to translate
+this new basic block. All information that is available could also be emitted
+into the code cache directly. Drawbacks of this approach are that we would mix
+code and date in the code cache (slowing down execution) and there would be a
+lot of dead code as well as soon as the code is translated. If we use a
+trampoline then we only need a jmp $TRAMPOLINE_ADDRESS in the code cache. This
+$TRAMPOLINE_ADDRESS can be backpatched with the translated address whenever we
+translate the corresponding basic block.
+
+The trampolines that are referenced through the thread local data struct (the
+second kind) are used in different optimizations to reduce the amount of emitted
+machine code instructions in the code cache. These (thread local) trampolines
+are built whenever the translation engine is started on a new thread and encode
+direct pointers to specific thread local data structures.
+
+Indirect jumps and indirect calls can be translated into a push of the indirect
+target and a jump to either opt_ijump_trampoline or opt_icall_trampoline. These
+trampolines make a lookup in the mapping table and transfer control to the
+translated version in the code cache. If the target is untranslated then we
+enter the BT mode. Return instructions are translated into a jump to
+opt_ret_trampoline or opt_ret_remove_trampoline. These trampolines read the RIP
+and transfer control to the translated return instruction or enter BT mode if
+the target is untranslated. The trampolines opt_ijump_predict_fixup and
+opt_icall_predict_fixup are used if we enable predictions for indirect control
+flow transfers. The predictions are directly encoded in the code cache and store
+one pair of translated/untranslated targets. If there is a cache hit then we can
+directly transfer control to the translated target. If there is a cache miss
+then we transfer control to the fixup trampoline that fixes the cache. If there
+are more than a specific number of mispredictions then we dynamically rewrite
+the translated control flow transfer into a quick lookup using either
+opt_ijump_trampoline or opt_icall_trampoline (see struct icf_prediction as
+well).
+
+The ret2app_trampoline is used when the BT is started to hide the start of the
+binary translator and to return to the caller (but the return is in a
+virtualized environment). The unmanaged_code_trampoline is used inside the first
+kind of trampolines to transfer control to the binary translator. This
+trampoline is used to enter the C-world of the BT. Application context is stored
+on the secure stack and the translator is started with the trampoline
+parameters.
+
+
+What is back patching?
+======================
+Backpatching fixes address in the code cache that have the wrong value. If we
+translate a new code block through a trampoline then we backpatch the location
+in the code cache where we came from. The trampoline is then no longer needed
+and the code in the code cache can transfer the code directly to the new
+location. The backpatching process depends on the origin type of the control
+transfer, see enum origin_type for more details.
+
+
+Using threads: my program segfaults after a clone syscall (0x78)
+================================================================
+Threads are difficult to handle in a binary translator. The BT ensures that a
+new thread executes under the control of (a new instance of) the BT. The clone
+system call is executed on the special translation stack of the BT, therefore we
+must switch stacks in both instances of the BT after the system call. To do this
+we must handle all system calls. Please ensure that AUTHORIZE_SYSCALLS and
+HANDLE_THREADS are activated (see the file CONFIGURATION and Makedefs for more
+information).

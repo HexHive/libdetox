@@ -1,0 +1,77 @@
+# Makedefs for the libdetox platform (relative to the src and test directory)
+include ../../Makedefs
+
+# Attach libdetox to loaded program
+# ATTACH_LIBDETOX = 1
+
+# Protect all loader internal datastructures
+export CFLAGS += -DMEMORY_PROTECTION
+
+# Libc secure mode (libc_enable_secure)
+export CFLAGS += -DSECURE_MODE
+
+# Write some statistics to a file
+#export CFLAGS += -DSL_STATISTIC
+
+# Name of the linux dynamic loader
+export CFLAGS += -DLINUX_LOADER="\"ld-linux.so.2\""
+
+# 32bit library search and paths
+PATH_32 = "/usr/lib/:/lib/"
+DBG_PATH_32 = "/usr/lib/debug/lib/"
+
+# 64bit library search and debug paths
+PATH_64 = "/usr/lib32/:/lib32/:/usr/lib:/lib/"
+DBG_PATH_64 = "/usr/lib/debug/lib32/"
+
+# Libc version 2.9 (default is 2.12)
+#export CFLAGS += -DLIBC2_9
+
+# export DEBUG = 1
+
+# Debug flags
+# --- Debug output ---
+ifdef DEBUG
+# Loading of libraries
+export CFLAGS += -DD_LOAD
+
+# Relocations
+#export CFLAGS += -DD_REL
+
+# Symbol lookup
+#export CFLAGS += -DD_SL
+
+# Thread local storage
+export CFLAGS += -DD_TLS
+
+# Runtime loading of libraries
+#export CFLAGS += -DD_RLOAD
+
+# Runtime symbol lookup
+#export CFLAGS += -DD_RSL
+
+# Communication with libdetox
+#export CFLAGS += -DD_LIBDETOX
+endif
+
+# Get architecture dependent search paths
+ARCH = $(shell getconf LONG_BIT)
+CFLAGS += -DLIB_SEARCH_PATHS=\"$(PATH_$(ARCH))\"
+CFLAGS += -DLIB_DBG_PATHS=\"$(DBG_PATH_$(ARCH))\"
+
+CC = gcc
+CFLAGS += -nostdlib
+LDFLAGS = -Wl,-T,link.lds,-nostdlib
+
+ifdef ATTACH_LIBDETOX
+CFLAGS += -DATTACH_LIBDETOX
+CFLAGS += -DLIBDETOX_LIB=\"./lib/$(LIBNAME).so.$(LIBVERS).$(LIBMIN)\"
+endif
+
+ifdef DEBUG
+LDFLAGS += -lpthread
+endif
+
+# Include needed header files
+INCLUDEDIR = -I../../src/
+

@@ -1,0 +1,19 @@
+General todos:
+##############
+- Add more security guards (ELF reading)
+- Finish support for profiles / syscall management
+- Check all system calls for return values
+
+Implementation issues:
+######################
+- Finish the signal implementation (store signal information and deliver when
+  back in user-context)
+- add table generator to common source base
+- clean up trusted lodaer (source review, naming, and libdetox integration)
+
+Known weaknesses of the current implementation:
+###############################################
+- /proc/self/maps (can be used to detect libdetox)
+- /proc/self/exe (can be used to detect loader)
+- ucontext (can be used to trick signals and attack sandbox)
+- fstenv instruction (returns EIP on user-stack)

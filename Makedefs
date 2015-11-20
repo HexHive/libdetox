@@ -1,0 +1,265 @@
+###############################################################################
+# Basic compilation settings                                                  #
+###############################################################################
+
+# Debug or production build?
+############################
+# Debug build: generates a debug.txt file with extensive information about the
+# translation process and the execution of individual authorization and
+# translation functions. Each translated opcode is also noted here.
+# Production build: produces an optimized version without assertions.
+# options: set either 'DEBUG = 1' or 'PRODUCTION = 1'
+# default: PRODUCTION =1
+PRODUCTION = 1
+#DEBUG = 1
+
+# Dump all generated code (debugging option)
+############################################
+# Generates the files code_dump.txt and jmpTable_dump.txt. code_dump.txt
+# contains a dump of the translated original code and the location where each
+# translated instruction was stored. jmpTable_dump.txt contains a basic block
+# mapping for each translated basic block from original to translated IP.
+# default: # CLAGS += -DDUMP_GENERATED_CODE
+#CFLAGS += -DDUMP_GENERATED_CODE
+
+# Sleep a couple of secs if we fail (debugging option)
+######################################################
+# Prints an error message and starts an endless loop whenever an error happens. 
+# This allows the user to attach a debugger to the running program
+# (e.g., gdb -p `pidof loader`)
+# defaukt: #export CFLAGS += -DSLEEP_ON_FAIL
+export CFLAGS += -DSLEEP_ON_FAIL
+
+# Should startup / shutdown messages be printed in debug mode?
+##############################################################
+# default: #export CFLAGS += -DSILENT_STARTUP
+export CFLAGS += -DSILENT_STARTUP
+
+
+###############################################################################
+# Performance Options                                                         #
+###############################################################################
+
+# Inline small leaf functions
+#############################
+# This optimization enables inlining of small leaf functions. If the leaf
+# function that is targeted by a single call is smaller than INLINE_MAX_LENGTH
+# and consists of a single basic block then we inline the the complete basic
+# block and remove the call and return instructions to reduce overall overhead.
+# default: CFLAGS += -DINLINE_CALLS
+# CFLAGS += -DINLINE_CALLS
+
+# Add a predictor for indirect control flow transfers
+#####################################################
+# Use a predictor that caches the last two targets for indirect control flow
+# transfers. The predictor also keeps a running count of mispredictions. If the
+# number of mispredictions is higher than ICF_PREDICT_MAX_MISPREDICTIONS then
+# the location of the indirect control flow transfer is dynamically rewritten
+# into a regular fast lookup.
+# default: CFLAGS += -DICF_PREDICT
+# CFLAGS += -DICF_PREDICT
+
+# Fast (mapping-)cache lookup
+#############################
+# Enables faster cache lookup by performing the whole cache scan on superficial
+# no-hits in assembly without switching back to the binary translator domain.
+# default: CFLAGS += -DFAST_CACHE_LOOKUP
+CFLAGS += -DFAST_CACHE_LOOKUP
+
+
+###############################################################################
+# Translation extensions and special features                                 #
+###############################################################################
+
+# Enable LD_PRELOAD feature that hijacks control?
+#################################################
+# enable automatic control-flow hi-jacking whenever a program loads
+# (this function uses the LD_PRELOAD facilities of the dynamic loader)
+# default: # CFLAGS += -DHIJACKCONTROL
+CFLAGS+= -DHIJACKCONTROL
+
+# Redirect system calls to the authorization framework
+######################################################
+# Redirects all system calls to an authorization function. This is needed for
+# signal redirection, signal handling, exception handling, thread creation
+# handling, and process creation handling.
+# Additionally we need this to load profiles to verify allowed system calls for
+# the security extensions.
+# default: CFLAGS += -DAUTHORIZE_SYSCALLS
+CFLAGS += -DAUTHORIZE_SYSCALLS
+
+# Check signals as well
+#######################
+# Handles all signals. Installed signal handlers are redirected to a trampoline.
+# Signals are caught and handled in a safe manner. This option should be enabled
+# by default. Depends on AUTHORIZE_SYSCALLS.
+# default: CFLAGS += -DHANDLE_SIGNALS 
+CFLAGS += -DHANDLE_SIGNALS 
+
+# Handle thread-/process-based system calls (clone)
+###################################################
+# Handles the creation of new threads. New threads are wrapped into a new
+# instance of the binary translator. The BT takes care of the initialization
+# task and also handles the inter-thread communication between the two
+# BTs. Depends on HANDLE_SIGNALS and AUTHORIZE_SYSCALLS.
+# You need this option if you want to use threads (e.g., clone system call).
+# Otherwise your program will fail with a SEGFAULT (due to wrong stacks after
+# the execution of the clone system call)
+# default: CFLAGS += -DHANDLE_THREADS
+CFLAGS += -DHANDLE_THREADS
+
+
+###############################################################################
+# Security related features                                                   #
+###############################################################################
+
+# Shadow stack configuration
+############################
+# Implements a special shadow stack. Every call instruction is translated so
+# that it pushes the location to an additional (hidden) shadow stack. Every
+# return instruction checks this shadow stack and verifies that we are still on
+# the right path. A security exception is triggered if there is a mismatch.
+# default: CFLAGS += -DSHADOWSTACK
+#CFLAGS += -DSHADOWSTACK
+
+# Should calls into and out of the loader be ignored?
+# Depends on -DSHADOWSTACK
+#CFLAGS += -DSHADOWSTACK_IGNORE_LOADER
+
+# The name of the loader. This will be used to ignore calls
+# into and out of the loader in shadowstack verification.
+# Depends on -DSHADOWSTACK
+#CFLAGS += -DSHADOWSTACK_LOADER_NAME="\"/lib/ld-linux.so.2\""
+
+# Specifies whether libdetox shold terminate when it detects a
+# shadowstack reauthentication failure
+# Depends on -DSHADOWSTACK
+# CFLAGS += -DSHADOWSTACK_TERMINATE_ON_FAILURE
+
+# Print debugging information for shadow stack
+# Depends on -DSHADOWSTACK
+#CFLAGS += -DSHADOWSTACK_DEBUG
+
+# Verification of control flow transfers
+########################################
+# Verifies all control flow transfers. Static control flow transfers are
+# verified during the translation of the corresponding basic block and dynamic
+# control flow transfers are verified during the dispatch.
+# TODO: reference to paper
+# default: # CFLAGS += -DVERIFY_CFTX
+# CFLAGS += -DVERIFY_CFTX
+
+# Print all verified control flow transfers
+###########################################
+# Prints all loaded DSOs and all reachable symbol information as well. All
+# control flow transfers are also printed (in a dot-graph-like language for
+# visualization of the potential control flows). This feature depends on
+# VERIFY_CFTX and should not be used in production.
+# default: # CFLAGS += -DPRINT_CFTX
+# CFLAGS += -DPRINT_CFTX
+
+# Parse external policy file
+############################
+# Enable extern policy files that are automatically loaded, parsed, and
+# enforced.
+# TODO: finish implementation (port from trustBT)
+# default: # CFLAGS += -DSYSCALL_POLICY_FILE
+# CFLAGS += -DSYSCALL_POLICY_FILE
+
+# DynaRace settings
+###################
+# Enable dynamic file system race detection and removal
+# This is an EXPERIMENTAL setting.
+# default: # CFLAGS += -DDYNARACE
+#CFLAGS += -DDYNARACE
+
+
+###############################################################################
+# Unsorted flags from student projects                                        #
+###############################################################################
+# TODO: clean-up and add descriptions
+
+# Activate shared data among different threads
+# (required for some other extensions)
+CFLAGS += -DSHARED_DATA
+
+# Activate basic block tracking (required for some extensions)
+# Keeps track of the regions used by each translated basic block 
+#export CFLAGS += -DTRACK_BASIC_BLOCKS
+
+#export CFLAGS += -DTRACK_INSTRUCTIONS
+
+#export CFLAGS += -DTRACK_CFTX
+
+# Activate selDebug interprocess communication
+#export CFLAGS += -DSEL_DEBUG -I../../selDebug/src
+#export FILES = fbt_sdbg.c
+
+# Online patching configuration
+###############################
+# Enable online patching functionality
+#export CFLAGS += -DONLINE_PATCHING
+
+# Checks on startup whether there exists a patch in the binary directory
+#export CFLAGS += -DONLINE_PATCHING_STARTUP
+
+# Allows using dynamic loading to load patches
+#export CFLAGS += -DONLINE_PATCHING_LOADER
+
+# Explicitly use loader interface of secuLoader to avoid libc dependency
+#export CLFAGS += -DONLINE_PATCHING_SECULOADER
+
+# Monitors the filesystem to detect when a patch is moved to the
+# binary directory
+#export CFLAGS += -DONLINE_PATCHING_FILE
+
+# Listens on a socket for incoming patches
+#export CFLAGS += -DONLINE_PATCHING_SOCKET
+#export CFLAGS += -DONLINE_PATCHING_PORT=5005
+
+# Defines patch lookup algorithm
+#export CFLAGS += -DONLINE_PATCHING_LINEAR_SEARCH
+#export CFLAGS += -DONLINE_PATCHING_BINARY_SEARCH
+#export CFLAGS += -DONLINE_PATCHING_HASH_SEARCH
+
+# if HIJACKCONTROL is defines with ONLINE PATCHING then we need -ldl as well
+# otherwise we assume a secure loader and use internal functionality to resolve
+# functions
+ifdef HIJACKCONTROL
+ifdef ONLINE_PATCHING
+LDFLAGS += -ldl
+endif
+endif
+
+
+###############################################################################
+# Implementation specific staff, selects correct flags depending              #
+# on choices from above                                                       #
+###############################################################################
+ifdef DEBUG
+CFLAGS += -O2  -ggdb -Wall -Wextra -DDEBUG
+LDFLAGS = -lpthread -nostartfiles -ldl
+endif
+
+ifdef PRODUCTION
+CFLAGS += -O3 -Wall -g -DNDEBUG
+LDFLAGS += -O1 -nodefaultlibs -lgcc -l:/lib/ld-linux.so.2 \
+       -fvisibility-inlines-hidden -Wl,-x,-z,nodelete,-z,nodlopen,-z,nodump \
+       -Wl,-z,-noexecstack -nostartfiles
+endif
+
+# build i386 code
+I386 = -m32
+CFLAGS += $(I386)
+
+# Path to the assembly generation DSL preprocessing step
+DSL_PATH=../DSL/src/parse.py
+
+
+# name of the library
+LIBNAME=libfastbt
+# major version
+LIBVERS=0
+# minor version
+LIBMIN=3.0
+

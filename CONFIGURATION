@@ -1,0 +1,10 @@
+The configuration file Makedefs contains a bunch of documentation on the
+configuration of the binary translation platform and a bunch of additional
+security extensions. Adjust the file Makedefs to your needs.
+
+The security extensions are additional and can be disabled for a full-speed
+binary translator. Check the best configuration that suits your needs.
+
+
+Type "make clean all" to generate the library.
+Type "make test" to run the test suite.
