@@ -5,10 +5,10 @@
  *
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedDate: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedBy: payerm $
- * $Revision: 443 $
+ * $Date: 2012-01-14 12:34:20 -0800 (Sat, 14 Jan 2012) $
+ * $LastChangedDate: 2012-01-14 12:34:20 -0800 (Sat, 14 Jan 2012) $
+ * $LastChangedBy: kravinae $
+ * $Revision: 1171 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,9 +28,6 @@
 #include "fbt_translate.h"
 
 #ifdef SECU_ENFORCE_NX
-#ifdef SLEEP_ON_FAIL
-#include <unistd.h> /* sleep */
-#endif
 #endif
 
 #include <assert.h>
@@ -44,11 +41,18 @@
 #include "fbt_llio.h"
 #include "fbt_mem_mgmt.h"
 #include "fbt_x86_opcode.h"
+#if defined(SEL_DEBUG)
+#include "fbt_sdbg.h"
+#endif
 
 #include "fbt_opcode_tables.h"
 
 #if defined(FBT_STATISTIC)
 #include "fbt_statistic.h"
+#endif
+
+#if defined(ONLINE_PATCHING)
+#include "patching/fbt_patching.h"
 #endif
 
 #if defined(INLINE_CALLS)
@@ -88,8 +92,21 @@ static ulong_t check_inline(struct translate *ts);
 static void check_transl_allowed(void* orig_address, struct mem_info *info);
 #endif
 
+#ifdef LMEM
+void *fbt_lmem_translate_noexecute(struct thread_local_data *tld,
+                              void *orig_address);
+#endif
+
 void *fbt_translate_noexecute(struct thread_local_data *tld,
                               void *orig_address) {
+  #ifdef ONLINE_PATCHING
+  return fbt_online_patching_translate_noexecute(tld, orig_address);
+  #endif
+
+#ifdef LMEM
+  return fbt_lmem_translate_noexecute(tld, orig_address);
+#endif
+                              
   PRINT_DEBUG_FUNCTION_START("translate_noexecute(*tld=%p, *orig_address=%p)",
                              tld, orig_address);
 
@@ -107,9 +124,10 @@ void *fbt_translate_noexecute(struct thread_local_data *tld,
   /* make sure that we don't translate translated code */
   while (code_block != NULL) {
     if ((orig_address >= code_block->ptr) &&
-        (orig_address <= (code_block->ptr + code_block->size))) {
-      llprintf("Translating translated code: %p (%p len: 0x%x (%p))\n",
-               orig_address, code_block->ptr, code_block->size, code_block);
+        (orig_address < (code_block->ptr + code_block->size))) {
+      llprintf("Translating translated code: %p (%p len: 0x%x (%p) type: %d (syscall=%d))\n",
+               orig_address, code_block->ptr, code_block->size, code_block, 
+               code_block->type, MT_SYSCALL_TABLE);
       fbt_suicide(255);
     }
     code_block = code_block->next;
@@ -143,15 +161,38 @@ void *fbt_translate_noexecute(struct thread_local_data *tld,
       JMP_REL32(prev_transl_instr, ts->transl_instr);
     }
   }
-  
   PRINT_DEBUG("tld->ts.transl_instr: %p", ts->transl_instr);
 
+#if defined(SEL_DEBUG)
+  if (tld->sdbg->command.operation != CCACHE_FLUSH) {
+    /* add entry to ccache index */
+    fbt_ccache_add_entry(tld, orig_address, ts->transl_instr);
+  }
+#else
   /* add entry to ccache index */
   fbt_ccache_add_entry(tld, orig_address, ts->transl_instr);
+#endif
+
 
   /* look up address in translation cache index */
   void *transl_address = ts->transl_instr;
 
+#ifdef TRACK_BASIC_BLOCKS
+  struct basic_block_node *basic_block = fbt_smalloc(
+    tld,
+    sizeof(struct basic_block_node)
+  );
+  basic_block->start = ts->transl_instr;
+  basic_block->original_start = orig_address;
+  basic_block->length = 0;
+  basic_block->original_length = 0;
+#endif
+
+  /*
+#if defined(SEL_DEBUG)
+  MOVB_IMM8_MEM8(ts->transl_instr, 0x05,  1, (int32_t)tld->sdbg->flag);
+#endif
+*/
   /* we translate as long as we
      - stay in the limit (MAX_BLOCK_SIZE)
      - or if we have an open TU (could happen if we are translating a call or
@@ -191,6 +232,7 @@ void *fbt_translate_noexecute(struct thread_local_data *tld,
 #endif
 
     fbt_disasm_instr(ts);
+    PRINT_DEBUG("translating a '%s'", ts->cur_instr_info->mnemonic);
 
     unsigned char *old_transl_instr = ts->transl_instr;
 #ifdef DEBUG
@@ -214,8 +256,26 @@ void *fbt_translate_noexecute(struct thread_local_data *tld,
       }
     }
 #endif
+
+#if defined(SEL_DEBUG)
+    sdbg_handle_flush_and_breaks(tld);
+#endif
+
+#if defined(TRACK_BASIC_BLOCKS)
+    basic_block->original_length += (ts->next_instr - ts->cur_instr);
+#endif  
+
+#if defined(TRACK_INSTRUCTIONS)
+    fbt_track_instruction(tld, ts->transl_instr, ts->cur_instr);
+#endif
+
     /* call the action specified for this instruction */
     tu_state = ts->cur_instr_info->opcode.handler(ts);
+
+#if defined(SEL_DEBUG)
+    sdbg_handle_watchpoints(tld);
+#endif
+
     bytes_translated += (ts->transl_instr - old_transl_instr);
 
 #if defined(FBT_STATISTIC)
@@ -258,7 +318,14 @@ void *fbt_translate_noexecute(struct thread_local_data *tld,
 
   PRINT_DEBUG_FUNCTION_END("-> %p,   next_tu=%p (len: %d)", transl_address,
                            ts->next_instr, bytes_translated);
-  ffflush();  /* maybe we translated something dangerous, flush our buffers */
+  
+  /* Store the basic block */
+#ifdef TRACK_BASIC_BLOCKS
+  basic_block->next = tld->basic_blocks;
+  basic_block->length = bytes_translated;
+  tld->basic_blocks = basic_block;
+#endif
+  
   return transl_address;
 }
 
@@ -517,9 +584,6 @@ static void check_transl_allowed(void* orig_address, struct mem_info *info) {
                " not to be in a section of any loaded shared library or the"
                " executable.\n", orig_address);
     }
-#ifdef SLEEP_ON_FAIL
-    sleep(10);
-#endif /* SLEEP_ON_FAIL */
     fbt_suicide_str("Exiting Program! If you believe this occurs in error,"
                     " disable the -DSECU_ENFORCE_NX CFLAG in the libdetox "
                     "Makefile (check_transl_allowed: fbt_translate.c).\n");

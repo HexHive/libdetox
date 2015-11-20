@@ -5,10 +5,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedDate: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
+ * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
- * $Revision: 443 $
+ * $Revision: 1134 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -65,11 +65,6 @@ int fllprintf(int fd, const char *format, ...);
  */
 int fllprintfva(int fd, const char* format, va_list ap);
 #endif
-
-/**
- * Flush all internal printf buffers.
- */
-void ffflush();
 
 /** macro to use fllprintf with stdout as file descriptor */
 #define llprintf(...) fllprintf(STDOUT_FILENO, __VA_ARGS__)

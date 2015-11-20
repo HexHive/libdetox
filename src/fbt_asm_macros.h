@@ -25,7 +25,7 @@
  */
 #ifndef FBT_ASM_MACROS_H
 #define FBT_ASM_MACROS_H
-  
+
 /* Control flow instructions */
 #define CHECKREL32PTR(dst, rel32)                                       \
   if ((((ulong_t)rel32 - (ulong_t)dst - 4) & ((uint32_t)0x0)) != 0) {   \
@@ -42,6 +42,9 @@
 
 /* relative 32bit jump, valid in ia32 / amd64 */
 #define JMP_REL32(dst, rel32) *dst++=0xe9; REL32PTR(dst, rel32); dst+=4
+
+/* relative 8bit jump */
+#define JMP_I8(dst, rel8) *dst=0xeb; *(dst+1)=(rel8); dst+=2
 
 #define MOV_ESP_MEM32(dst, mem32) *dst++=0x89; *dst++=0x25; \
   CHECKMEM32PTR(mem32) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem32); dst+=4
@@ -67,9 +70,21 @@
 #define MOVL_IMM32_RM32(dst, modrm, imm32) *dst++=0xc7; *dst++=modrm; \
   CHECKMEM32PTR(imm32) *((uint32_t*)dst) = (uint32_t)((ulong_t)imm32); dst+=4
 
+#define MOVL_IMM32_EAX(dst, imm32) *dst++=0xb8; \
+  *((uint32_t*)dst) = imm32; dst+=4;
+
 #define MOVL_IMM32_MEM32(dst, modrm, imm32, mem32) *dst++=0xc7; *dst++=modrm;  \
   CHECKMEM32PTR(mem32) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem32); dst+=4; \
   CHECKMEM32PTR(imm32) *((uint32_t*)dst) = (uint32_t)((ulong_t)imm32); dst+=4
+
+#define MOVL_EAX_MEM32(dst, mem32) *dst++=0xA3; \
+  CHECKMEM32PTR(mem32) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem32); dst+=4
+
+
+
+#define MOVB_IMM8_MEM8(dst, modrm, imm8, mem8) *dst++=0xc6; \
+  CHECKMEM32PTR(mem8) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem8); dst+=4; \
+  *dst++=imm8
 
 #define CALL_REL32(dst, rel32) *dst++=0xe8; REL32PTR(dst, rel32); dst+=4
 
@@ -78,8 +93,8 @@
 #define JCC_2B(dst, jcc, rel32) *((uint16_t*)dst)=(uint16_t)jcc; dst+=2; \
   REL32PTR(dst, rel32) dst+=4
 
-#define JE_I8(dst, i8) *dst++=0x74; *dst++=i8
-#define JNE_I8(dst, i8) *dst++=0x75; *dst++=i8
+#define JE_I8(dst, i8) *dst=0x74; *(dst+1)=i8; dst+=2;
+#define JNE_I8(dst, i8) *dst=0x75; *(dst+1)=i8; dst+=2;
 
 #define JMP_IND_M32(dst, m32) *dst++ = 0xff; *dst++ = 0x25; \
   *((int32_t*)dst) = m32; dst+=4
@@ -93,6 +108,8 @@
   *dst++=sib; *dst++=imm8
 
 /* valid only in ia32 */
+#define ADDL_IMM8_M32(dst, modrm, imm8, m32) *dst++= 0x83; *dst++=modrm; \
+  *((int32_t*)dst) = m32; dst+=4; *dst++ = imm8
 #define ADDL_IMM32_RM32(dst, modrm, imm32) *dst++=0x81; *dst++=modrm; \
   *((int32_t*)dst) = imm32; dst+=4
 #define ANDL_IMM32_RM32(dst, modrm, imm32) ADDL_IMM32_RM32(dst, modrm, imm32)
@@ -106,6 +123,23 @@
 #define CMPL_R32_IMM8RM32SIB(dst, modrm, sib, imm8) *dst++=0x3b;        \
   *dst++=modrm; *dst++=sib; *dst++=imm8
 #define CMPL_R32_IMM8(dst, modrm, imm8) *dst++=0x83; *dst++=modrm; *dst++=imm8
+#define CMPL_MEM32_IMM8(dst, mem32, imm8) *dst++=0x83; *dst++=0x3d; \
+  CHECKMEM32PTR(mem32) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem32); dst+=4; \
+  *dst++=imm8
+#define CMPL_RM32_IMM32(dst, modrm, imm32) *dst++=0x81; *dst++=modrm; \
+  *((int32_t*)dst) = imm32; dst+=4
+#define CMPL_IMM32RM32SIB_IMM32(dst, modrm, sib, disp32, imm32) *dst++=0x81; \
+  *dst++=modrm; *dst++=sib; *((int32_t*)dst) = disp32; dst+=4; \
+  *((int32_t*)dst) = imm32; dst+=4
+#define CMPL_IMM8RM32SIB_IMM32(dst, modrm, sib, disp8, imm32) *dst++=0x81; \
+  *dst++=modrm; *dst++=sib; *dst++ = disp8; *((int32_t*)dst) = imm32; dst+=4
+#define CMPL_RM32SIB_IMM32(dst, modrm, sib, imm32) *dst++=0x81; \
+  *dst++=modrm; *dst++=sib; *((int32_t*)dst) = imm32; dst+=4
+#define CMPL_DISP32_IMM32(dst, modrm, disp32, imm32) *dst++=0x81; \
+  *dst++=modrm; *((int32_t*)dst) = disp32; dst+=4; \
+  *((int32_t*)dst) = imm32; dst+=4
+#define CMPL_DISP8_IMM32(dst, modrm, disp8, imm32) *dst++=0x81; \
+  *dst++=modrm; *dst++=disp8; *((int32_t*)dst) = imm32; dst+=4
 /* movl imm32(mem32), rm32 */
 #define MOVL_IMM32RM32SIB_R32(dst, modrm, sib, imm32) *dst++=0x8b; \
   *dst++=modrm; *dst++=sib; *((int32_t*)dst) = imm32; dst+=4
@@ -124,6 +158,8 @@
 #define PUSHAD(dst) *dst++=0x60
 #define PUSHFL(dst) *dst++=0x9c
 #define PUSHL_RM32IMM8(dst, modrm, imm8) *dst++=0xff; *dst++=modrm; *dst++=imm8
+#define PUSHL_MEM32(dst, mem32) *dst++=0xff; *dst++=0x35; \
+  CHECKMEM32PTR(mem32) *((uint32_t*)dst) = (uint32_t)((ulong_t)mem32); dst+=4
 #define POPL_EAX(dst) *dst++=0x58
 #define POPL_ECX(dst) *dst++=0x59
 #define POPL_EDX(dst) *dst++=0x5a
@@ -149,5 +185,11 @@
 
 #define SYSENTER(dst) *dst++=0x0f; *dst++=0x34
 #define INT80(dst) *dst++=0xcd; *dst++=0x80
+
+#define INT3(dst) *dst++=0xcc
+
+#define LOCK_PREFIX(dst) *dst++=0xF0
+
+#define XOR_R32_R32(dst, modrm) *dst++=0x31; *dst++=modrm
 
 #endif  /* FBT_ASM_MACROS_H */

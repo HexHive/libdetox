@@ -5,10 +5,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
- * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
- * $LastChangedBy: payerm $
- * $Revision: 428 $
+ * $Date: 2012-01-19 11:17:12 -0800 (Thu, 19 Jan 2012) $
+ * $LastChangedDate: 2012-01-19 11:17:12 -0800 (Thu, 19 Jan 2012) $
+ * $LastChangedBy: kravinae $
+ * $Revision: 1195 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,8 +27,11 @@
  */
 #ifdef DEBUG
 
-#include <stdarg.h>
+#include <unistd.h>
+#include <asm-generic/fcntl.h>
+#include <sys/stat.h>
 #include <pthread.h>
+#include <stdarg.h>
 
 #include "fbt_debug.h"
 #include "fbt_code_cache.h"
@@ -49,18 +52,25 @@
 #define PRINT__BUF__SIZE 512
 
 /**
- * The global vars needed for debuging
+ * The global vars needed for debugging
  */
 #ifdef DEBUG
-static pthread_mutex_t debug_mutex;
+static pthread_mutex_t debug_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_key_t thread_debug;
-static int debugStream;
+int debugStream = 0;
+
+/** This variable keeps track of how many threads are still using the
+debugStream so it will not be closed before the last thread exits */
+static long stream_references = 0;
 #endif
 
 #ifdef DUMP_GENERATED_CODE
-static pthread_mutex_t dump_mutex;
-static int dumpCodeStream;
-static int dumpJmpTableStream;
+static pthread_mutex_t dump_mutex  = PTHREAD_MUTEX_INITIALIZER;
+static int dumpCodeStream = 0;
+static int dumpJmpTableStream = 0;
+
+/** Number of threads using the dump stream */
+static long dump_references = 0;
 #endif
 
 /* local functions */
@@ -72,7 +82,7 @@ static int printOperandString(int f, const unsigned int operandFlags,
                               const unsigned char tableFlags,
                               const unsigned char operandSize,
                               struct translate* ts, unsigned int instr_len);
-static void print_disasm_inst(int f, struct translate* ts,
+void print_disasm_inst(int f, struct translate* ts,
                               unsigned int instr_len);
 #endif
 
@@ -80,39 +90,65 @@ static void print_disasm_inst(int f, struct translate* ts,
 
 void debug_start()
 {
+  pthread_mutex_lock(&debug_mutex);
+
   if (debugStream == 0) {
     fbt_open(DEBUG_FILE_NAME,
              O_CREAT | O_TRUNC | O_WRONLY,
              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH |  \
-             S_IWOTH, debugStream);
+             S_IWOTH, debugStream,
+             "Could not open debug file (debug_start: fbt_debug.c).\n");
   }
   fllprintf(debugStream, "Start debugging\n\n");
-  pthread_mutex_init(&debug_mutex, NULL);
   if (pthread_key_create(&thread_debug, NULL) != 0) {
     fbt_suicide_str("Error creating thread local\n");
   }
   pthread_setspecific(thread_debug, (void *)0);
+  
+  stream_references += 1;
+  
+  pthread_mutex_unlock(&debug_mutex);  
 }
 
 void debug_end()
 {
-  pthread_mutex_destroy(&debug_mutex);
-  fllprintf(debugStream, "\nStop debugging\n");
-  ffflush();
-  int ret;
-  fbt_close(debugStream, ret);
-  if (ret != 0) {
-    fbt_suicide_str("BT failed to close debug file (debug_end: fbt_debug.c)\n");
+  pthread_mutex_lock(&debug_mutex);
+  
+  stream_references -= 1;
+  if (stream_references < 0) {
+    fbt_suicide_str("Unbalanced debug_start / debug_end.\n");
   }
-  debugStream = 0;
-  pthread_key_delete(thread_debug);
+  
+  int destroy = stream_references == 0;
+  int old_debug_stream = debugStream;
+  
+  if (destroy) {
+    debugStream = 0;
+  }
+  
+  pthread_mutex_unlock(&debug_mutex);
+  
+  if (destroy) { 
+    //pthread_mutex_destroy(&debug_mutex);  
+    fllprintf(old_debug_stream, "\nStop debugging\n");
+    int ret;
+    fbt_close(old_debug_stream, ret,
+              "BT failed to close debug file (debug_end: fbt_debug.c)\n");
+    pthread_key_delete(thread_debug);    
+  }
 }
 
 void debug_print_function_start(char *str, ...)
 {
+  pthread_mutex_lock(&debug_mutex);
+
+  if (debugStream == 0) {
+    fbt_suicide_str("Debug stream is not open.\n");
+  }
+
   va_list ap;
   va_start(ap, str);
-  pthread_mutex_lock(&debug_mutex);
+  
   long i, n = (long)pthread_getspecific(thread_debug);
   for (i = 0; i < n; i++) {
     fllprintf(debugStream, "\t");
@@ -130,7 +166,11 @@ void debug_print_function_start(char *str, ...)
 }
 
 void debug_print_function_end(char *str, ...)
-{
+{  
+  if (debugStream == 0) {
+    fbt_suicide_str("Debug stream is not open.\n");
+  }
+
   va_list ap;
   va_start(ap, str);
   pthread_mutex_lock(&debug_mutex);
@@ -151,13 +191,20 @@ void debug_print_function_end(char *str, ...)
 
 void debug_print(char *str, ...)
 {
+  pthread_mutex_lock(&debug_mutex);
+  
+  if (debugStream == 0) {
+    fbt_suicide_str("Debug stream is not open.\n");
+  }
+
   va_list ap;
   va_start(ap, str);
   long i, n = (long)pthread_getspecific(thread_debug);
-  pthread_mutex_lock(&debug_mutex);
+
   for (i = 0; i < n; i++) {
     fllprintf(debugStream, "\t");
   }
+  
   fllprintfva(debugStream, str, ap);
   fllprintf(debugStream, "\n");
   /*fflush(debugStream);*/
@@ -200,35 +247,54 @@ char* debug_memdump(unsigned char *addr, unsigned int n)
 #ifdef DUMP_GENERATED_CODE
 void debug_dump_start()
 {
+  pthread_mutex_lock(&dump_mutex);
+  dump_references += 1;
+  
   if (dumpCodeStream == 0) {
     fbt_open(CODE_DUMP_FILE_NAME,
              O_CREAT | O_TRUNC | O_WRONLY,
              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH,
-             dumpCodeStream);
+             dumpCodeStream,
+             "Could not open dump file (debug_dump_start: fbt_debuc.c)\n");
   }
   if (dumpJmpTableStream == 0) {
     fbt_open(JMP_TABLE_DUMP_FILE_NAME,
              O_CREAT | O_TRUNC | O_WRONLY,
              S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH,
-             dumpJmpTableStream);
+             dumpJmpTableStream,
+             "Could not open jmptable file (debug_dump_start: fbt_debuc.c)\n");
   }
-  pthread_mutex_init(&dump_mutex, NULL);
+  pthread_mutex_unlock(&dump_mutex);
 }
 
 void debug_dump_end()
 {
-  pthread_mutex_destroy(&dump_mutex);
-  ffflush();
-  int ret;
-  fbt_close(dumpCodeStream, ret);
-  fbt_close(dumpJmpTableStream, ret);
-  dumpCodeStream = 0;
-  dumpJmpTableStream = 0;
+  pthread_mutex_lock(&dump_mutex);
+  dump_references -= 1;
+  int destroy = dump_references == 0;
+  pthread_mutex_unlock(&dump_mutex);  
+
+  if (destroy) {
+    //pthread_mutex_destroy(&dump_mutex);
+    int ret;
+    fbt_close(dumpCodeStream, ret,
+              "Could not close code dump file (debug_dump_end: fbt_debug.c)\n");
+    fbt_close(dumpJmpTableStream, ret,
+              "Could not close jmptable file (debug_dump_end: fbt_debug.c)\n");
+    dumpCodeStream = 0;
+    dumpJmpTableStream = 0;
+  }
 }
 
 void debug_dump_code(struct translate *ts, int instr_len, int transl_len)
 {
+  if (dumpCodeStream == 0) {
+    fbt_suicide_str("Dump stream is not open.\n");  
+  }
+
   pthread_mutex_lock(&dump_mutex);
+  /* print address of instruction */
+  fllprintf(dumpCodeStream, "0x%.8x: ", (unsigned long)ts->cur_instr);
   print_disasm_inst(dumpCodeStream, ts, instr_len);
   fllprintf(dumpCodeStream, "--> %p (%d)\n", (char*)(ts->transl_instr-transl_len), transl_len);
   /*fflush(dumpCodeStream);*/
@@ -237,6 +303,10 @@ void debug_dump_code(struct translate *ts, int instr_len, int transl_len)
 
 void debug_dump_jmptable(char *orig_addr, char *transl_addr)
 {
+  if (dumpCodeStream == 0) {
+    fbt_suicide_str("Jmptable stream is not open.\n");  
+  }
+
   pthread_mutex_lock(&dump_mutex);
   fllprintf(dumpJmpTableStream, "0x%x %p --> %p\n",
             C_MAPPING_FUNCTION((long)orig_addr),
@@ -274,59 +344,71 @@ static int printOperandString(int f, const unsigned int operandFlags,
     { "dr0",   "dr1",   "dr2",   "dr3",   "dr4",   "dr5",   "dr6",   "dr7"   }
   };
   unsigned char prefix = 0x0;
+  const char const *seg_ovr = NULL;
   if (ts->num_prefixes!=0) {
     prefix = *(ts->cur_instr);
     int nriters = 0;
     /* look out for a prefix we handle */
-    while ((prefix!=PREFIX_ADDR_SZ_OVR) && (prefix!=PREFIX_OP_SZ_OVR)) {
-      nriters++;
-      /* did we use up all prefixes? */
-      if (nriters==ts->num_prefixes) {
-        prefix=0x0;
-        break;
-      }
-      prefix = *(ts->cur_instr+nriters);
+    for (nriters = 0; nriters < ts->num_prefixes; ++nriters) {
+      unsigned char cur_prefix = *(ts->cur_instr+nriters);
+      if ((cur_prefix == PREFIX_ADDR_SZ_OVR) || (cur_prefix == PREFIX_OP_SZ_OVR))
+        prefix = cur_prefix; 
+      if (prefix == PREFIX_ES_SEG_OVR) seg_ovr = register_names[5][0];
+      if (prefix == PREFIX_CS_SEG_OVR) seg_ovr = register_names[5][1];
+      if (prefix == PREFIX_SS_SEG_OVR) seg_ovr = register_names[5][2];
+      if (prefix == PREFIX_DS_SEG_OVR) seg_ovr = register_names[5][3];
+      if (prefix == PREFIX_FS_SEG_OVR) seg_ovr = register_names[5][4];
+      if (prefix == PREFIX_GS_SEG_OVR) seg_ovr = register_names[5][5];
     }
   }
+
+  int len = 0;
+  if (seg_ovr != NULL && hasMemOp(operandFlags)) {
+    len += fllprintf(f, "%%");
+    len += fllprintf(f, seg_ovr);
+    len += fllprintf(f, ":");
+  }
+  
   if (implOperandFlags!=NONE) {
     /* implicit operands */
     if (!(implOperandFlags & REG_TYPE_MASK)) {
-      return fllprintf(f, "$%d", implOperandFlags&REG_IDX_MASK);
+      len += fllprintf(f, "$%d", implOperandFlags & REG_IDX_MASK);
+      return len;
     } else {
       int table_select = ((implOperandFlags&REG_TYPE_MASK)>>4)-1;
       if (prefix==PREFIX_OP_SZ_OVR || prefix==PREFIX_ADDR_SZ_OVR)
         table_select--;
-      return fllprintf(f, "%%%s",
-                       register_names[table_select][(implOperandFlags &
-                                                     REG_IDX_MASK)]);
+      len += fllprintf(f, "%%%s",
+                        register_names[table_select][(implOperandFlags &
+                                                      REG_IDX_MASK)]);
+      return len;
     }
   } else if (hasImmOp(operandFlags)) {
     /* immediate operands (after whole instruction) */
-    int len = 0;
     if (operandFlags & EXECUTE) {
-      len+=fllprintf(f,"+");
+      len += fllprintf(f,"+");
     } else if (hasMemOp(operandFlags) && !(operandFlags & EXECUTE)) {
-      len+=fllprintf(f,"(");
+      len += fllprintf(f,"(");
     } else {
-      len+=fllprintf(f,"$");
+      len += fllprintf(f,"$");
     }
-    len+=fllprintf(f,"0x");
+    len += fllprintf(f,"0x");
     unsigned char *startaddr = (ts->cur_instr + instr_len - operandSize);
     switch (operandSize) {
     case 1:
-      len+=fllprintf(f, "%.2x", *(startaddr));
+      len += fllprintf(f, "%.2x", *(startaddr));
       break;
     case 2:
-      len+=fllprintf(f, "%.4x", *((unsigned short*)startaddr));
+      len += fllprintf(f, "%.4x", *((unsigned short*)startaddr));
       break;
     case 4:
-      len+=fllprintf(f, "%.8x", *((unsigned int*)startaddr));
+      len += fllprintf(f, "%.8x", *((unsigned int*)startaddr));
       break;
     default:
-      len+=fllprintf(f, "not supported");
+      len += fllprintf(f, "not supported");
     }
     if (hasMemOp(operandFlags) && !(operandFlags&EXECUTE)) {
-      len+=fllprintf(f,")");
+      len += fllprintf(f,")");
     }
     return len;
   } else if (tableFlags&HAS_MODRM) {
@@ -334,7 +416,7 @@ static int printOperandString(int f, const unsigned int operandFlags,
     if (ModRMparseRM(operandFlags)) {
       /* we read our information from the RM part, this is the regular 'free'
          option */
-      int table_select=0;
+      int table_select = 0;
       switch (operandFlags&OP_ADDRM_MASK) {
       case ADDRM_E:
       case ADDRM_M:
@@ -349,7 +431,6 @@ static int printOperandString(int f, const unsigned int operandFlags,
       }
       if (prefix==PREFIX_OP_SZ_OVR || prefix==PREFIX_ADDR_SZ_OVR)
         table_select--;
-      int len = 0;
       unsigned char modrm = *(ts->first_byte_after_opcode);
       /* decode ModRM byte */
       if (MODRM_MOD(modrm)==0x3) {
@@ -452,17 +533,18 @@ static int printOperandString(int f, const unsigned int operandFlags,
         break;
       }
       unsigned char modrm = *(ts->first_byte_after_opcode);
-      return fllprintf(f, "%%%s",
-                       register_names[table_select][MODRM_REG(modrm)]);
+      len += fllprintf(f, "%%%s",
+                        register_names[table_select][MODRM_REG(modrm)]);
+      return len;
     } else {
       /* although this instructions has a ModR/M byte,
          this argument (either dst, src, aux) does not use it*/
       return 0;
     }
   } else if ((operandFlags&ADDRM_X) == ADDRM_X) {
-    return fllprintf(f, "%ds:(%esi)");
+    return len + fllprintf(f, "%ds:(%esi)");
   } else if ((operandFlags&ADDRM_Y) == ADDRM_Y) {
-    return fllprintf(f, "%es:(%edi)");
+    return len + fllprintf(f, "%es:(%edi)");
   }
   return 0;
 }
@@ -470,7 +552,7 @@ static int printOperandString(int f, const unsigned int operandFlags,
 /**
  * Prints instructions to the file (and disassembles it)
  */
-static void print_disasm_inst(int f, struct translate* ts,
+void print_disasm_inst(int f, struct translate* ts,
                               unsigned int instr_len)
 /* we need to pass instr_len of the current instruction because we can't trust
    the ts struct the problem is that a call instruction will tether next_instr
@@ -479,8 +561,8 @@ static void print_disasm_inst(int f, struct translate* ts,
    the length as well!
  */
 {
-  unsigned int j, plen=0, args=0;
-  fllprintf(f, "0x%.8x: ", (unsigned long)ts->cur_instr);
+  unsigned int j, plen = 0, args = 0;
+  fllprintf(f, "0x");
   for (j=0; j<instr_len; ++j) {
     fllprintf(f, "%.2x", (unsigned char)(*(ts->cur_instr+j)));
   }

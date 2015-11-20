@@ -3,10 +3,10 @@
  * Interface to the binary translator which can be used from the outside.
  *
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
- * $Date: 2011-03-23 09:15:08 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedDate: 2011-03-23 09:15:08 +0100 (Wed, 23 Mar 2011) $
+ * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
- * $Revision: 442 $
+ * $Revision: 1134 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -51,6 +51,15 @@ fbt_init(struct ia32_opcode *opcode_table);
  */
 __attribute__((visibility("default"))) void
 fbt_exit(struct thread_local_data *tld);
+
+/**
+ * Initialize the transaction
+ * @param tld pointer to thread local data
+ * @param commit_function a function pointer to the function which indicates
+ * end of transaction
+ */
+void fbt_transaction_init(struct thread_local_data *tld,
+                          void (*commit_function)());
 
 /**
  * Start a transaction.

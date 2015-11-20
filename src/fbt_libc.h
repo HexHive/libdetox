@@ -6,10 +6,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
- * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
- * $Revision: 428 $
+ * $Revision: 1134 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,50 +33,13 @@
 #include "fbt_syscalls_impl.h"
 
 /** definition of NULL */
+#if !defined(NULL)
 #define NULL ((void *)0)
-
-/* copied from linux/stat.h to remove deps */
-#define S_IRUSR 00400
-#define S_IWUSR 00200
-#define S_IRGRP 00040
-#define S_IWGRP 00020
-#define S_IROTH 00004
-#define S_IWOTH 00002
-
-#define O_RDONLY        00000000
-#define O_WRONLY        00000001
-#define O_CREAT         00000100
-#define O_TRUNC         00001000
-
-#define SEEK_END 2
-
-/* taked from sys/mman.h */
-#define PROT_READ       0x1             /* Page can be read. */
-#define PROT_WRITE      0x2             /* Page can be written. */
-#define PROT_EXEC       0x4             /* Page can be executed. */
-#define PROT_NONE       0x0             /* Page can not be accessed. */
-
-#define MAP_SHARED      0x01            /* Share changes. */
-#define MAP_PRIVATE     0x02            /* Changes are private. */
-#define MAP_FIXED       0x10            /* Map memory to a fixed address */
-#define MAP_ANONYMOUS   0x20            /* Don't use a file. */
+#endif
 
 #define MAP_FAILED      ((void *)-1)
 
-/* taken from linux/sched.h */
-#define CLONE_VM        0x00000100      /* VM shared between processes */
-#define CLONE_FS        0x00000200      /* fs info shared between procs */
-#define CLONE_FILES     0x00000400      /* open files shared between proc */
-#define CLONE_SIGHAND   0x00000800      /* set if signal handlers and blocked
-                                           signals shared */
-#define CLONE_PTRACE    0x00002000      /* set if we want to let tracing
-                                           continue on the child too */
   
-/* taken from asm/signal.h */
-#define SIG_DFL (0)     /* default signal handling */
-#define SIG_IGN (1)     /* ignore signal */
-#define SIG_ERR (-1)    /* error return from signal */
-
 /**
  * Local implementation of memcpy. Copies one memory region to another address.
  * @param dest Destination memory region
@@ -85,6 +48,15 @@
  * @return Pointer to the target region.
  */
 void *fbt_memcpy(void *dest, const void *src, int n);
+
+/**
+ * Local implementation of memcmp. Compares two memory regions.
+ * @param s1 First region.
+ * @param s2 Second region.
+ * @param n Length that is compared.
+ * @return Returns 0 if they are equal.
+ */
+int fbt_memncmp(const char *s1, const char *s2, int n);
 
 /**
  * Local implementation of strncpy. Copies one string into another buffer.
@@ -112,12 +84,43 @@ int fbt_strnlen(const char *s, int maxlen);
  */
 int fbt_strncmp(const char *s1, const char *s2, int n);
 
+/**
+ * Convert integer to string
+ * @param value to convert.
+ * @param str array where to store string.
+ * @param base numerical base.
+ * @return same as str.
+ */
+char *fbt_itoa(int value, char* str, int base);
+
+/**
+ * Fill the first 'len' bytes of the memory area pointed to by 'dest' with the
+ * constant byte 'val'
+ * 
+ * @param dest Pointer to start of memory area to fill
+ * @param val  Byte to fill with
+ * @param len  Length of area in bytes
+ * */
+void *fbt_memset(void *dest, long val, long len);
+
 /** useful macro that checks if a pointer is in a certain region */
 #define PTR_IN_REGION(ptr, regionptr, size)             \
   ((ulong_t)(ptr) >= (ulong_t)(regionptr) &&            \
-   (ulong_t)(ptr) <= ((ulong_t)(regionptr)+(size)))
+   (ulong_t)(ptr) < ((ulong_t)(regionptr)+(size)))
+
+/* for a discussion of overlapping regions see
+   http://c2.com/cgi/wiki?TestIfDateRangesOverlap
+ */
+#define OVERLAPPING_REGIONS(regptr1, regsize1, regptr2, regsize2) \
+  (((ulong_t)regptr1 < ((ulong_t)regptr2 + regsize2)) &&          \
+   ((ulong_t)regptr2 < ((ulong_t)regptr1 + regsize1)))
 
 /** kill program */
+/* one possible implementation of fbt_suicide is an exit system call with an
+   exit number, but this will not work if the stack is corrupted, so we just use
+   a hlt instruction that causes a low level fault and terminates the
+   program. sys_exit terminates the program and never returns, that's why we
+   don't need to worry about saving the ebx register or return value. */
 #define fbt_suicide_str(str)	do {		\
     fllwrite(STDOUT_FILENO, str);		\
     fbt_suicide(255); } while (0)

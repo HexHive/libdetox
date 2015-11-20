@@ -3,14 +3,14 @@ Hall of fame:
 
 Mathias Payer <mathias.payer@nebelwelt.net>
 - Project leader and coordinator
-- Worked on fastBT and trustBt since 2007
+- Worked on fastBT and trustBtOK since 2007
 - Implemented and authored most of the optimizations
   - Fast indirect jump and prediction
   - Fast indirect call and prediction
   - Adaptive combination of prediction and fast optimization
   - Return cache and fast return
 - Implemented the new disassembler component
-- Pirimary human debugger
+- Primary human debugger
 
 
 Former developers:

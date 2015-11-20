@@ -7,10 +7,10 @@
  *
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
- * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
- * $Revision: 428 $
+ * $Revision: 1134 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

@@ -5,10 +5,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedDate: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedBy: payerm $
- * $Revision: 443 $
+ * $Date: 2012-01-22 12:05:54 -0800 (Sun, 22 Jan 2012) $
+ * $LastChangedDate: 2012-01-22 12:05:54 -0800 (Sun, 22 Jan 2012) $
+ * $LastChangedBy: kravinae $
+ * $Revision: 1206 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,6 +33,9 @@
 #include "fbt_code_cache.h"
 #include "fbt_debug.h"
 #include "fbt_dso.h"
+#if defined(DYNARACE)
+#include "fbt_dynarace.h"
+#endif  /* DYNARACE */
 #include "fbt_libc.h"
 #include "fbt_llio.h"
 #include "fbt_mem_mgmt.h"
@@ -41,8 +44,20 @@
 #include "fbt_trampoline.h"
 #include "fbt_x86_opcode.h"
 
+#if defined(ONLINE_PATCHING)
+#include "patching/fbt_patching.h"
+#endif
+
 #if defined(FBT_STATISTIC)
 #include "fbt_statistic.h"
+#endif
+
+#if defined(TRACK_CTFX)
+#include "fbt_restart_transaction.h"
+#endif
+
+#ifdef LMEM
+#include "fbt_lmem.h"
 #endif
 
 /* forward declaration for the default opcode table */
@@ -51,19 +66,29 @@ extern struct ia32_opcode opcode_table_onebyte[];
 #if defined(HIJACKCONTROL)
 static struct thread_local_data *tld;
 void _init() {
+#if defined(DEBUG) && !defined(SILENT_STARTUP)
   llprintf("Starting BT\n");
-#if defined(DEBUG)
   llprintf("This is a debug build, so do not expect stellar performance!\n");
 #endif
-  ffflush();
+
+#ifdef LMEM
+  lmem_init();
+#endif
+
   //sleep(5);
   tld = fbt_init(NULL);
+  
+#if defined(ONLINE_PATCHING)
+  fbt_online_patching_init(tld);
+#endif /* ONLINE_PATCHING */  
+  
   fbt_start_transaction(tld, fbt_commit_transaction);
 }
 
 void _fini() {
+#if defined(DEBUG) && !defined(SILENT_STARTUP)
   llprintf("Stopping BT\n");
-  ffflush();
+#endif /* DEBUG */
   fbt_commit_transaction();
   fbt_exit(tld);
 }
@@ -71,14 +96,13 @@ void _fini() {
 
 /* this function is called in fbt_asm_functions.S, .section .init */
 struct thread_local_data* fbt_init(struct ia32_opcode *opcode_table) {
-  /* secuBT: call init function for the secure system call mechanism */
-  //TODO trustVM
-  //fbt_init_sec_syscalls();
-
   DUMP_START();
   DEBUG_START();
 
   struct thread_local_data *tld = fbt_init_tls();
+  #ifdef SHARED_DATA
+  fbt_init_shared_data(tld);
+  #endif
 
   fbt_initialize_trampolines(tld);
   
@@ -92,6 +116,7 @@ struct thread_local_data* fbt_init(struct ia32_opcode *opcode_table) {
   }
 
 #if defined(AUTHORIZE_SYSCALLS)
+  /* call init function for the secure system call mechanism */
   fbt_init_syscalls(tld);
 #endif
 
@@ -99,7 +124,11 @@ struct thread_local_data* fbt_init(struct ia32_opcode *opcode_table) {
   /* check if we loaded some new code */
   fbt_rescan_dsos(tld);
 #endif  /* VERIFY_CFTX */
-  
+
+#if defined(DYNARACE)
+  fbt_dynarace_init(tld);
+#endif  /* DYNARACE */
+
   return tld;
 }
 
@@ -114,31 +143,33 @@ void fbt_exit(struct thread_local_data *tld) {
   DEBUG_END();
 }
 
+void fbt_transaction_init(struct thread_local_data *tld,
+                                void (*commit_function)()) {
+  /* set memory address of the stub of fbt_commit_transaction in the client
+     program */
+  fbt_ccache_add_entry(tld, (void*)commit_function, (void*)fbt_end_transaction);
+
+#ifdef SHARED_DATA
+  /* Remember the commit function, in case we need to reestablish the cache
+   * entry when we flush the cache */
+  tld->shared_data->commit_function = commit_function;
+#endif
+  
+  /* These functions are not transaction safe, therefore we catch them inside of
+   * transactions and execute our own cover-functions that take care to return
+   * to translated code */ 
+#if defined(HIJACKCONTROL)
+  /* if thread fails to exit from the BT then we force-exit it */
+  fbt_ccache_add_entry(tld, (void*)fbt_exit, (void*)fbt_exit);
+#endif  /* HIJACKCONTROL */
+}
+
 void fbt_start_transaction(struct thread_local_data *tld,
                            void (*commit_function)()) {
   PRINT_DEBUG_FUNCTION_START("fbt_start_transaction(commit_function = %p)",
                              (void*)commit_function);
 
-  /* set memory address of the stub of fbt_commit_transaction in the client
-     program */
-  fbt_ccache_add_entry(tld, (void*)commit_function, (void*)fbt_end_transaction);
-
-  /* These functions are not transaction safe, therefore we catch them inside of
-   * transactions and execute our own cover-functions that take care to return
-   * to translated code */ 
-#if defined(HIJACKCONTROL)
-  // CLEANUP -> remove
-  // TODO: keep this function as simple as possible!
-  //fbt_ccache_add_entry(tld, (void*)dlsym, (void*)dlsym_handler);
-  //fbt_ccache_add_entry(tld, (void*)dlvsym, (void*)dlvsym_handler);
-
-  /* if thread fails to exit from the BT then we force-exit it */
-  fbt_ccache_add_entry(tld, (void*)fbt_exit, (void*)fbt_exit);
-#ifdef SECU_BLOCK_DL_ITERATE_PHDR
-  // TODO: add REMOVE
-  fbt_ccache_add_entry(tld, (void*)dl_iterate_phdr, (void*)fbt_do_nothing);
-#endif /* SECU_BLOCK_DL_ITERATE_PHDR */
-#endif  /* HIJACKCONTROL */
+  fbt_transaction_init(tld, commit_function);
 
   /* find out return instruction pointer (=beginning of first TU)*/
   void *orig_begin = __builtin_return_address(0);

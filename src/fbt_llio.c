@@ -9,10 +9,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
- * $LastChangedDate: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
+ * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
- * $Revision: 443 $
+ * $Revision: 1134 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -75,17 +75,8 @@ int fllwrite(int fd, const char* str)
   int length = fbt_strnlen(str, 0);
   while (written < length) {
     int retval;
-    fbt_write(fd, str + written, length - written, retval);
-    if (retval < 0) {
-      fbt_suicide(255);
-      /*
-      // handle errors and interrupted writes
-      if (errno != EINTR) {
-        break;
-        }*/
-    } else {
-      written += retval;
-    }
+    fbt_writeK(fd, (str + written), (length - written), retval, 255);
+    written += retval;
   }
   return written;
 }
@@ -98,16 +89,6 @@ int fllprintf(int fd, const char *format, ...)
   va_end(ap);
   return ret;
 }
-
-#define FDBUFSIZE (BUFSIZE_L+1)
-struct llbuf {
-  int fd;
-  char buffer[FDBUFSIZE];
-};
-#define NRFDBUFS 4
-static struct llbuf buffers[NRFDBUFS] = {
-  {.fd=-1}, {.fd=-1}, {.fd=-1}, {.fd=-1}
-};
 
 int fllprintfva(int fd, const char* format, va_list app)
 {
@@ -220,57 +201,5 @@ int fllprintfva(int fd, const char* format, va_list app)
     fi++;
   }
   buf[BUFSIZE_L]=0x0;  /* guard */
-
-  int bufpos = -1;
-  /* should we buffer the current string? */
-  for (fi=0; fi<NRFDBUFS; fi++) if (buffers[fi].fd==fd) {
-      bufpos = fi;
-      break;
-    }
-
-  //return fllwrite(fd, buf);
-  // newline -> flush
-  // buffer too small? -> flush
-  // otherwise add to buf
-  int strlen = fbt_strnlen(buf,BUFSIZE_L);
-  if (bufpos!=-1 && (fbt_strnlen(buffers[bufpos].buffer,BUFSIZE_L) + strlen >=
-                     FDBUFSIZE)) {
-    /* write stuff to fd */
-    if (bufpos!=-1) {
-      fllwrite(fd, buffers[bufpos].buffer);
-      buffers[bufpos].fd=-1;  /* free buffer, all flushed */
-    }
-    fllwrite(fd, buf);
-  } else {
-    /* let's buffer */
-    if (bufpos==-1) {
-      /* we don't have a buffer associated with this fd (yet) */
-      for (fi=0; fi<NRFDBUFS; fi++) if (buffers[fi].fd==-1) {
-          bufpos = fi;
-          break;
-        }
-      if (bufpos==-1) {
-        /* we have no empty seats, flush first entry */
-        fllwrite(buffers[0].fd, buffers[0].buffer);
-        bufpos=0;
-      }
-      buffers[bufpos].buffer[0]='\0';
-      buffers[bufpos].fd=fd;
-    }
-    /* add stuff to buffer (we know that buf does not overflow our buffer) */
-    fbt_strncpy(buffers[bufpos].buffer + fbt_strnlen(buffers[bufpos].buffer,
-                                                     FDBUFSIZE), buf, strlen);
-  }
-  return strlen;
-}
-
-void ffflush()
-{
-  int i;
-  for (i=0; i<NRFDBUFS; i++) {
-    if (buffers[i].fd!=-1) {
-      fllwrite(buffers[i].fd, buffers[i].buffer);
-      buffers[i].fd=-1;
-    }
-  }
+  return fllwrite(fd, buf);
 }
