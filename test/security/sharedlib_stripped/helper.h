@@ -1,0 +1,2 @@
+int helperInt;
+void helperFunc();

@@ -1,5 +1,66 @@
 ###############################################################################
-# Basic compilation settings                                                  #
+# Lockdown Makedefs file, contains all compile-time configurations            #
+###############################################################################
+
+# Note: many configuration options can be changed here, it is crucial to know
+# what you do as some options will have significant impact on Lockdown's
+# behavior. If in doubt just use the original configuration.
+
+###############################################################################
+# GENERAL SETTINGS, OUTPUT NAMES, TARGET ARCHITECTURE, DIRECTORIES            #
+###############################################################################
+
+CFLAGS =
+CFLAGSEXEC =
+CFLAGSLIB =
+CFLAGSRTLD =
+LDFLAGSEXEC =
+LDFLAGSLIB =
+LDFLAGSRTLD =
+
+# name of the library output file
+LIBNAME=libtrustedRT
+# major version
+LIBVERS=0
+# minor version
+LIBMIN=3.0
+
+# name of the executable output file (Note: called trustedRT)
+EXECNAME=trustedRT
+
+# RTLD name
+RTLDNAME=trustedRTLD
+
+# compiler and linker
+CC=gcc
+LD=ld
+
+# target architecture
+I386 = -m32
+CFLAGS += $(I386)
+LDARCHFLAG += -m elf_i386
+LDFLAGSLIB += $(LDARCHFLAG)
+LDFLAGSEXEC += $(LDARCHFLAG)
+LDFLAGSRTLD += $(LDARCHFLAG)
+
+# path to the assembly generation DSL preprocessing step
+DSL_PATH=../../DSL/src/parse.py
+
+# we include some kernel stuff as we directly call system calls
+INCLUDEDIR=/lib/modules/$(shell uname -r)/build/arch/x86/include
+
+# generated subdirectory
+GEN_DIR=generated/
+
+# output directories for library and executable
+LIBDIR=../lib
+BINDIR=../bin
+
+# absolute path to RTLD (required for test Makefiles)
+RTLDPATH=../../../lib/$(RTLDNAME).so
+
+###############################################################################
+# BASIC SETTINGS                                                              #
 ###############################################################################
 
 # Debug or production build?
@@ -19,7 +80,7 @@ PRODUCTION = 1
 # contains a dump of the translated original code and the location where each
 # translated instruction was stored. jmpTable_dump.txt contains a basic block
 # mapping for each translated basic block from original to translated IP.
-# default: # CLAGS += -DDUMP_GENERATED_CODE
+# default: # CFLAGS += -DDUMP_GENERATED_CODE
 #CFLAGS += -DDUMP_GENERATED_CODE
 
 # Sleep a couple of secs if we fail (debugging option)
@@ -27,17 +88,17 @@ PRODUCTION = 1
 # Prints an error message and starts an endless loop whenever an error happens. 
 # This allows the user to attach a debugger to the running program
 # (e.g., gdb -p `pidof loader`)
-# defaukt: #export CFLAGS += -DSLEEP_ON_FAIL
-CFLAGS += -DSLEEP_ON_FAIL
+# default: # CFLAGS += -DSLEEP_ON_FAIL
+#CFLAGS += -DSLEEP_ON_FAIL
 
 # Should startup / shutdown messages be printed in debug mode?
 ##############################################################
-# default: #export CFLAGS += -DSILENT_STARTUP
-CFLAGS += -DSILENT_STARTUP
+# default: # CFLAGS += -DSILENT_STARTUP
+#CFLAGS += -DSILENT_STARTUP
 
 
 ###############################################################################
-# Performance Options                                                         #
+# PERFORMANCE OPTIONS                                                         #
 ###############################################################################
 
 # Inline small leaf functions
@@ -46,8 +107,8 @@ CFLAGS += -DSILENT_STARTUP
 # function that is targeted by a single call is smaller than INLINE_MAX_LENGTH
 # and consists of a single basic block then we inline the the complete basic
 # block and remove the call and return instructions to reduce overall overhead.
-# default: CFLAGS += -DINLINE_CALLS
-CFLAGS += -DINLINE_CALLS
+# default: # CFLAGS += -DINLINE_CALLS
+#CFLAGS += -DINLINE_CALLS
 
 # Add a predictor for indirect control flow transfers
 #####################################################
@@ -56,8 +117,8 @@ CFLAGS += -DINLINE_CALLS
 # number of mispredictions is higher than ICF_PREDICT_MAX_MISPREDICTIONS then
 # the location of the indirect control flow transfer is dynamically rewritten
 # into a regular fast lookup.
-# default: CFLAGS += -DICF_PREDICT
-CFLAGS += -DICF_PREDICT
+# default: # CFLAGS += -DICF_PREDICT
+#CFLAGS += -DICF_PREDICT
 
 # Fast (mapping-)cache lookup
 #############################
@@ -68,15 +129,17 @@ CFLAGS += -DFAST_CACHE_LOOKUP
 
 
 ###############################################################################
-# Translation extensions and special features                                 #
+# TRANSLATION EXTENSIONS AND SPECIAL FEATURES                                 #
 ###############################################################################
 
 # Enable LD_PRELOAD feature that hijacks control?
 #################################################
-# enable automatic control-flow hi-jacking whenever a program loads
+# Enable automatic control-flow hi-jacking whenever a program loads
 # (this function uses the LD_PRELOAD facilities of the dynamic loader)
 # default: # CFLAGS += -DHIJACKCONTROL
-CFLAGS+= -DHIJACKCONTROL
+# CFLAGS+= -DHIJACKCONTROL
+# TODO: remove HIJACKCONTROL flag as libtrue.c is new entry point for LDPRELOAD mechanism
+# Last macro usage is in fbt_syscall.c, to be removed.
 
 # Redirect system calls to the authorization framework
 ######################################################
@@ -93,8 +156,8 @@ CFLAGS += -DAUTHORIZE_SYSCALLS
 # Handles all signals. Installed signal handlers are redirected to a trampoline.
 # Signals are caught and handled in a safe manner. This option should be enabled
 # by default. Depends on AUTHORIZE_SYSCALLS.
-# default: CFLAGS += -DHANDLE_SIGNALS 
-CFLAGS += -DHANDLE_SIGNALS 
+# default: CFLAGS += -DHANDLE_SIGNALS
+CFLAGS += -DHANDLE_SIGNALS
 
 # Handle thread-/process-based system calls (clone)
 ###################################################
@@ -110,8 +173,11 @@ CFLAGS += -DHANDLE_THREADS
 
 
 ###############################################################################
-# Security related features                                                   #
+# SECURITY RELATED FEATURES                                                   #
 ###############################################################################
+
+
+# Lockdown's ROP guards
 
 # Shadow stack configuration
 ############################
@@ -120,7 +186,7 @@ CFLAGS += -DHANDLE_THREADS
 # return instruction checks this shadow stack and verifies that we are still on
 # the right path. A security exception is triggered if there is a mismatch.
 # default: CFLAGS += -DSHADOWSTACK
-#CFLAGS += -DSHADOWSTACK
+CFLAGS += -DSHADOWSTACK
 
 # Should calls into and out of the loader be ignored?
 # Depends on -DSHADOWSTACK
@@ -134,20 +200,125 @@ CFLAGS += -DHANDLE_THREADS
 # Specifies whether libdetox shold terminate when it detects a
 # shadowstack reauthentication failure
 # Depends on -DSHADOWSTACK
-# CFLAGS += -DSHADOWSTACK_TERMINATE_ON_FAILURE
+CFLAGS += -DSHADOWSTACK_TERMINATE_ON_FAILURE
 
 # Print debugging information for shadow stack
 # Depends on -DSHADOWSTACK
+# Note: Disable memory protection as a workaround when using SHADOWSTACK_DEBUG.
+
+# Print shadowstack information at each call and ret.
 #CFLAGS += -DSHADOWSTACK_DEBUG
+
+# Print every reauthentication attempt including its shadowstack.
+#CFLAGS += -DREAUTH_DEBUG
+
+
+# Lockdown's CFI guards (ijmp's and icall's)
 
 # Verification of control flow transfers
 ########################################
 # Verifies all control flow transfers. Static control flow transfers are
 # verified during the translation of the corresponding basic block and dynamic
 # control flow transfers are verified during the dispatch.
-# TODO: reference to paper
-# default: # CFLAGS += -DVERIFY_CFTX
-# CFLAGS += -DVERIFY_CFTX
+# default: CFLAGS += -DVERIFY_CFTX
+CFLAGS += -DVERIFY_CFTX
+
+# Enforce the strict CFI policy/model.
+# Strict means that only explicitly imported and exported
+# symbols are allowed to be called in inter-DSO calls.
+# Non-strict allows also to call unimported/unexported symbols!
+CFLAGS += -DENABLE_STRICT_CFI_POLICY
+
+# Inline PLT calls.
+CFLAGS += -DINLINE_PLT_CALLS
+
+# CFI performance optimizations
+
+# Use fastlookup optimization for transfer checks.
+CFLAGS += -DVERIFY_CFTX_ENABLE_FASTLOOKUP
+# Use inlined local symbol CFI check optimization.
+CFLAGS += -DVERIFY_CFTX_ENABLE_IJMP_LSYMOPT
+# Use inlined cache lookup.
+CFLAGS += -DVERIFY_CFTX_ENABLE_CACHE 
+# Resolve src symbol at translation time.
+CFLAGS += -DENABLE_TRANSLATION_TIME_SYMBOL_LOOKUP
+
+# Use a small symbol cache to improve symbol lookups.
+# Not effective if fastlookup is enabled.
+#CFLAGS += -DCFTX_ENABLE_SYMBOL_CACHE
+
+# Use inlined fastlookup for indirect calls. (not implemented yet)
+#CFLAGS += -DVERIFY_CFTX_ENABLE_INLINED_FASTLOOKUP
+
+# Callback detection heuristics (static and dynamic analysis)
+#############################################################
+CFLAGS += -DCALLBACK_MAIN_DETECTION
+CFLAGS += -DCALLBACK_RELOC_DETECTION
+CFLAGS += -DCALLBACK_LEA_DETECTION
+CFLAGS += -DCALLBACK_MOV_IMM_TO_REG_DETECTION
+CFLAGS += -DCALLBACK_DATA_SECTION_SEARCH
+CFLAGS += -DCALLBACK_LIBRARIES_DATA_SECTION_SEARCH
+
+
+# Metrics and statistics
+########################
+# TODO: these flags are not thread safe, to fix!
+
+# Print control-flow types.
+###########################
+# Print some stats about the authorization type of indirect branch instructions.
+# For the correct values please disable all CFI optimizations!
+# E.g. nr of inter dso calls or intra symbol jumps.
+#CFLAGS += -DPRINT_CFTX_TYPE_STATS
+
+# Print security metrics and statistics.
+########################################
+# Collect data for security metrics and related statistics.
+# Writes the data into a file right after process startup and termination.
+#CFLAGS += -DSECURITY_METRICS_AND_STATS
+
+# Print optimization statistics.
+################################
+# Print check transfer stats.
+#CFLAGS += -DPRINT_CFTX_CHECK_TRANSFER_STATS
+# Print fastlookup stats.
+#CFLAGS += -DPRINT_CFTX_FASTLOOKUP_STATS
+# Print inline cache lookup stats. (not implemented yet)
+#CFLAGS += -DPRINT_CFTX_CACHE_STATS
+
+# Log control-flow transfers (as CSV).
+######################################
+# Logs all control flow transfer checks to stderr in csv format so that it can be piped into a file.
+# Note: control flow transfers are not enforced anymore.
+#CFLAGS += -DLOG_CFTX_ONLY
+# Log also warnings.
+#CFLAGS += -DLOG_CFTX_WARNINGS
+
+# Print callbacks.
+##################
+# Prints all callbacks for all DSOs at program termination.
+#CFLAGS += -DPRINT_CALLBACKS
+
+# Logging of valid targets.
+# (This can be used to evaluate remaining gadgets
+# for specific indirect branch instructions.)
+#################################################
+
+# Write valid ret targets for a specific ret instruction into a file.
+#CFLAGS += -DLOG_VALID_RET_TARGETS
+#CFLAGS += -DLOG_RET_INSTR="0x80485f4" # demo/ret2mprotect/vuln
+#CFLAGS += -DLOG_RET_INSTR="0x807ad1c" # nginx 1.4.0 ngx_http_read_discarded_request_body ret
+
+# Write valid jmp targets for a specific jmp instruction into a file.
+#CFLAGS += -DLOG_VALID_JMP_TARGETS
+#CFLAGS += -DLOG_JMP_INSTR="0x804859e" # demo/jop_and_cop/vuln
+
+# Write valid call targets for a specific call instruction into a file.
+#CFLAGS += -DLOG_VALID_CALL_TARGETS
+#CFLAGS += -DLOG_CALL_INSTR="0x8048596" # demo/jop_and_cop/vuln
+#CFLAGS += -DLOG_CALL_INSTR="0x80721df" # nginx 1.4.0 ngx_http_request_handler ind.call. 
+#CFLAGS += -DLOG_CALL_INSTR="0x807acad" # nginx 1.4.0 ngx_http_read_discarded_request_body ind.call. 
+
 
 # Print all verified control flow transfers
 ###########################################
@@ -156,28 +327,23 @@ CFLAGS += -DHANDLE_THREADS
 # visualization of the potential control flows). This feature depends on
 # VERIFY_CFTX and should not be used in production.
 # default: # CFLAGS += -DPRINT_CFTX
-# CFLAGS += -DPRINT_CFTX
+#CFLAGS += -DPRINT_CFTX
 
-# Parse external policy file
-############################
-# Enable extern policy files that are automatically loaded, parsed, and
-# enforced.
+# Parse external syscall policy file
+####################################
+# Enable external policy files that are automatically loaded, parsed, and enforced.
 # TODO: finish implementation (port from trustBT)
 # default: # CFLAGS += -DSYSCALL_POLICY_FILE
-# CFLAGS += -DSYSCALL_POLICY_FILE
-
-# DynaRace settings
-###################
-# Enable dynamic file system race detection and removal
-# This is an EXPERIMENTAL setting.
-# default: # CFLAGS += -DDYNARACE
-#CFLAGS += -DDYNARACE
-
+#CFLAGS += -DSYSCALL_POLICY_FILE
 
 ###############################################################################
-# Unsorted flags from student projects                                        #
+# MISC                                                                        #
 ###############################################################################
 # TODO: clean-up and add descriptions
+
+# Sends informative messages to a named pipe for UI support.
+# If enabled, disable MEMORY_PROTECTION as a workaround, to be fixed!
+#CFLAGS += -DENABLE_UI_MESSAGES
 
 # Activate shared data among different threads
 # (required for some other extensions)
@@ -190,77 +356,113 @@ CFLAGS += -DSHARED_DATA
 #export CFLAGS += -DTRACK_INSTRUCTIONS
 
 #export CFLAGS += -DTRACK_CFTX
-
-# Activate selDebug interprocess communication
-#export CFLAGS += -DSEL_DEBUG -I../../selDebug/src
-#export FILES = fbt_sdbg.c
-
-# Online patching configuration
-###############################
-# Enable online patching functionality
-#export CFLAGS += -DONLINE_PATCHING
-
-# Checks on startup whether there exists a patch in the binary directory
-#export CFLAGS += -DONLINE_PATCHING_STARTUP
-
-# Allows using dynamic loading to load patches
-#export CFLAGS += -DONLINE_PATCHING_LOADER
-
-# Explicitly use loader interface of secuLoader to avoid libc dependency
-#export CLFAGS += -DONLINE_PATCHING_SECULOADER
-
-# Monitors the filesystem to detect when a patch is moved to the
-# binary directory
-#export CFLAGS += -DONLINE_PATCHING_FILE
-
-# Listens on a socket for incoming patches
-#export CFLAGS += -DONLINE_PATCHING_SOCKET
-#export CFLAGS += -DONLINE_PATCHING_PORT=5005
-
-# Defines patch lookup algorithm
-#export CFLAGS += -DONLINE_PATCHING_LINEAR_SEARCH
-#export CFLAGS += -DONLINE_PATCHING_BINARY_SEARCH
-#export CFLAGS += -DONLINE_PATCHING_HASH_SEARCH
-
-# if HIJACKCONTROL is defines with ONLINE PATCHING then we need -ldl as well
-# otherwise we assume a secure loader and use internal functionality to resolve
-# functions
-ifdef HIJACKCONTROL
-ifdef ONLINE_PATCHING
-LDFLAGS += -ldl
-endif
-endif
-
+#CFLAGS += -DSKIP_LOADER
+#CFLAGS += -DDUMP_CFTX
+#CFLAGS += -DASSERTIONS
 
 ###############################################################################
-# Implementation specific staff, selects correct flags depending              #
-# on choices from above                                                       #
+# SECURELOADER                                                                #
 ###############################################################################
+# protect all loader internal datastructures
+#export CFLAGS += -DMEMORY_PROTECTION
+
+# libc secure mode (libc_enable_secure)
+export CFLAGS += -DSECURE_MODE
+
+# write some statistics to a file
+#export CFLAGS += -DSL_STATISTIC
+
+# name of the linux dynamic loader
+export CFLAGS += -DLINUX_LOADER="\"ld-linux.so.2\""
+
+# libc version 2.9 (default is 2.12)
+#export CFLAGS += -DLIBC2_9
+
+# Library search paths
+# Note: PATH_XX are used to find production builds of libraries, this has to
+# be correct such that secureLoader can load and relocate required libraries
+# For additional debug symbol information adapt the DBG_PATH_XX variables to
+# point to the right location. If a debug version of a library is found within
+# these paths then the additional debug information is used to construct a
+# more fine-grained CFI policy. Else the CFI policy will be coarser grained.
+# TODO: check "./" inclusion
+# 32bit library search and paths
+PATH_32 = "/usr/lib:/lib/i386-linux-gnu:/lib:.:/usr/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu/mesa"
+#DBG_PATH_32 = "/usr/lib/debug/lib/i386-linux-gnu/:/usr/lib/debug/:/usr/lib/debug/lib:/usr/lib/debug/usr/lib/i386-linux-gnu/:/usr/lib/debug/usr/lib/:/usr/lib/debug/lib/i386-linux-gnu/tls/i686/nosegneg/:/usr/lib/debug/usr/lib/libreoffice/program/"
+DBG_PATH_32 = "/tmp/dbglib"
+
+# TODO: check "./" inclusion
+# 64bit library search and debug paths
+PATH_64 = "/lib/i386-linux-gnu:/usr/lib/i386-linux-gnu:/usr/lib32:/lib32:/usr/lib:/lib:."
+#DBG_PATH_64 = "/usr/lib/debug/lib/i386-linux-gnu/"
+DBG_PATH_64 = "/tmp/dbglib"
+
+# get architecture dependent search paths
+ARCH = $(shell getconf LONG_BIT)
+CFLAGS += -DLIB_SEARCH_PATHS=\"$(PATH_$(ARCH))\"
+CFLAGS += -DLIB_DBG_PATHS=\"$(DBG_PATH_$(ARCH))\"
+
+# secureloader DEBUG options
+# Loading of libraries
+#export CFLAGS += -DD_LOAD
+# Relocationsq
+#export CFLAGS += -DD_REL
+# Symbol lookup
+#export CFLAGS += -DD_SL
+# Thread local storage
+#export CFLAGS += -DD_TLS
+# Runtime loading of libraries
+#export CFLAGS += -DD_RLOAD
+# Runtime symbol lookup
+#export CFLAGS += -DD_RSL
+# Communication with libdetox
+#export CFLAGS += -DD_LIBDETOX
+
+###############################################################################
+# CFLAGS and LDFLAGS(LIB,EXEC) for DEBUG builds                               #
+###############################################################################
+# default optimization -> -O2 for gcc
+# DEBUG mode seems not to work if statically linked -> TODO
+# libpthread depends on libc -> problems during static linking into EXEC, missing symbols (libgcc stuff?)
+# statically linking LIB & RTLD will result ins segfaults during startup
 ifdef DEBUG
-CFLAGS += -O2  -ggdb -Wall -Wextra -DDEBUG
-LDFLAGS = -lpthread -nostartfiles -ldl
+
+CFLAGS += -O2 -ggdb -Wall -Wextra -DDEBUG -fno-stack-protector -fno-omit-frame-pointer -nostdlib -ffreestanding -fno-tree-loop-distribute-patterns
+#CFLAGSEXEC +=
+#CFLAGSLIB +=
+#CFLAGSRTLD +=
+
+#LDLIBSEXEC = -l pthread
+LDFLAGSEXEC += -T link.lds -O1 -nostdlib
+
+#LDLIBSLIB = -l pthread
+LDFLAGSLIB += -O1 -z nodelete -z nodlopen -z nodump -z noexecstack -z relro -z now -z initfirst
+
+#LDLIBSRTLD = -l pthread
+LDFLAGSRTLD += -T linkRTLD.lds -O1 -z nodelete -z nodlopen -z nodump -z noexecstack -z relro -z now -z initfirst
+
 endif
 
+
+###############################################################################
+# CFLAGS and LDFLAGS(LIB,EXEC) for PRODUCTION builds                          #
+###############################################################################
+# default optimization -> -O3 for gcc & -O1 for ld
 ifdef PRODUCTION
-CFLAGS += -O3 -ggdb -Wall -Wextra -DNDEBUG
-LDFLAGS += -O1 -nodefaultlibs -lgcc -l:/lib/ld-linux.so.2 \
-       -nostartfiles \
-       -fvisibility-inlines-hidden -Wl,-x,-z,nodelete,-z,nodlopen,-z,nodump 
-#       -Wl,-z,-noexecstack -nostartfiles
+
+CFLAGS += -O3 -g -Wall -DNDEBUG -fno-stack-protector -fno-omit-frame-pointer -nostdlib -ffreestanding -fno-tree-loop-distribute-patterns
+#CFLAGSEXEC +=
+CFLAGSLIB += -UVERIFY_CFTX -UINLINE_PLT_CALLS -UPRINT_CFTX
+#CFLAGSRTLD +=
+
+# TODO:
+# __stack_chk_fail_local -> symbol is missing if compiled without -fno-stack-protector
+# link __stack_chk_fail_local or implement __stack_chk_fail_local
+
+# TODO:
+# remove -fno-omit-frame-pointer and merge fbt_mmap/sl_mmap
+LDFLAGSEXEC += -T link.lds -O1 -nostdlib
+LDFLAGSLIB += -O1 -nostdlib -z nodelete -z nodlopen -z nodump -z noexecstack -z relro -z now -z initfirst
+LDFLAGSRTLD += -T linkRTLD.lds -O1 -nostdlib -z nodelete -z nodlopen -z nodump -z noexecstack -z relro -z now -z initfirst
+
 endif
-
-# build i386 code
-I386 = -m32
-CFLAGS += $(I386)
-
-# Path to the assembly generation DSL preprocessing step
-DSL_PATH=../DSL/src/parse.py
-
-
-# name of the library
-LIBNAME=libfastbt
-# major version
-LIBVERS=0
-# minor version
-LIBMIN=3.1
-

@@ -23,7 +23,7 @@ CXXFLAGS    = ${WARNOPT} ${IPATH} -O0 -g
 # Libraries
 LIBS      = ${LDPATH}
 
-TARGETS = example libstm_table_gen
+TARGETS = example libstm_table_gen true
 
 all: $(TARGETS)
 
@@ -43,3 +43,5 @@ example:	$(SRC_DIR)/table_gen.o $(SRC_DIR)/instr_analyse_helpers.o example.o
 libstm_table_gen:	$(SRC_DIR)/table_gen.o $(SRC_DIR)/instr_analyse_helpers.o libstm_table_gen.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
+true:	$(SRC_DIR)/table_gen.o $(SRC_DIR)/instr_analyse_helpers.o true.o
+	$(CXX) $(CXXFLAGS) -o $@ $^

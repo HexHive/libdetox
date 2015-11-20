@@ -2,15 +2,21 @@ Hall of fame:
 =============
 
 Mathias Payer <mathias.payer@nebelwelt.net>
-- Project leader and coordinator
-- Worked on fastBT and trustBtOK since 2007
-- Implemented and authored most of the optimizations
-  - Fast indirect jump and prediction
-  - Fast indirect call and prediction
-  - Adaptive combination of prediction and fast optimization
-  - Return cache and fast return
-- Implemented the new disassembler component
-- Primary human debugger
+* Project lead and coordinator
+* Worked on fastBT and trustBT since 2007
+* Implemented and authored most of the optimizations
+  * Fast indirect jump and prediction
+  * Fast indirect call and prediction
+  * Adaptive combination of prediction and fast optimization
+  * Return cache and fast return
+* Implemented the new disassembler component
+* Primary human debugger
+
+Antonio Barresi <barresi.antonio@gmail.com>
+* Implemented the Lockdown CFI checks
+* Reorganization of the source code
+* Evaluation of the mechanism
+* Security measurements of the Lockdown mechanism
 
 
 Former developers:

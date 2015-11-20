@@ -4,7 +4,7 @@ Frequently asked questions:
 * What are the different trampolines? How are they used?
 * What is back patching?
 * Using threads: my program segfaults after a clone syscall (0x78)
-* Comparison with related work (TODO)
+* Comparison with related work: see papers/documentation
 * How to hijack control flow (TODO)
 * 32bit libraries and 64bit applications (TODO)
 
@@ -13,17 +13,16 @@ What kind of documentation exists?
 There are a couple of papers that describe the binary translator and the
 security framework:
 * Requirements for Fast Binary Translation (AMAS-BT'09)
-  http://nebelwelt.net/research/publications/amas-bt09/
 * Generating Low-Overhead Dynamic Binary Translators (SYSTOR'10)
-  http://doi.acm.org/10.1145/1815695.1815724
-  http://nebelwelt.net/research/publications/systor10/
 * Fine-Grained User-Space Security Through Virtualization (VEE'11)
-  https://portal.acm.org/citation.cfm?doid=1952682.1952703
-  http://nebelwelt.net/research/publications/vee11/
+* Safe Loading - A Foundation for Secure Execution of Untrusted Programs (Oakland'12)
+* Protecting Applications Against TOCTTOU Races by User-Space Caching of File Metadata (VEE'12)
+* Lightweight Memory Tracing (ATC'13)
+* Hot-Patching a Web Server: a Case Study of ASAP Code Repair (PST'13)
+* Fine-Grained Control-Flow Integrity through Binary Hardening (DIMVA'15)
+* Papers are available at http://nebelwelt.net/publications
 * Source code documentation with doxygen
   Execute doxygen doxygen.config in the root directory of libdetox
-* See the project page for more information
-  http://nebelwelt.net/projects/libdetox/
 
 
 What are the different trampolines? How are they used?
