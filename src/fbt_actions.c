@@ -6,10 +6,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-04-13 04:31:40 -0700 (Fri, 13 Apr 2012) $
- * $LastChangedDate: 2012-04-13 04:31:40 -0700 (Fri, 13 Apr 2012) $
- * $LastChangedBy: kravinae $
- * $Revision: 1286 $
+ * $Date: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
+ * $LastChangedDate: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
+ * $LastChangedBy: payerm $
+ * $Revision: 1591 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -56,7 +56,7 @@
 #include "fbt_restart_transaction.h"
 #endif /* TRACK_CFTX */
 
-enum translation_state action_none(struct translate *ts) {
+enum translation_state action_none(struct translate *ts __attribute__((unused))) {
   PRINT_DEBUG_FUNCTION_START("action_none(*ts=%p)", ts);
   /* do nothing */
   PRINT_DEBUG_FUNCTION_END("-> neutral");
@@ -123,7 +123,7 @@ enum translation_state action_warn(struct translate *ts) {
   return action_copy(ts);
 }
 
-enum translation_state action_fail(struct translate *ts) {
+enum translation_state action_fail(struct translate *ts __attribute__((unused))) {
   PRINT_DEBUG_FUNCTION_START("action_fail(*ts=%p)", ts);
   PRINT_DEBUG("unhandled opcode encountered in TU at %p: %s", ts->cur_instr,
               MEMDUMP(ts->cur_instr, ts->next_instr - ts->cur_instr));
@@ -137,7 +137,6 @@ enum translation_state action_fail(struct translate *ts) {
   llprintf("\nERROR: unhandled opcode encountered in TU at %p\nBtOX will "
            "exit now!\n", ts->cur_instr);
 #endif
-
 #if defined(SLEEP_ON_FAIL)
   llprintf("Something bad happened (action_fail). Attach a debugger!\n");
   while (1);
@@ -887,21 +886,35 @@ enum translation_state action_call_indirect(struct translate *ts) {
         *(transl_addr++) = 0x4;
       }
       /* 1B displacement with %esp -> call *0xff(%esp) */
+      /* NOTE: there is the special case *0x7c(%esp)
+       * 		- 0x7c+4 = 0x80 = 128 
+       * 		- 0x80 has to be extended to a 4b displacement, else it will be translated to a "pushl  -0x80(%esp)"
+       * 		- see examples below
+       * 80483bf:	ff b4 24 80 00 00 00 	pushl  0x80(%esp)
+	   * 80483c6:	ff 74 24 80          	pushl  -0x80(%esp) */
       if (((modrm>>6)&0x3)==1) {
         /* just change the following displacement and add 4 to it! */
-        char before, after;
-        before = *(transl_addr-1);
-        after = before + 4;
-        assert(before < after);
-        *(transl_addr-1) = (*(transl_addr-1))+4;
+        #if defined(ASSERTIONS)
+        assert((*(transl_addr-1)) < ((*(transl_addr-1)) + 4));
+        #endif
+        if(*(transl_addr-1) == 0x7c) {
+			*(transl_addr-1) = (*(transl_addr-1))+4;
+			/* Add the additional 3x0x00 bytes */
+			*transl_addr++ = 0x00;
+			*transl_addr++ = 0x00;
+			*transl_addr++ = 0x00;
+			/* As we extended the displacement from 1B to 4B we need to adapt the ModRM byte
+			 * i.e. Mod = 01 to Mod = 10 so that ModRM == 0xb4 (0x74 before) */
+			*(transl_addr-6) = 0xb4;
+		}
+        else {
+			*(transl_addr-1) = (*(transl_addr-1))+4;
+		}
       }
       /* 4B displacement with %esp -> call *0xaabbccdd(%esp) */
       if (((modrm>>6)&0x3)==2) {
         /* just change the following displacement and add 4 to it! */
-        long before, after;
-        before = *((long*)(transl_addr-4));
-        after = before + 4;
-        assert(before < after);
+        assert((*((long*)(transl_addr-4))) < ((*((long*)(transl_addr-4)))+4));
         *((long*)(transl_addr-4)) = (*((long*)(transl_addr-4)))+4;
       }
       /* Mod=11 with SIB not handled for calls -> assert & die */

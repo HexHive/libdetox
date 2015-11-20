@@ -5,8 +5,8 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-01-19 11:17:12 -0800 (Thu, 19 Jan 2012) $
- * $LastChangedDate: 2012-01-19 11:17:12 -0800 (Thu, 19 Jan 2012) $
+ * $Date: 2012-01-19 20:17:12 +0100 (Thu, 19 Jan 2012) $
+ * $LastChangedDate: 2012-01-19 20:17:12 +0100 (Thu, 19 Jan 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1195 $
  *

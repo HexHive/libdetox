@@ -5,8 +5,8 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-01-18 07:44:48 -0800 (Wed, 18 Jan 2012) $
- * $LastChangedDate: 2012-01-18 07:44:48 -0800 (Wed, 18 Jan 2012) $
+ * $Date: 2012-01-18 16:44:48 +0100 (Wed, 18 Jan 2012) $
+ * $LastChangedDate: 2012-01-18 16:44:48 +0100 (Wed, 18 Jan 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1189 $
  *
@@ -232,11 +232,15 @@ void fbt_bootstrap_thread(struct thread_local_data *tld) {
 #endif /* ONLINE_PATCHING */
 }
 
-void internal_sighandler(int signal, fbt_siginfo_t *siginfo, void *ucontext) {
+void internal_sighandler(int signal __attribute__((unused)),
+												 fbt_siginfo_t *siginfo __attribute__((unused)),
+												 void *ucontext __attribute__((unused))) {
   //struct thread_local_data *tld = (*(struct thread_local_data **)&siginfo->value);
 }
 
-void sighandler(int signal, fbt_siginfo_t *siginfo, void *ucontext) {
+void sighandler(int signal __attribute__((unused)),
+								fbt_siginfo_t *siginfo __attribute__((unused)),
+								void *ucontext __attribute__((unused))) {
   /* TODO:
      - check signal number
      - check if in translated code or not (add trampoline)
@@ -577,8 +581,13 @@ static enum syscall_auth_response auth_exit(struct thread_local_data *tld,
 
 static enum syscall_auth_response __attribute__((unused))
 debug_syscall(struct thread_local_data *tld __attribute__((unused)),
-              ulong_t syscall_nr, ulong_t arg1, ulong_t arg2, ulong_t arg3,
-              ulong_t arg4, ulong_t arg5, ulong_t *arg6, ulong_t is_sysenter,
+              ulong_t syscall_nr __attribute__((unused)), 
+							ulong_t arg1 __attribute__((unused)), 
+							ulong_t arg2 __attribute__((unused)),
+							ulong_t arg3 __attribute__((unused)),
+              ulong_t arg4 __attribute__((unused)),
+							ulong_t arg5 __attribute__((unused)),
+							ulong_t *arg6 __attribute__((unused)), ulong_t is_sysenter,
               ulong_t *retval __attribute__((unused))) {
   if (is_sysenter) {
     #if defined(DEBUG)
@@ -943,7 +952,7 @@ void fbt_init_syscalls(struct thread_local_data *tld) {
  * and the hashtable.
  * TODO: handle dlsym, dlvsym, dl_iterate_phdr as well
  **/
-__attribute__((visibility("default"))) int dlclose(void *handle) {
+__attribute__((visibility("default"))) int dlclose(void *handle __attribute__((unused))) {
   #if defined(DEBUG)
   llprintf("fbt_syscall.c: dlclose intercepted (handle: 0x%p)!\n", handle);
   #endif

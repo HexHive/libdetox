@@ -6,8 +6,8 @@
  *
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-01-12 07:45:01 -0800 (Thu, 12 Jan 2012) $
- * $LastChangedDate: 2012-01-12 07:45:01 -0800 (Thu, 12 Jan 2012) $
+ * $Date: 2012-01-12 16:45:01 +0100 (Thu, 12 Jan 2012) $
+ * $LastChangedDate: 2012-01-12 16:45:01 +0100 (Thu, 12 Jan 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1167 $
  *
@@ -199,10 +199,10 @@
                    "addl $24, %%esp ;"                                  \
                    "popl %%ebx"                                         \
                    : "=a"(__res)                                        \
-                   : "0"(SYS_##name), "g"((long)(arg6)),                \
-                   "g"((long)(arg5)), "g"((long)(arg4)),                \
-                     "g"((long)(arg3)), "g"((long)(arg2)),              \
-                     "g"((long)(arg1))                                  \
+                   : "0"(SYS_##name), "gi"((long)(arg6)),                \
+                   "gi"((long)(arg5)), "gi"((long)(arg4)),                \
+                     "gi"((long)(arg3)), "q"((long)(arg2)),              \
+                     "gi"((long)(arg1))                                  \
                      : "memory")
 
 #define _syscallq(name,__res,errstr) do {                         \

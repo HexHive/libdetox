@@ -7,10 +7,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
- * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $Date: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
+ * $LastChangedDate: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
  * $LastChangedBy: payerm $
- * $Revision: 1134 $
+ * $Revision: 1591 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,7 +38,7 @@
 #include "fbt_libc.h"
 #include "fbt_llio.h"
 #include "fbt_mem_mgmt.h"
-#include "fbt_mem_pool.c"
+#include "fbt_mem_pool.h"
 #include "fbt_syscall.h"
 #include "libfastbt.h"
 #include "fbt_trampoline.h"

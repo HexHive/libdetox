@@ -1,7 +1,7 @@
 include ../Makedefs
 
 # activate optimizations
-CFLAGS += $(OPTFLAGS) -fno-stack-protector
+CFLAGS += -fno-stack-protector -fno-omit-frame-pointer
 
 # relro with global offset table protection
 LDFLAGS += -Wl,-z,relro,-z,now,-z,initfirst $(I386)
@@ -49,9 +49,9 @@ $(LIBNAME).so.$(LIBVERS).$(LIBMIN): *.h $(FILES)
 	
 	cp *.h $(GEN_DIR)
 
-	${CC} ${CFLAGS} $(LIBFLAGS) -I$(INCLUDEDIR) -combine -o libfastbt.o generated/patching/*.c generated/*.c
+	${CC} ${CFLAGS} $(LIBFLAGS) -I$(INCLUDEDIR) generated/patching/*.c generated/*.c
 	$(CC) -shared -Wl,-soname,$(LIBNAME).so.$(LIBVERS) -o \
-	$(LIBNAME).so.$(LIBVERS).$(LIBMIN) libfastbt.o $(LDFLAGS) 
+	$(LIBNAME).so.$(LIBVERS).$(LIBMIN) *.o $(LDFLAGS) 
 	cp $(LIBNAME).so.$(LIBVERS).$(LIBMIN) $(LIBDIR)
 
 	rm -R generated/

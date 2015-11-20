@@ -6,8 +6,8 @@
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  * @author Tobias Hartmann <tobi.hartmann@gmail.com>
  *
- * $Date: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
- * $LastChangedDate: 2011-12-30 05:24:05 -0800 (Fri, 30 Dec 2011) $
+ * $Date: 2011-12-30 14:24:05 +0100 (Fri, 30 Dec 2011) $
+ * $LastChangedDate: 2011-12-30 14:24:05 +0100 (Fri, 30 Dec 2011) $
  * $LastChangedBy: payerm $
  * $Revision: 1134 $
  *

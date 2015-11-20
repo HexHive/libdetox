@@ -5,10 +5,10 @@
  * Copyright (c) 2011 ETH Zurich
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-10-22 11:57:00 -0700 (Mon, 22 Oct 2012) $
- * $LastChangedDate: 2012-10-22 11:57:00 -0700 (Mon, 22 Oct 2012) $
- * $LastChangedBy: (local) $
- * $Revision: 1189M $
+ * $Date: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
+ * $LastChangedDate: 2013-02-13 23:03:12 +0100 (Wed, 13 Feb 2013) $
+ * $LastChangedBy: payerm $
+ * $Revision: 1591 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License

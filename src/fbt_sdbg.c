@@ -6,8 +6,8 @@
  * @author Jonas Pfefferle <jonaspf@student.ethz.ch>
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-01-18 07:44:48 -0800 (Wed, 18 Jan 2012) $
- * $LastChangedDate: 2012-01-18 07:44:48 -0800 (Wed, 18 Jan 2012) $
+ * $Date: 2012-01-18 16:44:48 +0100 (Wed, 18 Jan 2012) $
+ * $LastChangedDate: 2012-01-18 16:44:48 +0100 (Wed, 18 Jan 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1189 $
  *

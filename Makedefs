@@ -28,12 +28,12 @@ PRODUCTION = 1
 # This allows the user to attach a debugger to the running program
 # (e.g., gdb -p `pidof loader`)
 # defaukt: #export CFLAGS += -DSLEEP_ON_FAIL
-export CFLAGS += -DSLEEP_ON_FAIL
+CFLAGS += -DSLEEP_ON_FAIL
 
 # Should startup / shutdown messages be printed in debug mode?
 ##############################################################
 # default: #export CFLAGS += -DSILENT_STARTUP
-export CFLAGS += -DSILENT_STARTUP
+CFLAGS += -DSILENT_STARTUP
 
 
 ###############################################################################
@@ -47,7 +47,7 @@ export CFLAGS += -DSILENT_STARTUP
 # and consists of a single basic block then we inline the the complete basic
 # block and remove the call and return instructions to reduce overall overhead.
 # default: CFLAGS += -DINLINE_CALLS
-# CFLAGS += -DINLINE_CALLS
+CFLAGS += -DINLINE_CALLS
 
 # Add a predictor for indirect control flow transfers
 #####################################################
@@ -57,7 +57,7 @@ export CFLAGS += -DSILENT_STARTUP
 # the location of the indirect control flow transfer is dynamically rewritten
 # into a regular fast lookup.
 # default: CFLAGS += -DICF_PREDICT
-# CFLAGS += -DICF_PREDICT
+CFLAGS += -DICF_PREDICT
 
 # Fast (mapping-)cache lookup
 #############################
@@ -242,10 +242,11 @@ LDFLAGS = -lpthread -nostartfiles -ldl
 endif
 
 ifdef PRODUCTION
-CFLAGS += -O3 -Wall -g -DNDEBUG
+CFLAGS += -O3 -ggdb -Wall -Wextra -DNDEBUG
 LDFLAGS += -O1 -nodefaultlibs -lgcc -l:/lib/ld-linux.so.2 \
-       -fvisibility-inlines-hidden -Wl,-x,-z,nodelete,-z,nodlopen,-z,nodump \
-       -Wl,-z,-noexecstack -nostartfiles
+       -nostartfiles \
+       -fvisibility-inlines-hidden -Wl,-x,-z,nodelete,-z,nodlopen,-z,nodump 
+#       -Wl,-z,-noexecstack -nostartfiles
 endif
 
 # build i386 code
@@ -261,5 +262,5 @@ LIBNAME=libfastbt
 # major version
 LIBVERS=0
 # minor version
-LIBMIN=3.0
+LIBMIN=3.1
 

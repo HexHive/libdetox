@@ -166,8 +166,8 @@ struct OperandInfo computeOperandInfo(const unsigned int operandFlags,
 		const unsigned char tableFlags,
 		const unsigned char operandSize,
 		struct translate* ts,
-		unsigned int instr_len,
-		int print)
+		unsigned int instr_len __attribute__((unused)),
+		int print __attribute__((unused)))
 {
 	struct OperandInfo result;
 	result.valid = 1; // set to zero if we encounter an error
@@ -282,8 +282,8 @@ struct OperandInfo computeOperandInfo(const unsigned int operandFlags,
 		}
 #ifdef DEBUG
 		if (print) fllprintf(f,"0x");
-#endif
 		unsigned char *startaddr = (ts->cur_instr + instr_len - operandSize);
+#endif
 		switch (operandSize) {
 		case 1:
 #ifdef DEBUG
@@ -379,8 +379,11 @@ struct OperandInfo computeOperandInfo(const unsigned int operandFlags,
 				};
 				/* we have some compination of disp and register and maybe a sib
            escape */
-				/* offset for disp value */
-				int dispstarts = (MODRM_RM(modrm)==4) ? 2 : 1;
+#ifdef DEBUG
+			/* offset for disp value */
+			int dispstarts = (MODRM_RM(modrm)==4) ? 2 : 1;
+#endif 
+
 				switch (MODRM_MOD(modrm)) {
 				case 0:
 					if (MODRM_RM(modrm)==4 &&
@@ -613,7 +616,7 @@ void compute_instruction_register_usage(struct translate* ts,
 		instr->gp_registers_read |= ESP_BITS;
 		instr->gp_registers_written |= ESP_BITS;
 	}
-	if (ocf == OPCODEFL_DIV){
+	if (ocf == (OPCODEFL_DIV)){
 
 	}
 }

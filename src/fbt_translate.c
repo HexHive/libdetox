@@ -5,8 +5,8 @@
  *
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-01-14 12:34:20 -0800 (Sat, 14 Jan 2012) $
- * $LastChangedDate: 2012-01-14 12:34:20 -0800 (Sat, 14 Jan 2012) $
+ * $Date: 2012-01-14 21:34:20 +0100 (Sat, 14 Jan 2012) $
+ * $LastChangedDate: 2012-01-14 21:34:20 +0100 (Sat, 14 Jan 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1171 $
  *

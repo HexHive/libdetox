@@ -6,8 +6,8 @@
  * @author Tobias Hartmann <tobi.hartmann@gmail.com>
  * @author Mathias Payer <mathias.payer@nebelwelt.net>
  *
- * $Date: 2012-04-13 04:31:40 -0700 (Fri, 13 Apr 2012) $
- * $LastChangedDate: 2012-04-13 04:31:40 -0700 (Fri, 13 Apr 2012) $
+ * $Date: 2012-04-13 13:31:40 +0200 (Fri, 13 Apr 2012) $
+ * $LastChangedDate: 2012-04-13 13:31:40 +0200 (Fri, 13 Apr 2012) $
  * $LastChangedBy: kravinae $
  * $Revision: 1286 $
  *
