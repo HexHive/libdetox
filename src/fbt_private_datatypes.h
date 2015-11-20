@@ -99,8 +99,8 @@ extern void *fbt_random_tld_offset;
  * All free trampolines are kept in this trampoline-free-list
  */
 struct trampoline_entry {
-	struct trampoline_entry *next;
-	uint32_t allocMem[4];
+  struct trampoline_entry *next;
+  uint32_t allocMem[4];
 };
 typedef struct trampoline_entry trampoline_entry_t;
 
@@ -109,20 +109,20 @@ typedef struct trampoline_entry trampoline_entry_t;
  * we flush the translation cache
  */
 struct cache_free_list {
-    void *cache_block;
-    void *cache_end;
-    struct cache_free_list *next;
+  void *cache_block;
+  void *cache_end;
+  struct cache_free_list *next;
 };
 typedef struct cache_free_list cache_free_list_t;
 
 #ifdef FBT_RET_CACHE
 #define RET_CACHE_NR_ENTRIES 256
 struct ret_cache_entry {
-    void *ret_addr;
-    void *backpatch;
-    void *src;
-    void *retprelude;
-    struct ret_cache_entry *next;
+  void *ret_addr;
+  void *backpatch;
+  void *src;
+  void *retprelude;
+  struct ret_cache_entry *next;
 };
 typedef struct ret_cache_entry ret_cache_entry_t;
 #endif
@@ -135,43 +135,43 @@ typedef struct ret_cache_entry ret_cache_entry_t;
  * WARNING: code in fbt_asm_function.S depends on the layout of this structure!
  */
 struct ret_stack_entry {
-    void *transl_addr;
-    void *orig_addr;
+  void *transl_addr;
+  void *orig_addr;
 };
 typedef struct ret_stack_entry ret_stack_entry_t;
 #endif
 
 struct alloc_chunk {
-    struct rb_node node;
-    unsigned char flags;
-    struct alloc_chunk *next;
-    struct alloc_chunk *next_lockdown;
+  struct rb_node node;
+  unsigned char flags;
+  struct alloc_chunk *next;
+  struct alloc_chunk *next_lockdown;
 };
 
 struct mem_alloc_data {
-    int free_bytes;
-    void *mem_ptr;
-    int free_pers_bytes;
-    void *pers_mem_ptr;
+  int free_bytes;
+  void *mem_ptr;
+  int free_pers_bytes;
+  void *pers_mem_ptr;
 
-    /**
-     * linked list; holds non-persistent allocated memory that will be freed
-     * at the end of the thread.
-     */
-    struct alloc_chunk *chunks;
-    /**
-     * red-black tree; holds all chunks of allocated memory for fast lookup. It
-     * actually contains elements of type struct alloc_chunk, which "inherits"
-     * from struct rb_node by having one as its first field.
-     */
-    struct rb_node *chunks_tree;
+  /**
+   * linked list; holds non-persistent allocated memory that will be freed
+   * at the end of the thread.
+   */
+  struct alloc_chunk *chunks;
+  /**
+   * red-black tree; holds all chunks of allocated memory for fast lookup. It
+   * actually contains elements of type struct alloc_chunk, which "inherits"
+   * from struct rb_node by having one as its first field.
+   */
+  struct rb_node *chunks_tree;
 
 #ifdef SECU_MPROTECT_IDS
-    /**
-     * chunks that need to be write protected before returning control to the
-     * guest code.
-     */
-    struct alloc_chunk *lockdown_list;
+  /**
+   * chunks that need to be write protected before returning control to the
+   * guest code.
+   */
+  struct alloc_chunk *lockdown_list;
 #endif /* SECU_MPROTECT_IDS */
 };
 
@@ -181,11 +181,11 @@ struct mem_alloc_data {
  * Linked list of jumptable base addresses and their jumptables in memory.
  */
 struct jumptable_list {
-	unsigned int orig_base;
-	unsigned char **table_base;
-	char index_reg;
-	struct jumptable_list *next;
-	unsigned char *fixup;
+  unsigned int orig_base;
+  unsigned char **table_base;
+  char index_reg;
+  struct jumptable_list *next;
+  unsigned char *fixup;
 };
 typedef struct jumptable_list jumptable_list_t;
 #endif
@@ -196,89 +196,33 @@ typedef struct jumptable_list jumptable_list_t;
  * WARNING: code in fbt_asm_function.S depends on the layout of this structure!
  */
 struct thread_local_data {
-    void *hashtable;                    /* association between addresses in TU and addresses in CCF */
-    void *tcache_end;                   /* pointer to byte after allocated memory. */
-    trampoline_entry_t *trampoline;     /* the next free trampoline */
-    cache_free_list_t *cache_list;      /* linked list of all allocated cache and trampoline blocks. */
-    struct mem_alloc_data mem_alloc;    /* struct that keeps track of allocated memory */
-    translate_struct_t ts;              /* the struct which is used to hold the data for translation */
-    void *ind_jump_target;              /* variable to hold the address of translated indirect jump and ret targets */
-    void *ret_jumpback_tramp;           /* address of a jump-back trampoline that is jumped to by overwriting the RIP */
-    // remove or implement
-    // void *translate_stack;              /* stack for all bt internal functions */
-    // void *rip;                          /* return instruction pointer used for fbt -> prog transition */
-    unsigned int *ind_jump_trampoline;  /* fast version of indirect jumps (target is pushed before, remaining code is here) */
-    unsigned int *ind_call_trampoline;  /* fast version of indirect calls/rets (target is pushed before, remaining code is here) */
+  void *hashtable;                    /* association between addresses in TU and addresses in CCF */
+  void *tcache_end;                   /* pointer to byte after allocated memory. */
+  trampoline_entry_t *trampoline;     /* the next free trampoline */
+  cache_free_list_t *cache_list;      /* linked list of all allocated cache and trampoline blocks. */
+  struct mem_alloc_data mem_alloc;    /* struct that keeps track of allocated memory */
+  translate_struct_t ts;              /* the struct which is used to hold the data for translation */
+  void *ind_jump_target;              /* variable to hold the address of translated indirect jump and ret targets */
+  void *ret_jumpback_tramp;           /* address of a jump-back trampoline that is jumped to by overwriting the RIP */
+  unsigned int *ind_jump_trampoline;  /* fast version of indirect jumps (target is pushed before, remaining code is here) */
+  unsigned int *ind_call_trampoline;  /* fast version of indirect calls/rets (target is pushed before, remaining code is here) */
 #ifdef FBT_RET_CACHE
-    unsigned int *retcache;             /* cache of return addresses, set by the corresponding call instructions */
-    unsigned int *retcache_jump;        /* small trampoline that defaults to an ind call dispatch */
-    ret_cache_entry_t *untrans_calls;   /* call locations without a matching return target */
-    ret_cache_entry_t *trans_calls;   /* call locations without a matching return target */
+  unsigned int *retcache;             /* cache of return addresses, set by the corresponding call instructions */
+  unsigned int *retcache_jump;        /* small trampoline that defaults to an ind call dispatch */
+  ret_cache_entry_t *untrans_calls;   /* call locations without a matching return target */
+  ret_cache_entry_t *trans_calls;   /* call locations without a matching return target */
 #endif
-    
+
 #ifdef FBT_RET_STACK
-    ret_stack_entry_t *translated_call_stack;
-    ret_stack_entry_t *translated_call_stack_end;
-    ret_stack_entry_t *translated_call_stack_tos;
+  ret_stack_entry_t *translated_call_stack;
+  ret_stack_entry_t *translated_call_stack_end;
+  ret_stack_entry_t *translated_call_stack_tos;
 #endif
 #ifdef FBT_IND_JUMP_MULTIPLE
-    jumptable_list_t *jumptable_list; /* the jumptable linked list for the switch jumptable optimization */
+  jumptable_list_t *jumptable_list; /* the jumptable linked list for the switch jumptable optimization */
 #endif
 };
 
 #endif // language c
 
-/*
- * Define structure offset constants for use in assembler.
- */
-// #define OFFSETOF_RET_STACK_ENTRY_TRANSL_ADDR 0
-// #define OFFSETOF_RET_STACK_ENTRY_ORIG_ADDR 4
-//
-// #define OFFSETOF_TS_TRANSL_INSTR 16
-//
-// /* do not change this value, asm depends on it! */
-// #define OFFSETOF_TLD_HASHTABLE 0
-//
-// #define OFFSETOF_TLD_TS 16
-// #define OFFSETOF_TLD_TS_TRANSL_INSTR (OFFSETOF_TLD_TS + OFFSETOF_TS_TRANSL_INSTR)
-//
-// #if  defined(FBT_INLINE_CALLS)
-// #define OFFSETOF_TLD_TRANSLATED_CALL_STACK_END 56
-// #define OFFSETOF_TLD_TRANSLATED_CALL_STACK_TOS 60
-// #else
-// #define OFFSETOF_TLD_TRANSLATED_CALL_STACK_END 52
-// #define OFFSETOF_TLD_TRANSLATED_CALL_STACK_TOS 56
-// #endif
-//
-// #define OFFSETOF_TCACHE_ENTRY_SRC 0
-// #define OFFSETOF_TCACHE_ENTRY_DST 4
-//
-// #define SIZEOF_HASHTABLE_ENTRY 8
-
-// #if !defined(_ASSEMBLER_)
-
-/*
- * Check the correctness of the structure offset constants at compile time by the C compiler.
- */
-// #define static_assert(cond)  do { enum { static_assert_failed = 1/(cond) }; } while (0)
-
-// inline static void static_assert_structure_offsets() {
-// #ifdef FBT_RET_STACK
-// 	static_assert(OFFSETOF_RET_STACK_ENTRY_TRANSL_ADDR == offsetof(struct ret_stack_entry, transl_addr));
-// 	static_assert(OFFSETOF_RET_STACK_ENTRY_ORIG_ADDR == offsetof(struct ret_stack_entry, orig_addr));
-// 	static_assert(OFFSETOF_TLD_TRANSLATED_CALL_STACK_END == offsetof(struct thread_local_data,
-// 	                           translated_call_stack_end));
-// 	static_assert(OFFSETOF_TLD_TRANSLATED_CALL_STACK_TOS == offsetof(struct thread_local_data,
-//                                    translated_call_stack_tos));
-// #endif
-// 	static_assert(OFFSETOF_TLD_TS == offsetof(struct thread_local_data, ts));
-// 	static_assert(OFFSETOF_TLD_HASHTABLE == offsetof(struct thread_local_data, hashtable));
-//
-// 	static_assert(OFFSETOF_TS_TRANSL_INSTR == offsetof(translate_struct_t, transl_instr));
-//
-// 	static_assert(OFFSETOF_TCACHE_ENTRY_SRC == offsetof(struct tcache_entry, src));
-// 	static_assert(OFFSETOF_TCACHE_ENTRY_DST == offsetof(struct tcache_entry, dst));
-// }
-//
-// #endif // language c
-#endif
+#endif  // FBT_PRIVATE_DATATYPES_H

@@ -1,7 +1,7 @@
 /**
  * This header file contains all macros needed in fbt_actions.c to
  * generate the machine code used in the ccfs
- * 
+ *
  * If FBT is compiled with statistics, then they will be collected here.
  *
  * Copyright (c) 2008 ETH Zurich

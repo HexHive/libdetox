@@ -82,9 +82,9 @@ int fbt_strncmp(const char *s1, const char *s2, int n);
 		     : "a"(SYS_exit)	   \
 		     : "memory" )
 
-#define fbt_suicide_str(str)			\
+#define fbt_suicide_str(str)	do {		\
     fllwrite(STDOUT_FILENO, str);		\
-    fbt_suicide()
+    fbt_suicide(); } while (0)
 
 /* file management and I/O */
 #define fbt_open(pathname, flags, mode, res)				\
@@ -138,7 +138,8 @@ int fbt_strncmp(const char *s1, const char *s2, int n);
 		     "addl $24, %%esp\n\t"				\
 		     "popl %%ebx"					\
 		     : "=a"(res)					\
-		     : "0"(SYS_mmap), "g"(offset), "g"(fd), "g"(flags), "g"(prot), "g"(length), "g"(addr) \
+		     : "0"(SYS_mmap), "g"(offset), "g"(fd), "g"(flags), \
+                       "g"(prot), "g"(length), "g"(addr)                \
 		     : "memory")
 
 #define fbt_munmap(addr, length, res)				\

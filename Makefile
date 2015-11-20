@@ -33,13 +33,14 @@ export CFLAGS += -Winline -finline-limit=30000 --param inline-unit-growth=512 --
 # use special linker option to hide all unneded symbols
 #-fvisibility=hidden
 
+export CFLAGS += -m32
 
 # relro without global offset table protection 
 # (default on ubuntu 8.10 and other recent distributions)
 #export LDFLAGS += -Wl,-z,relro
 
 # relro with global offset table protection
-export LDFLAGS += -Wl,-z,relro,-z,now
+export LDFLAGS += -Wl,-z,relro,-z,now -m32
 
 #export CFLAGS += -DFBT_STATISTIC
 
@@ -80,7 +81,7 @@ export CFLAGS += -DLDPRELOAD
 export CFLAGS += -DHIJACKCONTROL
 
 # should we make it possible to attach a debugger in case of a segfault?
-#export CFLAGS += -DSLEEP_ON_FAIL
+export CFLAGS += -DSLEEP_ON_FAIL
 
 # should we force a pause on startup to make it possible to attach a debugger 
 # at the beginning?
@@ -141,7 +142,7 @@ export CFLAGS += -DSECU_NX_PROG
 # secuBT: write-protect all internal data structures before returning control
 # to the guest code. This makes jailbreak attacks much more difficult, but 
 # has a detrimental effect on performance.
-#export CFLAGS += -DSECU_MPROTECT_IDS
+export CFLAGS += -DSECU_MPROTECT_IDS
 
 
 #export CFLAGS += -DPBREAKGDB

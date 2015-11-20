@@ -8,18 +8,18 @@
 
 /* entry in the list of loaded libraries */
 struct lib_list_entry {
-    void *base_addr;
-    int length;
-    char *name;
+  void *base_addr;
+  int length;
+  char *name;
 };
 
 /* info about a memory region */
 struct mem_info {
-    struct rb_node node;    // red-black tree node, contains addr_begin and addr_end
-    const char* obj_name;   // name of the associated object (such as a library)
-    const char* sec_name;   // name of the section in an object
-    char flags;             // flags: read, write, execute, internal
-    uint16_t lib_index;     // index in the library list
+  struct rb_node node;    // red-black tree node, contains addr_begin and addr_end
+  const char* obj_name;   // name of the associated object (such as a library)
+  const char* sec_name;   // name of the section in an object
+  char flags;             // flags: read, write, execute, internal
+  uint16_t lib_index;     // index in the library list
 };
 
 void fbt_memprotect_init();

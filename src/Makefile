@@ -19,7 +19,7 @@ LIBNAME=libfastbt.so
 # major version
 LIBVERS=0
 # minor version
-LIBMIN=2.1
+LIBMIN=2.2
 
 LIBDIR=../lib
 # place for the static library

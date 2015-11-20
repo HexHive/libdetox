@@ -1,3 +1,11 @@
+fastBT 0.2.2 - 2011-01-05
+- Added a couple of new instructions and fixed the representation tables
+  - especially 660f71, 660f72, 660f73 prefixed ones
+- Adapted formating and used astyle to sync identation
+- Added lots of additional tables
+  - 0x0f38 and 0x0f3b (including 0x66 and 0xf2 prefixes for these tables)
+    these boil down to tables A4 and A5 of the intel instruction manual
+
 fastBT 0.2.1 - 2010-03-25
 - Fixed a bug in the opcode tables (added correct src operands for movs* and cmps*)
 - Fixup of includes (removed lots of <> includes and some "" includes)

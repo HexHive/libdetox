@@ -10,7 +10,7 @@ top level Makefile. After the correct settings are selected use "make" to
 generate the library.
 
 For a test run you might use:
-LD_PRELOAD=./src/libfastbt.so.0.2.0 /usr/lib/openoffice/program/soffice.bin 
+LD_PRELOAD=./src/libfastbt.so.0.2.2 /usr/lib/openoffice/program/soffice.bin 
 
 
 For 64bit systems, you need the 32bit libc: "aptitude install libc6-dev-i386.

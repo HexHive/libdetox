@@ -40,31 +40,37 @@
  * returns, the execution will continue at the supplied address
  * @param rip_address the address where the return instruction pointer shall point to
  */
-/*extern*/ void change_rip(void* rip_address);
+/*extern*/
+void change_rip(void* rip_address);
 
-/*extern*/ void set_return_to_translated_asm(void);
+/*extern*/
+void set_return_to_translated_asm(void);
 
-/*extern*/ void set_return_to_translated_asm_nostackframe(void);
+/*extern*/
+void set_return_to_translated_asm_nostackframe(void);
 
 /**
  * makes an jump to 'original_addr' in the translated code
  * @param original_addr pointer into the original code. will be translated if not already done so
  */
-/*extern*/ void ind_jump(thread_local_data_t *tld, void *original_addr);
+/*extern*/
+void ind_jump(thread_local_data_t *tld, void *original_addr);
 
 /**
  * makes an jump to 'original_addr' in the translated code
  * Used in signal handling trampolines to get to a tld
  * @param original_addr pointer into the original code. will be translated if not already done so
  */
-/*extern*/ void ind_jump_signal(thread_local_data_t *tld, void *original_addr);
+/*extern*/
+void ind_jump_signal(thread_local_data_t *tld, void *original_addr);
 
 /**
  * makes an jump to 'original_addr' in the translated code and removes 'num_bytes' from the stack
  * @param num_bytes the number of bytes which should be removed from the stack by this function
  * @param original_addr pointer into the original code. will be translated if not already done so.
  */
-/*extern*/ void ind_jump_remove(thread_local_data_t *tld, unsigned int num_bytes, void *original_addr);
+/*extern*/
+void ind_jump_remove(thread_local_data_t *tld, unsigned int num_bytes, void *original_addr);
 
 
 /**
@@ -74,7 +80,8 @@
  * @param original_addr the address to jump to
  * @param origin pointer to the offset of the jump to the trampoline
  */
-/*extern*/ void ind_jump_backpatch(thread_local_data_t *tld, void *original_addr, void *origin);
+/*extern*/
+void ind_jump_backpatch(thread_local_data_t *tld, void *original_addr, void *origin);
 
 /**
  * used for FBT_RET_STACK optimization.
@@ -84,12 +91,13 @@
  * @param original_addr the address to jump to
  * @param origin pointer to the offset of the jump to the trampoline
  */
-/*extern*/ void ind_jump_backpatch_abs(thread_local_data_t *tld, void *original_addr, void *origin);
+/*extern*/
+void ind_jump_backpatch_abs(thread_local_data_t *tld, void *original_addr, void *origin);
 
 /**
  * used for chaining with fallthrough optimization where possible.
- * The jump to the trampoline is either backpatched to point to the translated code if a translation 
- * of the next code block already existed, or overwritten by the next code block if it still had 
+ * The jump to the trampoline is either backpatched to point to the translated code if a translation
+ * of the next code block already existed, or overwritten by the next code block if it still had
  * to be translated.
  * Also frees the trampoline slot which was used to jump to this instruction.
  * @see ind_jump_backpatch
@@ -98,37 +106,44 @@
  * @param original_addr the address to jump to
  * @param origin pointer to the offset of the jump to the trampoline
  */
-/*extern*/ void ind_jump_chaining(thread_local_data_t *tld, void *original_addr, void *origin);
+/*extern*/
+void ind_jump_chaining(thread_local_data_t *tld, void *original_addr, void *origin);
 
 /**
  * makes an jump to 'original_addr' in the translated code
  * Uses the ind_jump backpatch routine for jmp r/m32 or call r/m32 optimizations
  * @param original_addr pointer into the original code. will be translated if not already done so
  */
-/*extern*/ void fix_ind_call_prediction(void *cmptarget, thread_local_data_t *tld, void *original_addr);
-/*extern*/ void fix_ind_call_prediction_fast(thread_local_data_t *tld, void *original_addr);
+/*extern*/
+void fix_ind_call_prediction(void *cmptarget, thread_local_data_t *tld, void *original_addr);
+/*extern*/
+void fix_ind_call_prediction_fast(thread_local_data_t *tld, void *original_addr);
 
 /**
  * makes a jump to 'original_addr' in the translated code
  * The indjump prediction fixup routine.
  * @param original_addr pointer into the original code. will be translated if not already done so
  */
-/*extern*/ void fix_ind_jmp_prediction(void *cmptarget, thread_local_data_t *tld, void *original_addr);
-/*extern*/ void tcache_find_fast(thread_local_data_t *tld, void *original_addr); // just a prototype definition so tcache_find_fast() can be used in fbt_actions.c
+/*extern*/
+void fix_ind_jmp_prediction(void *cmptarget, thread_local_data_t *tld, void *original_addr);
+/*extern*/
+void tcache_find_fast(thread_local_data_t *tld, void *original_addr); // just a prototype definition so tcache_find_fast() can be used in fbt_actions.c
 
 /**
  * returns to 'original_addr' in the translated code
  * @param eflags the saved EFLAGS register which should be restored by this function
  * @param original_addr pointer into the original code. will be translated if not already done so.
   */
-/*extern*/ void fix_ret_predict(void *cmptarget, thread_local_data_t *tld);
+/*extern*/
+void fix_ret_predict(void *cmptarget, thread_local_data_t *tld);
 
 /**
  * returns to 'original_addr' in the translated code
  * @param eflags the saved EFLAGS register which should be restored by this function
  * @param original_addr pointer into the original code. will be translated if not already done so.
   */
-/*extern*/ void ret_predict(thread_local_data_t *tld, unsigned int eflags, void *original_addr);
+/*extern*/
+void ret_predict(thread_local_data_t *tld, unsigned int eflags, void *original_addr);
 
 /**
  * returns to 'original_addr' in the translated code and removes 'num_bytes' from the stack
@@ -136,13 +151,15 @@
  * @param eflags the saved EFLAGS register which should be restored by this function
  * @param original_addr pointer into the original code. will be translated if not already done so.
   */
-/*extern*/ void ret_predict_remove(thread_local_data_t *tld, unsigned int num_bytes, unsigned int eflags, void *original_addr);
+/*extern*/
+void ret_predict_remove(thread_local_data_t *tld, unsigned int num_bytes, unsigned int eflags, void *original_addr);
 
 /**
  * called if FBT_RET_STACK shadow stack gets out of synch with real stack.
  * Tries to resynch the shadow stack by discarding elements or calling tcache_find.
    */
-/*extern*/ void ret_stack_synchronize(thread_local_data_t *tld);
+/*extern*/
+void ret_stack_synchronize(thread_local_data_t *tld);
 
 /**
  * called to prepare a sys enter
@@ -152,22 +169,27 @@
  *   ecx
  *   edx
  */
-/*extern*/ void prepare_sysenter(thread_local_data_t *tld);
+/*extern*/
+void prepare_sysenter(thread_local_data_t *tld);
 
-/*extern*/ void authorize_sysenter(thread_local_data_t *tld);
+/*extern*/
+void authorize_sysenter(thread_local_data_t *tld);
 
-/*extern*/ void authorize_int0x80();
+/*extern*/
+void authorize_int0x80();
 
 /**
  * print message on successful transaction commit
  */
-/*extern*/ void end_transaction();
+/*extern*/
+void end_transaction();
 
 /**
- * Returns to untranslated code and cleans memory allocated by the BT for 
+ * Returns to untranslated code and cleans memory allocated by the BT for
  * this thread.
  */
-/*extern*/ void end_transaction_clean(void *tld);
+/*extern*/
+void end_transaction_clean(void *tld);
 
 
 void *dlsym_handler(void *handle, const char *symbol);

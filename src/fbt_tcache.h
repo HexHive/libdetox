@@ -46,8 +46,8 @@
  * translation hash table entry
  */
 struct tcache_entry {
-	void *src;
-	void *dst;
+  void *src;
+  void *dst;
 };
 typedef struct tcache_entry tcache_entry_t;
 

@@ -136,18 +136,20 @@
 #define		ADDRM_W				0x00001200
 #define		ADDRM_X				0x00001300
 #define		ADDRM_Y				0x00001400
+#define		ADDRM_RM			0x00001500
+#define		ADDRM_UM			0x00001600
 
-#define hasModRMOp(x) (((x&OP_ADDRM_MASK)==ADDRM_C)||((x&OP_ADDRM_MASK)==ADDRM_D)||((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_G)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_N)||((x&OP_ADDRM_MASK)==ADDRM_P)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_R)||((x&OP_ADDRM_MASK)==ADDRM_S)||((x&OP_ADDRM_MASK)==ADDRM_U)||((x&OP_ADDRM_MASK)==ADDRM_V)||((x&OP_ADDRM_MASK)==ADDRM_W))
+#define hasModRMOp(x) (((x&OP_ADDRM_MASK)==ADDRM_C)||((x&OP_ADDRM_MASK)==ADDRM_D)||((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_G)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_N)||((x&OP_ADDRM_MASK)==ADDRM_P)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_R)||((x&OP_ADDRM_MASK)==ADDRM_S)||((x&OP_ADDRM_MASK)==ADDRM_U)||((x&OP_ADDRM_MASK)==ADDRM_V)||((x&OP_ADDRM_MASK)==ADDRM_W)||((x&OP_ADDRM_MASK)==ADDRM_RM)||((x&OP_ADDRM_MASK)==ADDRM_UM))
 #define anyModRMOp(x) (hasModRMOp(x->destFlags)||hasModRMOp(x->srcFlags)||hasModRMOp(x->auxFlags))
 
-#define ModRMparseRM(x) (((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_R)||((x&OP_ADDRM_MASK)==ADDRM_U)||((x&OP_ADDRM_MASK)==ADDRM_W))
+#define ModRMparseRM(x) (((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_R)||((x&OP_ADDRM_MASK)==ADDRM_U)||((x&OP_ADDRM_MASK)==ADDRM_W)||((x&OP_ADDRM_MASK)==ADDRM_RM)||((x&OP_ADDRM_MASK)==ADDRM_UM))
 #define ModRMparseREG(x) (((x&OP_ADDRM_MASK)==ADDRM_G)||((x&OP_ADDRM_MASK)==ADDRM_N)||((x&OP_ADDRM_MASK)==ADDRM_P)||((x&OP_ADDRM_MASK)==ADDRM_S)||((x&OP_ADDRM_MASK)==ADDRM_V)||((x&OP_ADDRM_MASK)==ADDRM_C)||((x&OP_ADDRM_MASK)==ADDRM_D))
 
 #define hasImmOp(x) (((x&OP_ADDRM_MASK)==ADDRM_A)||((x&OP_ADDRM_MASK)==ADDRM_I)||((x&OP_ADDRM_MASK)==ADDRM_J)||((x&OP_ADDRM_MASK)==ADDRM_O))
 #define anyImmOp(x) (hasModRMOp(x->destFlags)||hasModRMOp(x->srcFlags)||hasModRMOp(x->auxFlags))
 
 #define immIsPtr(x) (hasImmOp(x) && ((x&OP_ADDRM_MASK)!=ADDRM_I)) /* address or offset */
-#define hasMemOp(x) (((x&OP_ADDRM_MASK)==ADDRM_A)||((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_J)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_O)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_W)||((x&OP_ADDRM_MASK)==ADDRM_Y))
+#define hasMemOp(x) (((x&OP_ADDRM_MASK)==ADDRM_A)||((x&OP_ADDRM_MASK)==ADDRM_E)||((x&OP_ADDRM_MASK)==ADDRM_J)||((x&OP_ADDRM_MASK)==ADDRM_M)||((x&OP_ADDRM_MASK)==ADDRM_O)||((x&OP_ADDRM_MASK)==ADDRM_Q)||((x&OP_ADDRM_MASK)==ADDRM_W)||((x&OP_ADDRM_MASK)==ADDRM_Y)||((x&OP_ADDRM_MASK)==ADDRM_RM)||((x&OP_ADDRM_MASK)==ADDRM_UM))
 
 /* operand types - taken from intel manual */
 #define		OPT_a				0x00010000
@@ -182,10 +184,10 @@
  * we have to continue translating even if the instruction number limit is reached.
  */
 enum finalize_tu {
-    tu_open,		/* TU must not be closed after this instruction, even if the instruction number limit is reached */
-    tu_neutral,		/* TU can be closed after this instruction, if the instruction number limit is reached */
-    tu_close,		/* TU has to be closed after this instruction in any case */
-    tu_close_glue       /* TU has to be closed after this instruction, but fixup code must be inserted as when instr nr limit is reached */
+  tu_open,		/* TU must not be closed after this instruction, even if the instruction number limit is reached */
+  tu_neutral,		/* TU can be closed after this instruction, if the instruction number limit is reached */
+  tu_close,		/* TU has to be closed after this instruction in any case */
+  tu_close_glue       /* TU has to be closed after this instruction, but fixup code must be inserted as when instr nr limit is reached */
 };
 typedef enum finalize_tu finalize_tu_t;
 
@@ -201,56 +203,56 @@ typedef finalize_tu_t (*actionFunP_t)(translate_struct_t* ts);
     parameters * WARNING: code in fbt_asm_function.S depends on the layout
     of this structure!  */
 struct translate_struct {
-    unsigned char  *cur_instr;                 /* Pointer to the first byte of the current instruction */
-    const struct ia32_opcode* cur_instr_info;  /* information about the current instruction */
-    unsigned char  *first_byte_after_opcode;   /* Pointer to the first byte after the current intruction */
-    unsigned int    num_prefixes;              /* Number of prefixes of this instruction */
-    unsigned char  *next_instr;                /* Pointer to the first byte of the next instruction */
-    unsigned char  *transl_instr;              /* Pointer to the translated code */
-    actionFunP_t    action;                    /* Action to be
+  unsigned char  *cur_instr;                 /* Pointer to the first byte of the current instruction */
+  const struct ia32_opcode* cur_instr_info;  /* information about the current instruction */
+  unsigned char  *first_byte_after_opcode;   /* Pointer to the first byte after the current intruction */
+  unsigned int    num_prefixes;              /* Number of prefixes of this instruction */
+  unsigned char  *next_instr;                /* Pointer to the first byte of the next instruction */
+  unsigned char  *transl_instr;              /* Pointer to the translated code */
+  actionFunP_t    action;                    /* Action to be
 							called in order to translate the current instruction */
-    thread_local_data_t  *tld;                 /* thread local data */
-    void           *app_data;                  /* Pointer to the application specific data */
+  thread_local_data_t  *tld;                 /* thread local data */
+  void           *app_data;                  /* Pointer to the application specific data */
 #if defined(FBT_INLINE_CALLS)
-    struct inline_struct *inlined_frames;    
+  struct inline_struct *inlined_frames;
 #endif
 };
 
 #if defined(FBT_INLINE_CALLS)
 /* linear list for static just-in-time inlining of recursive calls */
 struct inline_struct {
-    void *ret_addr;
-    struct inline_struct *next;
+  void *ret_addr;
+  struct inline_struct *next;
 };
 #endif
 
 /** entry for opcode table */
 struct ia32_opcode {
-    /* the following hold flags for the operands */
-    /* the value NONE means the opcode does not make use of this operand */
-    const unsigned int destFlags;
-    const unsigned int srcFlags;
-    const unsigned int auxFlags;
+  /* the following hold flags for the operands */
+  /* the value NONE means the opcode does not make use of this operand */
+  const unsigned int destFlags;
+  const unsigned int srcFlags;
+  const unsigned int auxFlags;
 
-    /*implicit flags */
-    const unsigned char implDestFlags;
-    const unsigned char implSrcFlags;
-    const unsigned char implAuxFlags;
+  /*implicit flags */
+  const unsigned char implDestFlags;
+  const unsigned char implSrcFlags;
+  const unsigned char implAuxFlags;
 
-    /* table or function ptr */
-    const unsigned char tableFlags;
+  /* table or function ptr */
+  const unsigned char tableFlags;
 
-    union {
-	/** offset in opcode extension table (only relevant if OPCODE_RM flag set) */
-	const struct ia32_opcode* const table;
-	/** pointer to the function that shall handle that instruction */
-	const actionFunP_t handler;
-    } opcode;
+  union {
+    /** offset in opcode extension table (only relevant if OPCODE_RM flag set) */
+    const struct ia32_opcode* const table;
+    /** pointer to the function that shall handle that instruction */
+    const actionFunP_t handler;
+  } opcode;
 
-    //#ifdef DEBUG
-    const char* mnemonic;
-    //#endif
-    
+  //#ifdef DEBUG
+  const char* mnemonic;
+  //#endif
+
 };
 typedef struct ia32_opcode ia32_opcode_t;
 

@@ -6,7 +6,8 @@
 /* allocate a small amount of memory; will be freed when thread finishes */
 void *fbt_smalloc(struct thread_local_data *tld, int bytes);
 
-/* allocate a small amount of memory; will only be freed when the application exits */
+/* allocate a small amount of memory; will only be freed when the application
+   exits */
 void *fbt_smalloc_pers(struct thread_local_data *tld, int bytes);
 
 /* allocate a number of pages that will be freed when thread finishes */
@@ -16,7 +17,9 @@ void *fbt_lalloc(struct thread_local_data *tld, int pages);
 void fbt_free_all(struct thread_local_data *tld);
 
 /** macro to allocate n pages of memory */
-#define allocpages(n, res) fbt_mmap(NULL, n * PAGESIZE, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0, res)
+#define allocpages(n, res) fbt_mmap(NULL, n * PAGESIZE, \
+                                    PROT_READ|PROT_WRITE, \
+                                    MAP_PRIVATE|MAP_ANONYMOUS, -1, 0, res)
 
 /** macro to free n pages of memory that was allocated with allocpages() */
 #define freepages(addr, n, res) fbt_munmap(addr, n * PAGESIZE, res)

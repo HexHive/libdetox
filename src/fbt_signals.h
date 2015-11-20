@@ -24,8 +24,8 @@ typedef void (*sighandler_t)(int);
 sighandler_t fbt_signal(int signum, sighandler_t handler);
 int fbt_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact);
 int fbt_pthread_create(pthread_t *__restrict __newthread,
-               __const pthread_attr_t *__restrict __attr,
-               void *(*__start_routine) (void *),
-            void *__restrict __arg);
+                       __const pthread_attr_t *__restrict __attr,
+                       void *(*__start_routine) (void *),
+                       void *__restrict __arg);
 void initSignals();
 

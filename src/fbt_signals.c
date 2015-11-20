@@ -23,6 +23,7 @@
 #include <signal.h>
 #include <dlfcn.h>
 #include <pthread.h>
+#include <unistd.h> /* sleep */
 
 #include "libfastbt.h"
 #include "fbt_debug.h"
@@ -84,9 +85,9 @@ static void seghandler (unsigned int sn, siginfo_t  si, struct ucontext *sc);
 static void (*(*o_signal) ( int signum, void (*handler)(int)))(int)=0;
 static int (*o_sigaction) ( int signum, const struct sigaction *act, struct sigaction *oldact)=0;
 static int (*o_pthread_create)(pthread_t *__restrict __newthread,
-				 __const pthread_attr_t *__restrict __attr,
-				 void *(*__start_routine) (void *),
-				 void *__restrict __arg)=0;
+                               __const pthread_attr_t *__restrict __attr,
+                               void *(*__start_routine) (void *),
+                               void *__restrict __arg)=0;
 static void (*o_nptl_deallocate_tsd)(void)=0;
 
 void initSignals()
@@ -104,9 +105,9 @@ void initSignals()
   o_signal = (void (*(*) ( int signum, void (*handler)(int)))(int)) dlsym(REAL_LIBC, "signal");
 
   o_pthread_create =  (int (*)(pthread_t *__restrict __newthread,
-					       __const pthread_attr_t *__restrict __attr,
-					       void *(*__start_routine) (void *),
-					       void *__restrict __arg)) dlsym(REAL_LIBC, "pthread_create");
+                               __const pthread_attr_t *__restrict __attr,
+                               void *(*__start_routine) (void *),
+                               void *__restrict __arg)) dlsym(REAL_LIBC, "pthread_create");
 
   o_nptl_deallocate_tsd = (void (*)(void))dlsym(REAL_LIBC, "__nptl_deallocate_tsd");
   PRINT_DEBUG("Installed special SIGSEGV handler");
@@ -120,13 +121,16 @@ static void seghandler(unsigned int sn , siginfo_t  si , struct ucontext *sc)
 
   llprintf("I'll try to show some debug output (might catch another segv):\n");
   llprintf(" Signal number = %d (%d), status = %d\n", si.si_signo, sn, si.si_status);
-  switch(si.si_code) {
-    case 1: llprintf(" SI code = %d (Address not mapped to object)\n", si.si_code);
-      break;
-    case 2: llprintf(" SI code = %d (Invalid permissions for mapped object)\n",si.si_code);
-      break;
-    default: llprintf(" SI code = %d (Unknown SI Code)\n",si.si_code);
-      break;
+  switch (si.si_code) {
+  case 1:
+    llprintf(" SI code = %d (Address not mapped to object)\n", si.si_code);
+    break;
+  case 2:
+    llprintf(" SI code = %d (Invalid permissions for mapped object)\n",si.si_code);
+    break;
+  default:
+    llprintf(" SI code = %d (Unknown SI Code)\n",si.si_code);
+    break;
   }
   llprintf(" Intruction pointer = 0x%.08x \n", gregs[REG_EIP]);
   llprintf(" Fault addr = 0x%p \n",si.si_addr);
@@ -153,65 +157,65 @@ static void seghandler(unsigned int sn , siginfo_t  si , struct ucontext *sc)
 typedef void (*sighandler_t)(int);
 sighandler_t fbt_signal(int signum, sighandler_t handler)
 {
-    FIX_BACK2TRANSLATED
+  FIX_BACK2TRANSLATED
 
-    PRINT_DEBUG("signal(%d)\n", signum);
-    if (signum==SIGSEGV || signum==SIGBUS || signum==SIGILL) {
-        PRINT_DEBUG("Blocked SIGSEGV replacement\n");
-        FBT_IDS_LOCKDOWN(tld);
-        return 0;
+  PRINT_DEBUG("signal(%d)\n", signum);
+  if (signum==SIGSEGV || signum==SIGBUS || signum==SIGILL) {
+    PRINT_DEBUG("Blocked SIGSEGV replacement\n");
+    FBT_IDS_LOCKDOWN(tld);
+    return 0;
+  } else {
+    /* Escape to static trampoline for signal handling */
+    sighandler_t result;
+    if (handler!=NULL) {
+      PRINT_DEBUG("Handler: %p\n", handler);
+      result = (*o_signal)(signum, trampoline_put_signal(handler));
     } else {
-        /* Escape to static trampoline for signal handling */
-        sighandler_t result;
-        if (handler!=NULL) {
-            PRINT_DEBUG("Handler: %p\n", handler);
-            result = (*o_signal)(signum, trampoline_put_signal(handler));
-        } else {
-            result = (*o_signal)(signum, handler);
-        }
-        FBT_IDS_LOCKDOWN(tld);
-        return result;
+      result = (*o_signal)(signum, handler);
     }
+    FBT_IDS_LOCKDOWN(tld);
+    return result;
+  }
 }
 
 int fbt_sigaction(int signum, const struct sigaction *act, struct sigaction *oldact)
 {
-    FIX_BACK2TRANSLATED
+  FIX_BACK2TRANSLATED
 
-    PRINT_DEBUG("sigaction(%d)\n", signum);
+  PRINT_DEBUG("sigaction(%d)\n", signum);
 
-    int result = 0;
+  int result = 0;
 
-    if (signum==SIGSEGV) {
-        PRINT_DEBUG("Blocked SIGSEGV replacement\n");
-        struct sigaction m;
-	fbt_memset(&m, 0x0, sizeof(struct sigaction));
-        m.sa_flags = SA_SIGINFO;
-        m.sa_sigaction = (void *)seghandler;
-        result = (*o_sigaction)(SIGSEGV,&m,(struct sigaction *)NULL);
-    } else {
-        /* overwrite call to sigaction with our own trampoline for signal handling */
-        if (act!=NULL) {
-            if (act->sa_handler!=NULL) {
-                void *myhandler = act->sa_handler;
-                PRINT_DEBUG("Handler: %p\n", act->sa_handler);
-                myhandler = trampoline_put_signal(act->sa_handler);
-            } else if (act->sa_sigaction!=NULL) {
-                void *myhandler = act->sa_sigaction;
-                PRINT_DEBUG("Handler: %p\n", act->sa_sigaction);
-                myhandler = trampoline_put_signal(act->sa_sigaction);
-            }
-        }
-        result = (*o_sigaction)(signum, act, oldact);
+  if (signum==SIGSEGV) {
+    PRINT_DEBUG("Blocked SIGSEGV replacement\n");
+    struct sigaction m;
+    fbt_memset(&m, 0x0, sizeof(struct sigaction));
+    m.sa_flags = SA_SIGINFO;
+    m.sa_sigaction = (void *)seghandler;
+    result = (*o_sigaction)(SIGSEGV,&m,(struct sigaction *)NULL);
+  } else {
+    /* overwrite call to sigaction with our own trampoline for signal handling */
+    if (act!=NULL) {
+      if (act->sa_handler!=NULL) {
+        void *myhandler = act->sa_handler;
+        PRINT_DEBUG("Handler: %p\n", act->sa_handler);
+        myhandler = trampoline_put_signal(act->sa_handler);
+      } else if (act->sa_sigaction!=NULL) {
+        void *myhandler = act->sa_sigaction;
+        PRINT_DEBUG("Handler: %p\n", act->sa_sigaction);
+        myhandler = trampoline_put_signal(act->sa_sigaction);
+      }
     }
-    FBT_IDS_LOCKDOWN(tld);
-    return result;
+    result = (*o_sigaction)(signum, act, oldact);
+  }
+  FBT_IDS_LOCKDOWN(tld);
+  return result;
 }
 
 int fbt_pthread_create(pthread_t *__restrict __newthread,
-			   __const pthread_attr_t *__restrict __attr,
-			   void *(*__start_routine) (void *),
-		    void *__restrict __arg)
+                       __const pthread_attr_t *__restrict __attr,
+                       void *(*__start_routine) (void *),
+                       void *__restrict __arg)
 {
   FIX_BACK2TRANSLATED
   llprintf("pthread_create inside transaction - using fixup! (in fbt_signals.c)\n");
