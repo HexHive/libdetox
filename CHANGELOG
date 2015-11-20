@@ -1,10 +1,13 @@
-fastBT 0.2.2 - 2011-01-05
-- Added a couple of new instructions and fixed the representation tables
-  - especially 660f71, 660f72, 660f73 prefixed ones
-- Adapted formating and used astyle to sync identation
-- Added lots of additional tables
-  - 0x0f38 and 0x0f3b (including 0x66 and 0xf2 prefixes for these tables)
-    these boil down to tables A4 and A5 of the intel instruction manual
+libdetox 0.3 - 2010-12-10
+- Reimplementation of fastBT (removal of legacy code, reducing dependencies)
+  - Clear memory management, no libC dependencies, no redundant includes,
+    code is formatted and consistent, no more ugly 1k lines of ASM code
+  - All indirect control flow transfers now use specific trampolines
+  - Implemented separate stack for libdetox functions (stack of user program
+    remains clean)
+  - Easier verification, only effective and used optimizations are implemented.
+  - Started implementation of x86_64 code
+  - Added (many) test cases and uses gtest unit testing
 
 fastBT 0.2.1 - 2010-03-25
 - Fixed a bug in the opcode tables (added correct src operands for movs* and cmps*)
@@ -14,8 +17,8 @@ fastBT 0.2.1 - 2010-03-25
 - Extended debugging information and output available (for binary analysis)
 - Reimplementation of lots of system calls and library functions in libc.c and libc.h
   * System calls are possible via int 80 and sysenter
-- Removed dependencies from the libc (str functions, sysconf, memcpy)
-- Reimplementation of some system calls to reduce libc dependencies (mmap, munmap)
+- Removed dependencies from the libC (str functions, sysconf, memcpy)
+- Reimplementation of some system calls to reduce libC dependencies (mmap, munmap)
 
 fastBT 0.2.0 - 2010-03-10
 - Removal of the bastard disassembler
@@ -26,7 +29,7 @@ fastBT 0.2.0 - 2010-03-10
 - Clearer structure and removal of dead code
 
 fastBT 0.1.0 - 2009-11-19
-- Lots of bug fixing and straigthening of the security features
+- Lots of bug fixing and strengthening of the security features
 - Public release at 26c3 (26th chaos communication congress in Berlin)
 - Lots of new optimizations
   - Return cache and fast return
@@ -36,13 +39,13 @@ fastBT 0.1.0 - 2009-11-19
   
 fastBT 0.1.0pre2 - 2009-10-22
 - Lots of bug fixing
-- Some security extensions (nx enforcement, secuBT stuff)
+- Some security extensions (NX enforcement, secuBT stuff)
 - Lots of new optimizations
   - Jumptable optimization
   - Fast return optimization
-- Special optimization for low-level functions to be independent from libc
+- Special optimization for low-level functions to be independent from libC
   memory management
-- Special IO functions to be independent from libc (not reentrant)
+- Special IO functions to be independent from libC (not reentrant)
 
 fastBT 0.1.0pre - 2009-05-31
 - Initial public release

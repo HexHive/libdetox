@@ -1,17 +1,19 @@
-This file describes how to install and work with fastBT.
+This file describes how to install and work with fastBT/libdetox.
 
-To compile your own translation table go into the directory tableGenerator and
-use "make" (have a look at example.cpp to generate a plain translation table)
-The resulting translation table must then be copied into the src directory of
-fastBT.
+To compile your own translation table download the old fastBT distrubtion. 
+Change the directory to tableGenerator and use "make" (have a look at
+example.cpp to generate a plain translation table) The resulting translation
+table must then be copied into the src directory of fastBT.
 
 To compile the binary translator you must choose your optimizations in the
-top level Makefile. After the correct settings are selected use "make" to
-generate the library.
+top level Makefile and all the Makedef.* files according to CONFIGURATION.
+Additionally you need to select if you would like a debug build or a
+production build. To select a debug build use "ln -s Makedefs.debug Makedefs".
+To select a production build use "ln -s Makedefs.production Makedefs".
+After the correct settings are selected use "make" to generate the library.
 
 For a test run you might use:
-LD_PRELOAD=./src/libfastbt.so.0.2.2 /usr/lib/openoffice/program/soffice.bin 
-
+LD_PRELOAD=./src/libfastbt.so.0.3.0 /usr/lib/openoffice/program/soffice.bin 
 
 For 64bit systems, you need the 32bit libc: "aptitude install libc6-dev-i386.
 The default installation location is /usr/lib

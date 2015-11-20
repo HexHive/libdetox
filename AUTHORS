@@ -3,7 +3,7 @@ Hall of fame:
 
 Mathias Payer <mathias.payer@nebelwelt.net>
 - Project leader and coordinator
-- Worked on fastBT since 2007
+- Worked on fastBT and trustBt since 2007
 - Implemented and authored most of the optimizations
   - Fast indirect jump and prediction
   - Fast indirect call and prediction
@@ -14,6 +14,12 @@ Mathias Payer <mathias.payer@nebelwelt.net>
 
 
 Former developers:
+------------------
+Developers that worked on either fastBT, secuBT, or trustBT:
+fastBT and secuBT were merged into trustBT. libdetox is a reimplementation of
+the successful optimization concepts and security concepts of trustBT. The 
+authors below helped with the implementation of the optimizations and security
+concepts of the proof of concept implementation.
 
 Antonio Barresi <abarresi@student.ethz.ch>
 - Worked hard on the security extensions during his master thesis in 2009

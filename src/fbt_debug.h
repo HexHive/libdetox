@@ -1,12 +1,11 @@
 /**
+ * @file fbt_debug.h
  * This handles the debug output that can be customized in the Makefile
- *
- * Note: stdio is thread-safe
  *
  * IMPORTANT:
  * - The macro START_DEBUG and START_DUMP must be called before any
  *   call to PRINT_* or DUMP_* respectively, otherwise the program
- *   will abort.
+ *   will fail.
  * - The macro STOP_DEBUG and STOP_DUMP clean up the data structure
  *   after calling one of these macros the corresponding debugging
  *   features must not be called anymore otherwise the program will
@@ -18,10 +17,13 @@
  * - output is written to file (i.e. debug.txt)
  * - macros are thread safe
  *
- * Copyright (c) 2008 ETH Zurich
- *   Mathias Payer <mathias.payer@inf.ethz.ch>
- *   Marcel Wirth <mawirth@student.ethz.ch>
- *   Stephan Classen <scl@soft-eng.ch>
+ * Copyright (c) 2011 ETH Zurich
+ * @author Mathias Payer <mathias.payer@nebelwelt.net>
+ *
+ * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedBy: payerm $
+ * $Revision: 428 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -38,74 +40,67 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
+#ifndef FBT_DEBUG_H
+#define FBT_DEBUG_H
 
-#include "fbt_datatypes.h"
-#include "fbt_llio.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef DEBUG
-
-#include <assert.h>
+/* forward declare translate_t */
+struct translate;
 
 /* use debug */
 void debug_start();
 void debug_end();
 void debug_print_function_start(char *str, ...);
 void debug_print_function_end(char *str, ...);
-void debug_print_n(int N, char *str, ...);
+/* print a debug string with indentation */
+void debug_print(char *str, ...);
+char* debug_memdump(unsigned char *addr, unsigned int n);
 
-#define DEBUG_START debug_start()
-#define DEBUG_END   debug_end()
-#define PRINT_DEBUG(...) debug_print_n(1, __VA_ARGS__)
-#define PRINT_DEBUG_N(N, ...) debug_print_n(N, __VA_ARGS__)
+#define DEBUG_START() debug_start()
+#define DEBUG_END()   debug_end()
+#define PRINT_DEBUG(...) debug_print(__VA_ARGS__)
 #define PRINT_DEBUG_FUNCTION_START(...) debug_print_function_start(__VA_ARGS__)
 #define PRINT_DEBUG_FUNCTION_END(...) debug_print_function_end(__VA_ARGS__)
-#else
-/* no debug */
-#define assert(...)
-#define DEBUG_START
-#define DEBUG_END
-#define PRINT_DEBUG(...)
-#define PRINT_DEBUG_N(N, ...)
-#define PRINT_DEBUG_FUNCTION_START(...)
-#define PRINT_DEBUG_FUNCTION_END(...)
-#endif
+#define MEMDUMP(addr, n) debug_memdump(addr, n)
 
 /* todo remove */
 char* printnbytes(unsigned char *addr, unsigned int n);
+#else
+/* no debug */
+#define DEBUG_START()
+#define DEBUG_END()
+#define PRINT_DEBUG(...)
+#define PRINT_DEBUG_FUNCTION_START(...)
+#define PRINT_DEBUG_FUNCTION_END(...)
+#define MEMDUMP(...)
+#endif
 
 #ifdef DUMP_GENERATED_CODE
 /* dump generated code */
 void debug_dump_start();
 void debug_dump_end();
-void debug_dump_code(struct translate_struct *ts, int instr_len, int transl_len);
+void debug_dump_code(struct translate *ts, int instr_len, int transl_len);
 void debug_dump_jmptable(char *orig_addr, char *transl_addr);
-#define DUMP_START debug_dump_start()
-#define DUMP_END debug_dump_end()
-#define DUMP_CODE(ts, instr_len, transl_len) debug_dump_code(ts, instr_len, transl_len)
-#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr) debug_dump_jmptable(org_addr, transl_addr)
+#define DUMP_START() debug_dump_start()
+#define DUMP_END() debug_dump_end()
+#define DUMP_CODE(ts, instr_len, transl_len) \
+  debug_dump_code(ts, instr_len, transl_len)
+#define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr) \
+  debug_dump_jmptable(org_addr, transl_addr)
 #else
 /* do not dump generated code */
-#define DUMP_START
-#define DUMP_END
+#define DUMP_START()
+#define DUMP_END()
 #define DUMP_CODE(ts, instr_len, transl_len)
 #define DUMP_JMP_TABLE_ENTRY(org_addr, transl_addr)
 #endif
 
-#ifdef PBREAKGDB
-#define BREAK_ON_TRANSL(org_addr, transl_addr)		\
-do {							\
-    if(break_on_transl_addr == (org_addr))		\
-	break_on_transl(org_addr, transl_addr);		\
- } while (0)
-/*
- * Useful in gdb to break on translation of a certain address:
- * break break_on_transl
- * p pbreak(address)
- */
-extern void *break_on_transl_addr;
-extern void pbreak(void *break_addr);
-extern void break_on_transl(void *org_addr, void *transl_addr);
-#else
-
-#define BREAK_ON_TRANSL(org_addr, addr)
+#ifdef __cplusplus
+}
 #endif
+
+#endif  /* FBT_DEBUG_H */

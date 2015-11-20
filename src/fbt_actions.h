@@ -1,13 +1,15 @@
 /**
- * This file contains all the actions that are used in the bt to
- * translate each instruction.
- * Each action takes an instruction and 'translates' it into the code buffer
+ * @file fbt_actions.h
+ * This module defines some generic default actions that are used to translate
+ * specific machine codes.
  *
- * Copyright (c) 2008 ETH Zurich
- *   Mathias Payer <mathias.payer@inf.ethz.ch>
- *   Marcel Wirth <mawirth@student.ethz.ch>
- *   Stephan Classen <scl@soft-eng.ch>
- *   Antonio Barresi <abarresi@student.ethz.ch>
+ * Copyright (c) 2011 ETH Zurich
+ *
+ * @author Mathias Payer <mathias.payer@nebelwelt.net>
+ * $Date: 2011-03-23 09:15:08 +0100 (Wed, 23 Mar 2011) $
+ * $LastChangedDate: 2011-03-23 09:15:08 +0100 (Wed, 23 Mar 2011) $
+ * $LastChangedBy: payerm $
+ * $Revision: 442 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,21 +29,114 @@
 #ifndef FBT_ACTIONS_H
 #define FBT_ACTIONS_H
 
-#include "fbt_datatypes.h"
+/* forward declare translation state enum and translate struct*/
+enum translation_state;
+struct translate;
+
+/**
+ * This instruction drops/removes the current instruction.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_none(struct translate *ts);
+
+/**
+ * Copies the current instruction verbatim from the original code region to the
+ * code cache.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_copy(struct translate *ts);
+
+/**
+ * Copies the current instruction verbatim from the original code region to the
+ * code cache. This method additional emits a warning in the logs for unsafe
+ * instructions.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_warn(struct translate *ts);
+
+/**
+ * This action fails and terminates the program. This action is used for illegal
+ * instructions.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_fail(struct translate *ts);
 
 
-/* standard actions */
-finalize_tu_t   action_none            (translate_struct_t *ts);
-finalize_tu_t   action_copy            (translate_struct_t *ts);
-finalize_tu_t   action_call            (translate_struct_t *ts);
-finalize_tu_t   action_call_indirect   (translate_struct_t *ts);
-finalize_tu_t   action_jcc             (translate_struct_t *ts);
-finalize_tu_t   action_jmp             (translate_struct_t *ts);
-finalize_tu_t   action_jmp_indirect    (translate_struct_t *ts);
-finalize_tu_t   action_ret             (translate_struct_t *ts);
-finalize_tu_t   action_sysenter        (translate_struct_t *ts);
-finalize_tu_t   action_int             (translate_struct_t *ts);
-finalize_tu_t   action_warn            (translate_struct_t *ts);
-finalize_tu_t   action_fail            (translate_struct_t *ts);
+/**
+ * Handles relative jump instructions.
+ * Rewrites relative jump instructions such that the jump is relative to the
+ * translated code. Short jumps are rewritten to near jumps, as we cannot
+ * guarantee that the offset for the translated version can fit into 8 bit.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_jmp(struct translate *ts);
 
-#endif /* FBT_ACTIONS_H */
+/**
+ * Handles indirect jumps.
+ * Indirect jumps are translated into a PUSH of the addr and a call to the
+ * function "ind_jump"
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction.
+ */
+enum translation_state action_jmp_indirect(struct translate *ts);
+
+/**
+ * This function handles a jump conditional (Jcc).
+ * Short jumps are rewritten to near jumps, as we cannot guarantee that the
+ * offset for the translated version can fit into 8 bit.
+ * JECXZ are handled separately (within this function), as there exists only a
+ * short jump version.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_jcc(struct translate *ts);
+
+/**
+ * Handles call instructions to relative memory addresses.
+ * Copies the call instruction, but changes the target address such that the
+ * translated version of the function is called. If the function is not already
+ * translated, the function translate_function is invoked.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_call(struct translate *ts);
+
+/**
+ * Handles near indirect calls.
+ * If the function is not already translated, the function translate_function is
+ * invoked.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_call_indirect(struct translate *ts);
+
+/**
+ * This function translates a sysenter instruction.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction
+ */
+enum translation_state action_sysenter(struct translate *ts);
+
+/**
+ * Handles ret instructions.
+ * @param ts is a pointer to the translation struct of the current thread
+ * @return enum that determines if the TU shall be finalized after this
+ * instruction (in this case: YES).
+ */
+enum translation_state action_ret(struct translate *ts);
+#endif  /* FBT_ACTIONS_H */

@@ -1,15 +1,16 @@
 /**
- * The trampoline module. Trampolines are used for conditional jumps
- * Trampolines are kept in a linked list and can be recycled after usage.
+ * @file fbt_trampoline.h
+ * Handles the generation of thread local trampolines for secure
+ * code transitions and control flow transfers
  *
- * A trampoline is used if a code region is not alraedy translated and the
- * trampoline will then handle the translation of this region and backpatch
- * the old code with the newly generated target
+ * Copyright (c) 2011 ETH Zurich
  *
- * Copyright (c) 2008 ETH Zurich
- *   Mathias Payer <mathias.payer@inf.ethz.ch>
- *   Marcel Wirth <mawirth@student.ethz.ch>
- *   Stephan Classen <scl@soft-eng.ch>
+ * @author Mathias Payer <mathias.payer@nebelwelt.net>
+ *
+ * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedBy: payerm $
+ * $Revision: 428 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,33 +27,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
+
 #ifndef FBT_TRAMPOLINE_H
 #define FBT_TRAMPOLINE_H
 
-/* roughly two pages worth of trampolines */
-/* #define NUM_TRAMPOLINES 400 */
-#define TRAMPOLINE_PAGES 2
-
-void *trampoline_put(thread_local_data_t *tld, void* call_target, void* origin);
-
-#ifdef FBT_RET_STACK
-void *trampoline_put_abs(thread_local_data_t *tld, void *call_target, void *origin);
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-void *trampoline_put_chaining(thread_local_data_t *tld, void* call_target, void* origin);
+/* forward declare structs */
+struct thread_local_data;
 
-void *trampoline_put_signal(void *call_target);
+/**
+ * Initializes all thread local trampolines that are used for control flow
+ * transfers and transfers to secure code. Pointers inside tld are updated and
+ * will point to newly generated code.
+ * @param tld pointer to thread local data
+ */
+void fbt_initialize_trampolines(struct thread_local_data *tld);
 
-void trampoline_free(thread_local_data_t *tld, trampoline_entry_t *slot);
-
-void create_jumpback_trampoline(thread_local_data_t *tld);
-
-void create_indjump_fast_trampoline(thread_local_data_t *tld);
-void create_indcall_fast_trampoline(thread_local_data_t *tld);
-
-#ifdef FBT_RET_CACHE
-void create_ret_cache(thread_local_data_t *tld);
-unsigned char* write_ret_trampoline(translate_struct_t *ts, void *backpatch, unsigned char *target, void *retaddr);
+#ifdef __cplusplus
+}
 #endif
 
-#endif /* FBT_TRAMPOLINE_H */
+#endif  /* FBT_TRAMPOLINE_H */

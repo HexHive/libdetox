@@ -1,33 +1,77 @@
+/**
+ * @file fbt_llio.h
+ * Interface for low level IO (without any dependencies to libC).
+ *
+ * Copyright (c) 2011 ETH Zurich
+ * @author Mathias Payer <mathias.payer@nebelwelt.net>
+ *
+ * $Date: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
+ * $LastChangedDate: 2011-03-23 10:26:53 +0100 (Wed, 23 Mar 2011) $
+ * $LastChangedBy: payerm $
+ * $Revision: 443 $
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+ * MA  02110-1301, USA.
+ */
 #ifndef FBT_LLIO_H
 #define FBT_LLIO_H
 
+#if defined(DEBUG)
 #include <stdarg.h>
+#endif
+
 #define STDOUT_FILENO 1
 
-/* low-level I/O and memory allocation functions */
-
-/* print a string to the file descriptor fd */
+/**
+ * Print a string str to file descriptor fd.
+ * This function is a replacement for (f)printf with verbatim printing of the
+ * format string, i. e. no conversion specifications.
+ * In effect, this is just a wrapper around the write(2) system call which
+ * handles interrupted writes.
+ * @param fd the target file descriptor
+ * @param str the string to write
+ * @return the number of characters written
+ */
 int fllwrite(int fd, const char* str);
 
-/** macro to use fllprint with stdout as file descriptor */
-#define llprint(str) fllprintf(STDOUT_FILENO, str)
-
-
-/* write a formatted string to the file descriptor fd (might use a buffer) */
+/**
+ * Write a formatted string to the file descriptor fd (might use a buffer).
+ * @param fd File descriptor that is written to.
+ * @param format format string that is interpreted (including all varargs).
+ * @return Number of bytes written.
+ */
 int fllprintf(int fd, const char *format, ...);
+
+#if defined(DEBUG)
+/**
+ * Write a formatted string to the file descriptor fd (might use a buffer). Used
+ * only during debugging.
+ * @param fd File descriptor that is written to.
+ * @param format format string that is interpreted (including all varargs).
+ * @param ap List of var args.
+ * @return Number of bytes written.
+ */
 int fllprintfva(int fd, const char* format, va_list ap);
-/* flush printf buffers */
+#endif
+
+/**
+ * Flush all internal printf buffers.
+ */
 void ffflush();
 
 /** macro to use fllprintf with stdout as file descriptor */
 #define llprintf(...) fllprintf(STDOUT_FILENO, __VA_ARGS__)
 
-/** macro to allocate one page of memory */
-//#define allocpage() mmap(NULL, PAGESIZE, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0)
-
-/** macro to free a page of memory that was allocated with allocpage() */
-//#define freepage(addr) munmap(addr, PAGESIZE)
-
-
-
-#endif /* FBT_LLIO_H */
+#endif  /* FBT_LLIO_H */

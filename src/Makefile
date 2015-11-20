@@ -1,77 +1,57 @@
-# don't invoke make in this directory! always invoke make in the libfastbt directory
+include ../Makedefs
+include ../Makedefs.security
+include ../Makedefs.extensions
+include ../Makedefs.performance
 
+# activate optimizations
+CFLAGS+= $(OPTFLAGS) -fno-stack-protector
+
+# relro with global offset table protection
+LDFLAGS += -Wl,-z,relro,-z,now,-z,initfirst $(I386)
+
+# use gcc
 CC=gcc
-
-# use PositionIndependentCode in object files
+# flags for position independent code in object files
 LIBFLAGS=-fpic -c
 
-# our objects
-FILES=libfastbt.c fbt_translate.c fbt_tcache.c fbt_disassemble.c fbt_actions.c fbt_trampoline.c fbt_debug.c fbt_signals.c fbt_statistic.c fbt_rbtree.c fbt_mem_protection.c fbt_llio.c fbt_mem_alloc.c fbt_libc.c
+# object files
+FILES=libfastbt.c fbt_mem_mgmt.c fbt_translate.c fbt_code_cache.c fbt_actions.c \
+	fbt_llio.c fbt_libc.c fbt_debug.c fbt_trampoline.c fbt_syscall.c \
+	fbt_dso.c
 
-ASMFILES=fbt_asm_functions.S
-
-OBJS=libfastbt.o fbt_translate.o fbt_asm_functions.o fbt_tcache.o fbt_disassemble.o fbt_actions.o fbt_trampoline.o fbt_debug.o fbt_signals.o fbt_statistic.o fbt_rbtree.o fbt_mem_protection.o fbt_llio.o fbt_mem_alloc.o fbt_libc.o
-# fbt_sec_syscalls.o fbt_syscall_table.o 
-
-AUXOBJS=fbt_translate.o,fbt_asm_functions.o,fbt_tcache.o,fbt_disassemble.o,fbt_actions.o,fbt_trampoline.o,fbt_debug.o,fbt_signals.o,fbt_statistic.o,fbt_rbtree.o,fbt_mem_protection.o,fbt_llio.o,fbt_mem_alloc.o,fbt_libc.o
-
-LIBNAME=libfastbt.so
+# name of the library
+LIBNAME=libfastbt
 # major version
 LIBVERS=0
 # minor version
-LIBMIN=2.2
+LIBMIN=3.0
 
 LIBDIR=../lib
-# place for the static library
-STATICLIB=$(LIBDIR)/libfastbt.a
 
-.PHONY: clean uninstall includes library asmdefs-prog
+# we include some kernel stuff as we directly call system calls.
+INCLUDEDIR=/lib/modules/$(shell uname -r)/build/arch/x86/include
 
-library: fbt_asm_offsets.h $(LIBNAME).$(LIBVERS).$(LIBMIN) $(STATICLIB) includes
+.PHONY: clean includes
 
-fbt_asm_offsets.h: asmdefs
-	./asmdefs > fbt_asm_offsets.h
+all: $(LIBNAME).so.$(LIBVERS).$(LIBMIN) $(LIBNAME).a
 
-asmdefs: asmdefs.c fbt_datatypes.h fbt_private_datatypes.h
-	gcc $(CFLAGS) -o asmdefs -m32 asmdefs.c
+$(LIBNAME).so.$(LIBVERS).$(LIBMIN): *.h $(FILES)
+	${CC} ${CFLAGS} $(LIBFLAGS) -I$(INCLUDEDIR) -combine -o libfastbt.o $(FILES)
+	$(CC) -shared $(LDFLAGS) -Wl,-soname,$(LIBNAME).so.$(LIBVERS) -o \
+	$(LIBNAME).so.$(LIBVERS).$(LIBMIN) libfastbt.o
+	cp $(LIBNAME).so.$(LIBVERS).$(LIBMIN) $(LIBDIR)
 
-$(STATICLIB): $(LIBNAME).$(LIBVERS).$(LIBMIN)
-	ar cru $(STATICLIB) $^
-
-$(LIBNAME).$(LIBVERS).$(LIBMIN): *.h $(FILES) $(ASMFILES)
-	${CC} ${CFLAGS} $(LIBFLAGS) -combine -o libfastbt.o $(FILES)
-	${CC} ${CFLAGS} $(LIBFLAGS) -combine -o libfastbtasm.o $(ASMFILES)
-	$(CC) -shared $(LDFLAGS) -Wl,-soname,$(LIBNAME).$(LIBVERS) -o $(LIBNAME).$(LIBVERS).$(LIBMIN) libfastbt.o libfastbtasm.o -lc -ldl -lpthread
-	cp $(LIBNAME).$(LIBVERS).$(LIBMIN) $(LIBDIR)
+$(LIBNAME).a:
+	ar cru libfastbt.a libfastbt.o
 
 includes: libfastbt.h fbt_datatypes.h fbt_actions.h
 	cp -f libfastbt.h fbt_datatypes.h fbt_actions.h ../include/
 
-libfastbt.o: $(FILES) $(ASMFILES)
-	${CC} ${CFLAGS} $(LIBFLAGS) -combine -o libfastbt.o $(FILES)
-	${CC} ${CFLAGS} $(LIBFLAGS) -combine -o libfastbtasm.o $(ASMFILES)
-
-
-install: library
-	sudo cp $(LIBNAME).$(LIBVERS).$(LIBMIN) $(INSTPATH)/
-	sudo ln -sf $(INSTPATH)/$(LIBNAME).$(LIBVERS).$(LIBMIN) $(INSTPATH)/$(LIBNAME).$(LIBVERS)
-	sudo ln -sf $(INSTPATH)/$(LIBNAME).$(LIBVERS).$(LIBMIN) $(INSTPATH)/$(LIBNAME)
-	sudo ldconfig -n $(INSTPATH)
-	sudo install -c libfastbt.h  fbt_datatypes.h fbt_actions.h $(INCPATH)
-	cp $(LIBNAME).$(LIBVERS).$(LIBMIN) ../lib
-	ln -sf ../lib/$(LIBNAME).$(LIBVERS).$(LIBMIN) ../lib/$(LIBNAME).$(LIBVERS)
-	ln -sf ../lib/$(LIBNAME).$(LIBVERS).$(LIBMIN) ../lib/$(LIBNAME)
-
-
 clean:
 	rm -f *.o *.lo *.la *~
-	rm -f $(LIBNAME).$(LIBVERS).$(LIBMIN)
+	rm -f $(LIBNAME).so.$(LIBVERS).$(LIBMIN)
+	rm -f $(LIBNAME).a
 	rm -rf ../lib/*.a
 	rm -rf ../include/*.h
 	rm -f fbt_asm_offsets.h
 	rm -f asmdefs
-
-uninstall:
-	sudo rm -f $(INSTPATH)/$(LIBNAME).$(LIBVERS).$(LIBMIN) $(INSTPATH)/$(LIBNAME).$(LIBVERS) $(INSTPATH)/$(LIBNAME) $(INCPATH)/libfastbt.h $(INCPATH)/fbt_datatypes.h $(INCPATH)/fbt_actions.h
-	sudo ldconfig -n $(INSTPATH)
-

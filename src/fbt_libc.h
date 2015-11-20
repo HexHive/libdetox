@@ -1,9 +1,15 @@
 /**
+ * @file fbt_libc.h
  * This file contains reimplementations of some library functions
  * to remove dependencies on these libs.
  *
- * Copyright (c) 2010 ETH Zurich
- *   Mathias Payer <mathias.payer@inf.ethz.ch>
+ * Copyright (c) 2011 ETH Zurich
+ * @author Mathias Payer <mathias.payer@nebelwelt.net>
+ *
+ * $Date: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedDate: 2011-03-18 19:09:01 +0100 (Fri, 18 Mar 2011) $
+ * $LastChangedBy: payerm $
+ * $Revision: 428 $
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,6 +26,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  * MA  02110-1301, USA.
  */
+#ifndef FBT_LIBC_H
+#define FBT_LIBC_H
+
+/* include ugliness of system call definition */
+#include "fbt_syscalls_impl.h"
+
+/** definition of NULL */
+#define NULL ((void *)0)
 
 /* copied from linux/stat.h to remove deps */
 #define S_IRUSR 00400
@@ -37,125 +51,75 @@
 #define SEEK_END 2
 
 /* taked from sys/mman.h */
-#define PROT_READ       0x1             /* Page can be read.  */
-#define PROT_WRITE      0x2             /* Page can be written.  */
-#define PROT_EXEC       0x4             /* Page can be executed.  */
-#define PROT_NONE       0x0             /* Page can not be accessed.  */
+#define PROT_READ       0x1             /* Page can be read. */
+#define PROT_WRITE      0x2             /* Page can be written. */
+#define PROT_EXEC       0x4             /* Page can be executed. */
+#define PROT_NONE       0x0             /* Page can not be accessed. */
 
-#define MAP_SHARED      0x01            /* Share changes.  */
-#define MAP_PRIVATE     0x02            /* Changes are private.  */
-#define MAP_ANONYMOUS   0x20            /* Don't use a file.  */
+#define MAP_SHARED      0x01            /* Share changes. */
+#define MAP_PRIVATE     0x02            /* Changes are private. */
+#define MAP_FIXED       0x10            /* Map memory to a fixed address */
+#define MAP_ANONYMOUS   0x20            /* Don't use a file. */
 
-#define MAP_FAILED      ((void *) -1)
+#define MAP_FAILED      ((void *)-1)
 
-/* Syscall numbers needed here */
-#define SYS_exit    1
-#define SYS_write   4
-#define SYS_open    5
-#define SYS_close   6
-#define SYS_lseek  19
-#define SYS_mmap   90
-#define SYS_munmap 91
-#define SYS_mprotect 0x7d
+/* taken from linux/sched.h */
+#define CLONE_VM        0x00000100      /* VM shared between processes */
+#define CLONE_FS        0x00000200      /* fs info shared between procs */
+#define CLONE_FILES     0x00000400      /* open files shared between proc */
+#define CLONE_SIGHAND   0x00000800      /* set if signal handlers and blocked
+                                           signals shared */
+#define CLONE_PTRACE    0x00002000      /* set if we want to let tracing
+                                           continue on the child too */
+  
+/* taken from asm/signal.h */
+#define SIG_DFL (0)     /* default signal handling */
+#define SIG_IGN (1)     /* ignore signal */
+#define SIG_ERR (-1)    /* error return from signal */
 
-/* functions from string.h */
-void *fbt_memset(void *s, const char c, int n);
+/**
+ * Local implementation of memcpy. Copies one memory region to another address.
+ * @param dest Destination memory region
+ * @param src Source region
+ * @param n number of bytes that are copied
+ * @return Pointer to the target region.
+ */
 void *fbt_memcpy(void *dest, const void *src, int n);
+
+/**
+ * Local implementation of strncpy. Copies one string into another buffer.
+ * @param dest Destination memory region.
+ * @param src Source region.
+ * @param n Max. number of copied characters.
+ * @return Pointer to the copied string.
+ */
 char *fbt_strncpy(char *dest, const char *src, int n);
-char *fbt_strcpy(char *dest, const char *src);
+
+/**
+ * Local implementation of strnlen. Calculates the length of a string.
+ * @param s Source string
+ * @param maxlen Maximum length
+ * @return Length of the string or maxlen.
+ */
 int fbt_strnlen(const char *s, int maxlen);
-int fbt_strcmp(const char *s1, const char *s2);
+
+/**
+ * Local implementation of strncmp. Compares two strings.
+ * @param s1 First string.
+ * @param s2 Second string.
+ * @param n Maximum length that is compared.
+ * @return Returns 0 if they are equal.
+ */
 int fbt_strncmp(const char *s1, const char *s2, int n);
 
-#define ENTER_KERNEL_INT "int $0x80\n\t"
-#define ENTER_KERNEL_SYSENTER "call *%%gs:0x10\n\t"
+/** useful macro that checks if a pointer is in a certain region */
+#define PTR_IN_REGION(ptr, regionptr, size)             \
+  ((ulong_t)(ptr) >= (ulong_t)(regionptr) &&            \
+   (ulong_t)(ptr) <= ((ulong_t)(regionptr)+(size)))
 
-#define ENTER_KERNEL ENTER_KERNEL_SYSENTER
-
-/* kill program */
-#define fbt_suicide()			   \
-    __asm__ volatile("pushl %%ebx\n\t"	   \
-		     "movl $139,%%ebx\n\t" \
-		     ENTER_KERNEL	   \
-		     "popl %%ebx"	   \
-		     :			   \
-		     : "a"(SYS_exit)	   \
-		     : "memory" )
-
+/** kill program */
 #define fbt_suicide_str(str)	do {		\
     fllwrite(STDOUT_FILENO, str);		\
-    fbt_suicide(); } while (0)
+    fbt_suicide(255); } while (0)
 
-/* file management and I/O */
-#define fbt_open(pathname, flags, mode, res)				\
-    __asm__ volatile("pushl %%ebx\n\t"					\
-		     "movl %2,%%ebx\n\t"				\
-		     ENTER_KERNEL					\
-		     "popl %%ebx"					\
-		     : "=a"(res)					\
-		     : "0"(SYS_open), "g"(pathname), "c"(flags), "d"(mode) \
-		     : "memory" )
-
-#define fbt_write(fd, buf, count, res)					\
-    __asm__ volatile("pushl %%ebx\n\t"					\
-		     "movl %2,%%ebx\n\t"				\
-		     ENTER_KERNEL					\
-		     "popl %%ebx"					\
-		     : "=a"(res)					\
-		     : "0"(SYS_write), "g"(fd), "c"(buf), "d"(count)	\
-		     : "memory" )
-
-#define fbt_close(fd, res)			\
-    __asm__ volatile("pushl %%ebx\n\t"		\
-		     "movl %2,%%ebx\n\t"	\
-		     ENTER_KERNEL		\
-		     "popl %%ebx"		\
-		     : "=a"(res)		\
-		     : "0"(SYS_close), "g"(fd)	\
-		     : "memory" )
-
-#define fbt_lseek(fd, offset, whence, res)				\
-    __asm__ volatile("pushl %%ebx\n\t"					\
-		     "movl %2,%%ebx\n\t"				\
-		     ENTER_KERNEL					\
-		     "popl %%ebx"					\
-		     : "=a"(res)					\
-		     : "0"(SYS_lseek), "g"(fd), "c"(offset), "d"(whence) \
-		     : "memory" )
-
-
-/* memory mapping */
-#define fbt_mmap(addr, length, prot, flags, fd, offset, res)		\
-    __asm__ volatile("pushl %%ebx\n\t"					\
-		     "pushl %2\n\t"					\
-		     "pushl %3\n\t"					\
-		     "pushl %4\n\t"					\
-		     "pushl %5\n\t"					\
-		     "pushl %6\n\t"					\
-		     "pushl %7\n\t"					\
-		     "movl %%esp, %%ebx\n\t"				\
-		     ENTER_KERNEL					\
-		     "addl $24, %%esp\n\t"				\
-		     "popl %%ebx"					\
-		     : "=a"(res)					\
-		     : "0"(SYS_mmap), "g"(offset), "g"(fd), "g"(flags), \
-                       "g"(prot), "g"(length), "g"(addr)                \
-		     : "memory")
-
-#define fbt_munmap(addr, length, res)				\
-    __asm__ volatile("pushl %%ebx\n\t"				\
-		     "movl %2,%%ebx\n\t"			\
-		     ENTER_KERNEL				\
-		     "popl %%ebx"				\
-		     : "=a"(res)				\
-		     : "0"(SYS_munmap), "g"(addr), "c"(length)	\
-		     : "memory" )
-
-#define fbt_mprotect(addr, len, prot, res)				\
-    __asm__ volatile("pushl %%ebx\n\t"					\
-		     "movl %2,%%ebx\n\t"				\
-		     ENTER_KERNEL					\
-		     "popl %%ebx"					\
-		     : "=a"(res)					\
-		     : "0"(SYS_mprotect), "g"(addr), "c"(len), "d"(prot) \
-		     : "memory" )
+#endif  /* FBT_LIBC_H */
