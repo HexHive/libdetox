@@ -935,10 +935,9 @@ enum translation_state action_call_indirect(struct translate *ts) {
     BEGIN_ASM(transl_addr)  
         movl ${transl_next}, (%ebx)
     END_ASM
-    /* Old buggy version, uses return_addr instead of transl_next, when is the backpatching supposed to happen? */
-    /*BEGIN_ASM(transl_addr)  
+    /* Old buggy version, uses return_addr instead of transl_next, when is the backpatching supposed to happen?
         movl ${return_addr}, (%ebx) // addr backpatched later on
-    END_ASM*/
+     */
   }
 
   BEGIN_ASM(transl_addr)

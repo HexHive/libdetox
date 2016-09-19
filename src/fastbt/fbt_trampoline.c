@@ -1627,10 +1627,10 @@ static void initialize_signal_trampoline(struct thread_local_data *tld) {
     movl 12(%esp), %eax
 
     // Debug
-    movl ${tld}, {offsetof(fbt_siginfo_t, value)}(%eax)
+    movl ${tld}, {__builtin_offsetof(fbt_siginfo_t, value)}(%eax)
 
     // Load si_ptr into %eax
-    movl {offsetof(fbt_siginfo_t, value)}(%eax), %eax
+    movl {__builtin_offsetof(fbt_siginfo_t, value)}(%eax), %eax
 
     cmpl ${tld}, %eax
 
