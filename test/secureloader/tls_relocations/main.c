@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include "lib1.h"
 
-__thread var_init = 12;
+int var_init = 12;
 
 int main()
 {

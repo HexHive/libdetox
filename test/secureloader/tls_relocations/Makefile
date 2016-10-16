@@ -2,7 +2,7 @@ include ../../../Makedefs
 
 CC = gcc 
 CFLAGS = -g -m32 -Wl,--hash-style=both -Wl,-rpath=$(CURDIR)
-LIBCFLAGS = -g -Wall -m32 -fPIC -shared
+LIBCFLAGS = -g -Wall -m32 -fPIC -shared -fno-stack-protector
 LD = ld
 LIBLDFLAGS = -g -m elf_i386 -shared 
 

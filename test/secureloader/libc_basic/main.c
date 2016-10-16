@@ -30,7 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-main(int argc, char **argv, char **envp) {
+int main(int argc, char **argv, char **envp) {
   
   /* This tests the support for symbols of type STT_GNU_IFUNC  */ 
   char string[]="abc";
