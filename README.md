@@ -57,5 +57,5 @@ directory (not within the test/ directory).
 Fine-Grained Control-Flow Integrity through Binary Hardening
 Mathias Payer, Antonio Barresi, and Thomas R. Gross.
 In DIMVA'15: 12th Conference on Detection of Intrusions and Malware and Vulnerability Assessment, 2015.
-http://nebelwelt.net/publications/15DIMVA/Lockdown-DIMVA15.pdf
+https://nebelwelt.net/publications/files/15DIMVA.pdf
 See the [HexHive group homepage](http://nebelwelt.net/group) for publications and vidoes.
